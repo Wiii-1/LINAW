@@ -2,8 +2,7 @@ networks:
   postgres:
     driver: bridge
 
-services: 
-
+services:
   backend:
     build:
       context: ../../backend

@@ -19,6 +19,4 @@ solution.md
 /*.log
 /*.yaml
 /*.yml
-docker/.dockerignore
-docker/compose/.env
-
+.env
