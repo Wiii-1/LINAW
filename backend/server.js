@@ -12,8 +12,8 @@ const { router: usersRouter } = require("./routes/usersRoute");
 const { router: fabricRouter } = require("./routes/fabricRoute");
 const { router: peerRouter } = require("./routes/peerRoute");
 
-app.get("/api/v1/", (_request, response) => {
-  response.json({ ok: true, service: "linaw-backend" });
+app.get("/api/v1/", (_req, res) => {
+  res.json({ ok: true, service: "linaw-backend" });
 });
 
 app.use(

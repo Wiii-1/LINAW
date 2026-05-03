@@ -1,12 +1,12 @@
 const fs = require('fs-extra');
-const { allocatePorts } = require('../utils/portManager');
-const { initWorkspace, destroyWorkspace, getUserWorkspace } = require('../utils/workspace');
+const { allocatePorts } = require('../../utils/portManager');
+const { initWorkspace, destroyWorkspace, getUserWorkspace } = require('../../utils/workspace');
 const { generateConfigtx, generateDockerCompose } = require('./configGenerator');
 const { composeUp, composeDown, composeUpCA, composeDownWithVolumes } = require('./dockerCompose')
 const { generateCryptoMaterial } = require('./cryptoMaterialGenerator')
 const { createChannel, joinPeersToChannel, updateAnchorPeers } = require('./channelOrchestrator')
 const { generateGenesisBlock } = require('./configtxgen')
-const logger = require(`../utils/logger`);
+const logger = require(`../../utils/logger`);
 
 /*
 NOTE:

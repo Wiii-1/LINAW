@@ -1,3 +1,11 @@
+/*
+  TODO: Wii
+  - [ ] Refactor the peerService.js file to improve readability and maintainability.
+  - [ ] Implement error handling and logging for better debugging and monitoring.
+  - [ ] Write unit tests for the functions in peerService.js to validate their functionality and reliability.
+*/
+
+
 const { existsSync } = require("node:fs");
 const path = require("node:path");
 const { exec } = require("node:child_process");
@@ -93,8 +101,21 @@ async function startPeerNode(organization) {
 }
 
 async function runInContainer(containerName, command) {
+
+/*
+  TODO:
+- Input validation should be handled in a separate function or layer to keep this function focused on its main responsibility of running commands in a container.
+- The logic for constructing the docker command could be encapsulated in its own function or module to improve readability and maintainability.
+- Error handling should be consistent and possibly centralized to avoid throwing raw HTTP errors from within this function. Instead, it could throw custom errors that can be handled by a central error handler.
+*/
   const normalizedContainerName = validateContainerName(containerName);
   const normalizedCommand = String(command ?? "").trim();
+
+
+  /*  TODO: There's already a centralized Error handling this is literally redundant, 
+  we should just throw an error with a specific message and let the central handler convert 
+  it to an HTTP error with the appropriate status code.
+  */
 
   if (!normalizedCommand) {
     throw createHttpError(400, "command is required");
@@ -132,6 +153,18 @@ async function runInContainer(containerName, command) {
 }
 
 function provisionOrganization(payload) {
+
+  /*
+    TODO: 
+- This function handles too much responsibility.
+- This should be refactored to have clear separation of concerns, for example:
+- Input validation should be handled in a separate function or layer.
+- The logic for generating the organization slug, domain, and MSP ID should be encapsulated in its own function or module.
+- The provisioning logic (e.g., saving to a database, calling external services) should be handled in a separate service or module.
+- Error handling should be consistent and possibly centralized to avoid throwing raw HTTP errors from within this function.
+
+  */
+
   const organizationName = String(payload.organizationName ?? "").trim();
   const adminEmail = String(payload.adminEmail ?? "")
     .trim()

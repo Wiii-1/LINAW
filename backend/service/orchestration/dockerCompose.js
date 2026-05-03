@@ -1,5 +1,5 @@
-const { execAsync } = require('../utils/execAsync')
-const logger = require('../utils/logger')
+const { execAsync } = require('../../utils/execAsync')
+const logger = require('../../utils/logger')
 
 async function composeUp(workspace, userId) {
     logger.info(`[INFO] Starting container for fabric-${userId}...`)
