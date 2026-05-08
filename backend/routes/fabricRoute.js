@@ -16,12 +16,12 @@ router.post("/networks/:id/channels", fabricController.channelCreate);
 router.post("/channel/:channel_id/contracts", fabricController.smartContract);
 router.get("/channel/:channel_id/contracts", fabricController.contractReadAll);
 
-// idk what to categorize this part
+// member addition
 
-// router.post     ('/organizations/:organizationId/members', fabricController.addMember)
-// router.patch    ('/organizations/:organizationId/members/:userId', fabricController.updateMemberRole)
-// router.get      ('/organizations/:organizationId/members', fabricController.getOrganizationMemebrs)
-// router.delete   ('/organizations/:organizationId/member/:userId', fabricController.deleteMember)
+router.post     ('/organizations/:organizationId/members', fabricController.addMember)
+router.patch    ('/organizations/:organizationId/members/:userId', fabricController.updateMemberRole)
+router.get      ('/organizations/:organizationId/members', fabricController.getOrganizationMemebrs)
+router.delete   ('/organizations/:organizationId/member/:userId', fabricController.deleteMember)
 
 // asset registry
 router.post("/assets", fabricController.createAsset);

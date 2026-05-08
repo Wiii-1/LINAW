@@ -2,6 +2,8 @@ const networkAssetsService = require('../service/application/networkAssetsServic
 const approvalWorkflowService = require('../service/application/approvalWorkflowService');
 
 class fabricController {
+
+// Blockchain
     async networkCreate(req, res, next) {
         try {
             const network = await networkAssetsService.networkCreate({
@@ -83,6 +85,22 @@ class fabricController {
         }
     }
 
+// Member addition
+
+    async addMember                 (req, res, next) {
+        
+    }
+    async updateMemberRole          (req, res, next) {
+
+    }
+    async getOrganizationMemebrs    (req, res, next) {
+
+    }
+    async deleteMember              (req, res, next) {
+
+    }
+
+// Approval Workflow 
     async createSubmission (req, res, next) {
         try{
             const submission = await approvalWorkflowService.createSubmission({
@@ -215,6 +233,7 @@ class fabricController {
         }
     } 
 
+// Asset registry
     async createAsset(req,res, next) {
         try {
             const create = await networkAssetsService.createAsset({

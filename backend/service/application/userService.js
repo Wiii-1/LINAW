@@ -43,6 +43,12 @@ class userService {
 
     const { email } = validated.body
 
+    const existingUser = await userDao.findUserByEmail(email)
+
+    if(existingUser){
+      throw new AppError (409, 'Email already exist', 'EMAIL_ALREADY_EXISTS')
+    }
+
     const created = await userDao.signup({
       email: email,
       firebase_uid: user?.uid
@@ -56,6 +62,10 @@ class userService {
 
     const { email } = validated.body
 
+    if (!user?.uid) {
+      throw new AppError('User not authenticated', 401, 'UNAUTHORIZED')
+    }
+
     const userRow = await userDao.login({
       email: email,
       firebase_uid: user?.uid
@@ -63,6 +73,8 @@ class userService {
 
     return userRow
   }
+
+  async addMember () {}
 
 }
 

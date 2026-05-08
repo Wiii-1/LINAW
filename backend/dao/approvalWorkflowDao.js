@@ -24,7 +24,8 @@ class ApprovalWorkflowDao {
                     original_file_name: originalFileName,
                     mime_type: mimeType,
                     size: size,
-                    created_at: db.fn.now()
+                    created_at: db.fn.now(),    
+                    updated_at: db.fn.now()
                 })
                 .returning('*');
 
