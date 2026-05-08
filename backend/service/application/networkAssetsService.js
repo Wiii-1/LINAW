@@ -111,6 +111,7 @@ class networkAssetsService {
 
     await assetRegistryDao.createAsset({
       id,
+      tentantId: user?.tenantId,
       color,
       size,
       owner,

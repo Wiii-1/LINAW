@@ -1,9 +1,13 @@
 const userService = require('../service/application/userService')
+const AppError = require('../utils/AppError')
 
 class userController {
     async signup (req, res, next) {
         try {
-            const user = await userService.signup(req.body)
+            const user = await userService.signup({
+                body: req.body,
+                user: req.user.uid
+            })
             if (!user) {
                 return res.status(400).json({
                     message: 'Signup failed',
@@ -21,7 +25,10 @@ class userController {
 
     async login (req, res, next) {
         try {
-            const user = await userService.login(req.body)
+            const user = await userService.login({
+                body: req.body,
+                user: req.user.uid
+            })
 
             if (!user) {
                 return res.status(400).json({

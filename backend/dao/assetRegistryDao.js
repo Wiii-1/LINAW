@@ -5,6 +5,7 @@ class AssetRegistryDao {
         try {
             const {
                 id,
+                tenantId,
                 color,
                 size,
                 owner,
@@ -15,6 +16,7 @@ class AssetRegistryDao {
             const [asset] = await db('asset_registry')
                 .insert({
                     id,
+                    tenant_id: tenantId,
                     color,
                     size,
                     owner,
@@ -37,12 +39,13 @@ class AssetRegistryDao {
         try {
             const {
                 id,
+                tenantId,
                 owner,
                 requestedBy
             } = data;
 
             const [asset] = await db('asset_registry')
-                .where({ id })
+                .where({ id, tenant_id: tenantId })
                 .update({
                     owner,
                     updated_by: requestedBy,
@@ -61,6 +64,7 @@ class AssetRegistryDao {
         try {
             const {
                 id,
+                tenantId,
                 color,
                 size,
                 owner,
@@ -69,7 +73,7 @@ class AssetRegistryDao {
             } = data;
 
             const [asset] = await db('asset_registry')
-                .where({ id })
+                .where({ id, tenant_id: tenantId })
                 .update({
                     color,
                     size,
@@ -89,10 +93,10 @@ class AssetRegistryDao {
 
     async assetDelete(data) {
         try {
-            const { id } = data;
+            const { id, tenantId } = data;
 
             const deletedRows = await db('asset_registry')
-                .where({ id })
+                .where({ id, tenant_id: tenantId })
                 .del();
 
             return deletedRows > 0;
@@ -103,11 +107,11 @@ class AssetRegistryDao {
 
     async assetRead(data) {
         try {
-            const { id } = data;
+            const { id, tenantId } = data;
 
             const asset = await db('asset_registry')
                 .select('*')
-                .where({ id })
+                .where({ id, tenant_id: tenantId })
                 .first();
 
             return asset || null;
@@ -120,6 +124,7 @@ class AssetRegistryDao {
         try {
             const assets = await db('asset_registry')
                 .select('*')
+                .where({ tenant_id: data.tenantId })
                 .orderBy('created_at', 'desc');
 
             return assets;
