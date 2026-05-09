@@ -89,19 +89,14 @@ const contractReadAllSchema = joi.object({
 
 const createAssetSchema = joi.object({
     body: joi.object({
-        id: joi.string().trim().min(1).max(128).required(),
         color: joi.string().trim().min(1).max(50).required(),
         size: joi.number().integer().positive().max(1000000).required(),
-        owner: joi.string().trim().min(1).max(256).required(),
         appraisedValue: joi.number().positive().max(999999999).required()
     }).required()
 }).required()
 
 const assetTransferSchema = joi.object({
     params: assetIdParam,
-    body: joi.object({
-        owner: joi.string().trim().min(1).max(256).required()
-    }).required()
 }).required()
 
 const assetUpdateSchema = joi.object({
@@ -109,7 +104,6 @@ const assetUpdateSchema = joi.object({
     body: joi.object({
         color: joi.string().trim().min(1).max(50).required(),
         size: joi.number().integer().positive().max(1000000).required(),
-        owner: joi.string().trim().min(1).max(256).required(),
         appraisedValue: joi.number().positive().max(999999999).required()
     }).required()
 }).required()

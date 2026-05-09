@@ -5,7 +5,11 @@ const { promisify } = require("node:util");
 const { randomUUID } = require("node:crypto");
 
 const { peerConfig } = require("../../config/peerConfig");
-const { createHttpError } = require("../../utils/httpError");
+const AppError = require("../../utils/AppError");
+const {
+  validateProvisionOrganizationPayload,
+  validateRunInContainerInput,
+} = require("../../validators/peer/provisionSchema");
 
 const execAsync = promisify(exec);
 const provisionedOrganizations = new Map();
@@ -50,40 +54,41 @@ function normalizeSlug(value) {
     .slice(0, 32);
 }
 
-function validateContainerName(containerName) {
-  const normalizedContainerName = String(containerName ?? "").trim();
-
-  if (!normalizedContainerName) {
-    throw createHttpError(400, "containerName is required");
-  }
-
-  if (!peerConfig.allowedContainerNames.has(normalizedContainerName)) {
-    throw createHttpError(
-      400,
-      `Unsupported container ${normalizedContainerName}. Use one of: ${Array.from(peerConfig.allowedContainerNames).join(", ")}`,
-    );
-  }
-
-  return normalizedContainerName;
-}
-
 async function startPeerNode(organization) {
   const config = buildPeerConfig(organization);
 
   for (const requiredPath of config.requiredPaths) {
     if (!existsSync(requiredPath)) {
-      throw createHttpError(
-        400,
+      throw new AppError(
         `Missing Fabric artifacts at ${requiredPath}. Run ./network.sh up first.`,
+        400,
+        "MISSING_FABRIC_ARTIFACTS",
+        { requiredPath },
       );
     }
   }
 
-  await execAsync(config.dockerCommand, {
-    cwd: peerConfig.testNetworkDir,
-    env: process.env,
-    maxBuffer: 10 * 1024 * 1024,
-  });
+  try {
+    await execAsync(config.dockerCommand, {
+      cwd: peerConfig.testNetworkDir,
+      env: process.env,
+      maxBuffer: 10 * 1024 * 1024,
+    });
+  } catch (error) {
+    throw new AppError(
+      error?.stderr?.trim() || error?.message || "Unable to start peer node",
+      500,
+      "PEER_NODE_START_FAILED",
+      {
+        stdout: error?.stdout ?? "",
+        stderr: error?.stderr ?? "",
+        exitCode: error?.code,
+        command: config.dockerCommand,
+        peerName: config.peerName,
+        organization: config.organization,
+      },
+    );
+  }
 
   return {
     organization: config.organization,
@@ -93,14 +98,13 @@ async function startPeerNode(organization) {
 }
 
 async function runInContainer(containerName, command) {
-  const normalizedContainerName = validateContainerName(containerName);
-  const normalizedCommand = String(command ?? "").trim();
+  const validated = validateRunInContainerInput(
+    containerName,
+    command,
+    peerConfig.allowedContainerNames,
+  );
 
-  if (!normalizedCommand) {
-    throw createHttpError(400, "command is required");
-  }
-
-  const dockerCmd = `docker exec ${normalizedContainerName} sh -lc ${JSON.stringify(normalizedCommand)}`;
+  const dockerCmd = `docker exec ${validated.containerName} sh -lc ${JSON.stringify(validated.command)}`;
 
   try {
     const { stdout, stderr } = await execAsync(dockerCmd, {
@@ -109,22 +113,22 @@ async function runInContainer(containerName, command) {
     });
 
     return {
-      containerName: normalizedContainerName,
-      command: normalizedCommand,
+      containerName: validated.containerName,
+      command: validated.command,
       dockerCmd,
       stdout,
       stderr,
     };
   } catch (error) {
-    throw createHttpError(
-      error.code === 125 ? 400 : 500,
-      error.stderr?.trim() ||
-        error.message ||
-        "Unable to run container command",
+    const statusCode = error?.code === 125 ? 400 : 500;
+    throw new AppError(
+      error?.stderr?.trim() || error?.message || "Unable to run container command",
+      statusCode,
+      "CONTAINER_COMMAND_FAILED",
       {
-        stdout: error.stdout ?? "",
-        stderr: error.stderr ?? "",
-        exitCode: error.code,
+        stdout: error?.stdout ?? "",
+        stderr: error?.stderr ?? "",
+        exitCode: error?.code,
         dockerCmd,
       },
     );
@@ -132,40 +136,23 @@ async function runInContainer(containerName, command) {
 }
 
 function provisionOrganization(payload) {
-  const organizationName = String(payload.organizationName ?? "").trim();
-  const adminEmail = String(payload.adminEmail ?? "")
-    .trim()
-    .toLowerCase();
-  const domainInput = String(payload.domain ?? "")
-    .trim()
-    .toLowerCase();
-  const channelName = String(payload.channelName ?? "mychannel").trim();
+  const validated = validateProvisionOrganizationPayload(payload);
 
-  if (!organizationName) {
-    throw createHttpError(400, "organizationName is required");
-  }
-
-  if (!adminEmail || !adminEmail.includes("@")) {
-    throw createHttpError(400, "adminEmail must be a valid email address");
-  }
-
-  const slug = normalizeSlug(organizationName);
-  if (!slug) {
-    throw createHttpError(
-      400,
-      "organizationName must contain letters or numbers",
-    );
-  }
+  const slug = normalizeSlug(validated.organizationName);
 
   if (provisionedOrganizations.has(slug)) {
-    throw createHttpError(
+    throw new AppError(
+      `Organization ${validated.organizationName} already exists`,
       409,
-      `Organization ${organizationName} already exists`,
+      "ORG_ALREADY_EXISTS",
+      { slug },
     );
   }
 
   const domain =
-    domainInput.length > 0 ? domainInput : `${slug}.linaw.example.com`;
+    validated.domain.length > 0
+      ? validated.domain
+      : `${slug}.linaw.example.com`;
 
   const mspId = `${slug.replace(/(^|-)(\w)/g, (_match, _dash, char) =>
     char.toUpperCase(),
@@ -173,18 +160,18 @@ function provisionOrganization(payload) {
 
   const provisioned = {
     id: randomUUID(),
-    organizationName,
+    organizationName: validated.organizationName,
     slug,
     mspId,
     domain,
     adminIdentity: {
       enrollmentId: `admin@${domain}`,
-      email: adminEmail,
+      email: validated.adminEmail,
       secret: randomUUID().replace(/-/g, "").slice(0, 16),
       status: "issued",
     },
     networkAttachment: {
-      channel: channelName || "mychannel",
+      channel: validated.channelName || "mychannel",
       status: "requested",
     },
     createdAt: new Date().toISOString(),

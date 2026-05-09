@@ -35,3 +35,4 @@ logs/
 .yarn/
 .serverless/
 .pnp.*   
+/graphify-out

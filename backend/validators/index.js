@@ -1,4 +1,5 @@
 module.exports = {
   user: require('./user'),
-  network: require('./fabric')
+  network: require('./fabric'),
+  peer: require('./peer'),
 }

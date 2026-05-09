@@ -21,13 +21,14 @@ function parseBuffer(resultBuffer) {
 }
 
 class assetRegistry {
-  async createAsset({ id, color, size, owner, appraisedValue, requestedBy }) {
+  async createAsset({ id, tenantId, color, size, owner, appraisedValue, requestedBy }) {
     try {
       const contract = getContractFromGateway("assetRegistryContract");
 
       const result = await contract.submitTransaction(
         "CreateAsset",
         id,
+        tenantId,
         color,
         String(size),
         owner,
@@ -48,12 +49,12 @@ class assetRegistry {
     }
   }
 
-  async assetTransfer({ id, owner, requestedBy }) {
+  async assetTransfer({ id, tenantId, owner, requestedBy }) {
     try {
       const contract = getContractFromGateway("assetRegistryContract");
 
       const commit = await contract.submitAsync("TransferAsset", {
-        arguments: [id, owner],
+        arguments: [id, tenantId, owner],
       });
 
       const result = commit.getResult();
@@ -79,13 +80,14 @@ class assetRegistry {
     }
   }
 
-  async assetUpdate({ id, color, size, owner, appraisedValue, requestedBy }) {
+  async assetUpdate({ id, tenantId, color, size, owner, appraisedValue, requestedBy }) {
     try {
       const contract = getContractFromGateway("assetRegistryContract");
 
       const result = await contract.submitTransaction(
         "UpdateAsset",
         id,
+        tenantId,
         color,
         String(size),
         owner,
@@ -106,12 +108,12 @@ class assetRegistry {
     }
   }
 
-  async assetDelete({ id, requestedBy }) {
+  async assetDelete({ id, tenantId, requestedBy }) {
     try {
       const contract = getContractFromGateway("assetRegistryContract");
 
       const commit = await contract.submitAsync("DeleteAsset", {
-        arguments: [id],
+        arguments: [id, tenantId],
       });
 
       const result = commit.getResult();
@@ -137,7 +139,7 @@ class assetRegistry {
     }
   }
 
-  async assetRead({ id, requestedBy }) {
+  async assetRead({ id, tenantId, requestedBy }) {
     try {
       const contract = getContractFromGateway("assetRegistryContract");
 
