@@ -1,42 +1,15 @@
 const userService = require('../service/application/userService')
-const AppError = require('../utils/AppError')
-const userService = require("../service/application/userService");
-const disposableService = require("../service/disposableEmailService");
 
 class userController {
-    async signup (req, res, next) {
-        try {
-            const user = await userService.signup({
-                body: req.body,
-                user: req.user.uid
-            })
-            if (!user) {
-                return res.status(400).json({
-                    message: 'Signup failed',
-                })
-            }
-  async signup(req, res, next) {
+    async signup(req, res, next) {
     try {
       const email = req.body?.email;
-
+      
       if (!email) {
         return res.status(400).json({ message: "Email is required" });
       }
 
-      // Check disposable email
-      try {
-        const check = await disposableService.checkEmail(email);
-        if (check && check.is_disposable) {
-          return res
-            .status(400)
-            .json({ message: "Disposable email addresses are not allowed" });
-        }
-      } catch (err) {
-        // If the disposable check fails due to config or network, log and continue
-        console.error("Disposable email check failed:", err.message || err);
-      }
-
-      const user = await userService.signup(req.body);
+      const user = await userService.signup(req.body, req.user);
       if (!user) {
         return res.status(400).json({
           message: "Signup failed",
@@ -54,9 +27,13 @@ class userController {
 
   async login(req, res, next) {
     try {
+      /* 
+        this is login, the user already has a valid UID from firebase the only thing
+        that doesn't need an auth is the signup. 
+      */
       const user = await userService.login({
                 body: req.body,
-                user: req.user.uid
+                user: req.user
             });
 
       if (!user) {

@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const approvalWorkflowSchema = require('../../validators/fabric/approvalWorkflowsSchema');
 const AppError = require('../../utils/AppError');
 const approvalWorkflow = require('../fabric/approvalWorkflow');
-const submissionDao = require('../../dao/approvalWorkflowDao');
+const submissionDao = require('../../dao/chaincodeMetadata/approvalWorkflowDao');
 const fileService = require('./fileService');
 
 class ValidationError extends Error {

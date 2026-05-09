@@ -1,4 +1,4 @@
-const disposableService = require("../service/disposableEmailService");
+const disposableService = require("../service/application/disposableEmailService");
 
 exports.check = async (req, res, next) => {
   try {

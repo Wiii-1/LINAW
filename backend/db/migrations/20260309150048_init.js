@@ -15,7 +15,7 @@ exports.up = async function (knex) {
     table.uuid('user_id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('tenant_id').notNullable();
     table.string('user_email', 255).notNullable();
-    table.string('username', 255).notNullable();
+    table.string('firebase_uid').text().unique().notNullable();
     table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
     table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
@@ -124,12 +124,79 @@ exports.up = async function (knex) {
     table.index(['tenant_id']);
     table.index(['owner']);
   });
+
+  await knex.schema.createTable('tenant_storage', (table) => {
+    table.uuid('tenant_id').primary().notNullable();
+    table.string('provider', 50).notNullable().defaultTo('Cloudflare_r2');
+    table.string('bucket_name', 63).notNullable().unique();
+    table.timestamp('created_at', { useTz: true}).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true}).notNullable().defaultTo(knex.fn.now());
+
+    table.foreign('tenant_id').references('tenant_id').inTable('tenants').onDelete('CASCADE');
+  });
+
+  await knex.schema.createTable('organization_invites', (table) => {
+    table.uuid('invite_id').primary().defaultTo(knex.raw('gen_random_uuid()'));
+
+    table.uuid('tenant_id').notNullable();
+    table
+      .foreign('tenant_id')
+      .references('tenant_id')
+      .inTable('tenants')
+      .onDelete('CASCADE');
+
+    table.uuid('organization_id').notNullable();
+    table
+      .foreign('organization_id')
+      .references('organization_id')
+      .inTable('organizations')
+      .onDelete('CASCADE');
+
+    table.string('invited_email').notNullable();
+    table.text('token_hash').notNullable();
+
+    table
+      .enu('status', ['pending', 'accepted', 'revoked', 'expired'], {
+        useNative: true,
+        enumName: 'organization_invite_status',
+      })
+      .notNullable()
+      .defaultTo('pending');
+
+    table.timestamp('expires_at').notNullable();
+
+    table.uuid('invited_by').notNullable();
+    table
+      .foreign('invited_by')
+      .references('user_id')
+      .inTable('users')
+      .onDelete('CASCADE');
+
+    table.uuid('accepted_by').nullable();
+    table
+      .foreign('accepted_by')
+      .references('user_id')
+      .inTable('users')
+      .onDelete('SET NULL');
+
+    table.timestamp('accepted_at').nullable();
+
+    table.timestamps(true, true);
+
+    table.index(['tenant_id']);
+    table.index(['organization_id']);
+    table.index(['invited_email']);
+    table.index(['status']);
+    table.unique(['token_hash']);
+  });
 };
 
 /**
  * @param {import('knex').Knex} knex
  */
 exports.down = async function (knex) {
+  await knex.schema.dropTableIfExists('organization_invites');
+  await knex.schema.dropTableIfExists('tenant_storage')
   await knex.schema.dropTableIfExists('asset_registry');
   await knex.schema.dropTableIfExists('submissions');
   await knex.schema.dropTableIfExists('channel');

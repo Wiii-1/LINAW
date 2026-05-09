@@ -1,7 +1,14 @@
 const https = require("https");
 
+/*
+  NOTICE: As far as I know i can't rebuild it without the updated env file. 
+  I can't rebuild the docker image of the backend server when pushed to main. 
+  I don't have the updated env file.
+*/
+
 const API_KEY =
   process.env.DISPOSABLE_EMAIL_API_1 || process.env.DISPOSABLE_EMAIL_API;
+  
 
 function checkEmail(email) {
   return new Promise((resolve, reject) => {

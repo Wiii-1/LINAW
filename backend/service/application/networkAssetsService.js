@@ -10,7 +10,7 @@ class ValidationError extends Error {
 const fabricSchema = require("../../validators/fabric/fabricSchema");
 const AppError = require("../../utils/AppError");
 const assetService = require("../fabric/assetRegistry");
-const assetRegistryDao = require("../../dao/assetRegistryDao");
+const assetRegistryDao = require("../../dao/chaincodeMetadata/assetRegistryDao");
 class networkAssetsService {
   constructor() {
     this.schemas = fabricSchema;

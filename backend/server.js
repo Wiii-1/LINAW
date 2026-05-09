@@ -43,4 +43,7 @@ app.listen(port, () => {
     functions to ensure that the database is
     ready before the server
     - Jed
+
+    Okay understood.
+    - Wes
 */

@@ -1,13 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const fabricController = require("../controllers/fabricController");
+const fabricController = require("../controllers/blockchainController.js");
+const orgnaitionInvitation = require("../controllers/organizationInvitationController")
 const authenticate = require("../middleware/authenticate");
 const { apiLimiter } = require("../middleware/rateLimiter");
 const uploadSubmissionFile = require("../middleware/uploadSubmissionFile.js");
 
 router.use(apiLimiter, authenticate.decodeToken);
 
-//blockchain
+// blockchain related routes
+
+
 router.post("/networks", fabricController.networkCreate);
 router.get("/networks", fabricController.networkRead);
 
@@ -18,10 +21,9 @@ router.get("/channel/:channel_id/contracts", fabricController.contractReadAll);
 
 // member addition
 
-router.post     ('/organizations/:organizationId/members', fabricController.addMember)
-router.patch    ('/organizations/:organizationId/members/:userId', fabricController.updateMemberRole)
-router.get      ('/organizations/:organizationId/members', fabricController.getOrganizationMemebrs)
-router.delete   ('/organizations/:organizationId/member/:userId', fabricController.deleteMember)
+router.post("organizations/:organization_id/invitations", orgnaitionInvitation.invitations)
+router.get("organizations-invitations/:token",orgnaitionInvitation.tokens)
+router.post("organizations-invitations/:token/accept", orgnaitionInvitation.accepted)
 
 // asset registry
 router.post("/assets", fabricController.createAsset);

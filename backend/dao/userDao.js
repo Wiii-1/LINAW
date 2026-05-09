@@ -1,62 +1,77 @@
-const db = require('../db/db')
+const db = require("../db/db");
 
+class UserDao {
+  async signup(data) {
+    try {
+      const { email, firebase_uid } = data;
 
-class userDao {
-    async signup (data) {
-        try {
-            const { email, firebase_uid } = data;
-            const [users] = await db('users')
-            .insert ({
-                email: email,
-                firebase_uid: firebase_uid,
-            })
-            .returning (['user_id', 'email']);
-            console.log('Inserted users row:', users);
+      const [user] = await db("users")
+        .insert({
+          email,
+          firebase_uid,
+          created_at: db.fn.now(),
+          updated_at: db.fn.now(),
+        })
+        .returning([
+          "user_id",
+          "email",
+          "firebase_uid",
+          "created_at",
+          "updated_at",
+        ]);
 
-        return users;
-        } catch (err) {
-            if (err.code == "23505") throw Error("EMAIL_ALREADY_EXISTS")
-            throw err
-        }
+      return user;
+    } catch (err) {
+      if (err.code === "23505") {
+        throw new Error("EMAIL_ALREADY_EXISTS");
+      }
+      throw err;
     }
+  }
 
-    async login (data) {
-        try {
-            const { email, firebase_uid } = data
-    
-            const users = await db('users')
-                .where({ 'firebase_uid': firebase_uid }) 
-                .orWhere('email', email)
-                .select('user_id', 'email')
-                .first()
-    
-            return users || null;   
-        } catch (err) {
-            console.error('DAO login error:', err);
-            throw err;
-        }
-    }
+  async login(data) {
+    try {
+      const { email, firebase_uid } = data;
 
-    async findByFirebaseUid(firebase_uid) {
-        const users = await db('users')
-            .where ({ 'firebase_uid': firebase_uid })
-            .select('firebase_uid')
-            .first();
-        return users || null;
-    }
+      const user = await db("users")
+        .where({ firebase_uid })
+        .orWhere("email", email)
+        .select("user_id", "email", "firebase_uid", "created_at", "updated_at")
+        .first();
 
-    async findUserByEmail(email) {
-        const user = await db('users')
-            .where ({ 'email': email })
-            .select('user_id', 'email')
-            .first();
-        return user || null;
+      return user || null;
+    } catch (err) {
+      console.error("DAO login error:", err);
+      throw err;
     }
+  }
+
+  async findByFirebaseUid(firebase_uid) {
+    const user = await db("users")
+      .where({ firebase_uid })
+      .select("user_id", "email", "firebase_uid", "created_at", "updated_at")
+      .first();
+
+    return user || null;
+  }
+
+  async findUserByEmail(email) {
+    const user = await db("users")
+      .where({ email })
+      .select("user_id", "email", "firebase_uid", "created_at", "updated_at")
+      .first();
+
+    return user || null;
+  }
+
+  async findById(user_id) {
+    const user = await db("users")
+      .where({ user_id })
+      .select("user_id", "email", "firebase_uid", "created_at", "updated_at")
+      .first();
+
+    return user || null;
+  }
 }
 
-module.exports = new userDao();
-
-
-
-
-
+module.exports = new UserDao();
