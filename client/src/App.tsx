@@ -3,9 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { lazy, Suspense } from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 
-const AuthenticationRoute = lazy(() => import("./AuthenticationRoute"))
+const AuthenticationRoute = lazy(() => import("./pages/AuthenticationRoute"))
 const AuthenticationRouteReversed = lazy(
-  () => import("./AuthenticationRouteReversed")
+  () => import("./pages/AuthenticationRouteReversed")
 )
 const Login = lazy(() => import("./pages/Login"))
 const Register = lazy(() => import("./pages/Register"))
@@ -14,7 +14,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"))
 const TermsOfService = lazy(() => import("./pages/TermsOfService"))
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"))
 const Organizations = lazy(() => import("./pages/Organizations"))
-const SmartContract = lazy(() => import("./pages/SmartContract"))
+const SmartContracts = lazy(() => import("./pages/SmartContracts"))
 const Analytics = lazy(() => import("./pages/Analytics"))
 const Account = lazy(() => import("./pages/Account"))
 const Settings = lazy(() => import("./pages/Settings"))
@@ -67,10 +67,10 @@ export function App() {
               }
             />
             <Route
-              path="/smart-contract"
+              path="/smart-contracts"
               element={
                 <AuthenticationRoute>
-                  <SmartContract />
+                  <SmartContracts />
                 </AuthenticationRoute>
               }
             />
