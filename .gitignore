@@ -1,5 +1,6 @@
 chaindeploy 
 database/
+/.github/agents/
 
 # Hyperledger Fabric
 fabric-ca
