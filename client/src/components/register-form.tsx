@@ -93,7 +93,26 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
       setAuthorizing(false)
     }
   }
+  
+  /* 
+    NOTICE: needed to add this manually so I can continue testing and developing the organization and making the backend run on cli only. 
+            I need the firebase uid from firebase for authentication purposes on testing so it can run without the frontend
+  */
+  async function syncAuthenticatedUser(firebaseUser: {
+    getIdToken: () => Promise<string>
+  }) {
+    const idToken = await firebaseUser.getIdToken()
 
+    await axios.post(
+      "/api/auth/sync-user",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    )
+  }
   const postRegister = async (email: string, firebase_uid: string) => {
     try {
       await axios.post("/api/login", { email, firebase_uid })
@@ -101,6 +120,7 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
       console.error("Error posting register:", error)
     }
   }
+
   return (
     <form
       className={cn("flex flex-col gap-6", className)}
