@@ -1,5 +1,5 @@
 node_modules
-package-lock.json/
+package-lock.json
 ../database/
 config/serviceAccount.json
 db/knexfile.js
