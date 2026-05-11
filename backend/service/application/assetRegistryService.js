@@ -7,14 +7,14 @@ class ValidationError extends Error {
   }
 }
 
-const fabricSchema = require("../../validators/fabric/fabricSchema");
+const assetRegistrySchema = require("../../validators/fabric/assetRegistrySchema");
 const AppError = require("../../utils/AppError");
 const assetService = require("../fabric/assetRegistry");
 const assetRegistryDao = require("../../dao/chaincodeMetadata/assetRegistryDao");
 
-class networkAssetsService {
+class assetRegistryService {
   constructor() {
-    this.schemas = fabricSchema;
+    this.schemas = assetRegistrySchema;
   }
 
   validate(schemaKey, data) {
@@ -39,73 +39,6 @@ class networkAssetsService {
     return value;
   }
 
-  // Copilot note: Blockchain/network methods - separated from asset registry operations
-  async networkCreate({ body, user }) {
-    const validated = this.validate("networkCreateSchema", { body });
-
-    const { name, description, orgs } = validated.body;
-
-    return await assetService.networkCreate({
-      name,
-      description,
-      orgs,
-      requestedBy: user?.uid,
-    });
-  }
-
-  async networkRead({ params, user }) {
-    throw new AppError(
-      "Network read is not implemented",
-      501,
-      "NOT_IMPLEMENTED",
-    );
-  }
-
-  async channelCreate({ params, body, user }) {
-    const validated = this.validate("channelCreateSchema", { params, body });
-
-    const { id } = validated.params;
-    const { name, memberOrgs } = validated.body;
-
-    return await assetService.channelCreate({
-      id,
-      name,
-      memberOrgs,
-      requestedBy: user?.uid,
-    });
-  }
-
-  async channelRead({ params, user }) {
-    throw new AppError(
-      "Channel read is not implemented",
-      501,
-      "NOT_IMPLEMENTED",
-    );
-  }
-
-  async smartContract({ params, body, user }) {
-    const validated = this.validate("smartContractSchema", { params, body });
-
-    const { contractType, contractName, version } = validated.body;
-
-    return await assetService.smartContract({
-      channel_id: validated.params.channel_id,
-      contractType,
-      contractName,
-      version,
-      requestedBy: user?.uid,
-    });
-  }
-
-  async contractReadAll({ params, user }) {
-    const validated = this.validate("contractReadAllSchema", { params });
-
-    return await assetService.contractReadAll({
-      channel_id: validated.params.channel_id,
-      requestedBy: user?.uid,
-    });
-  }
-
   async createAsset({ body, user }) {
     if (!user?.tenantId) {
       throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
@@ -120,7 +53,7 @@ class networkAssetsService {
       tenantId: user.tenantId,
       color,
       size,
-      owner,
+      owner: user.uid, 
       appraisedValue,
       requestedBy: user.uid,
     });
@@ -242,4 +175,4 @@ class networkAssetsService {
   }
 }
 
-module.exports = new networkAssetsService();
+module.exports = new assetRegistryService();

@@ -18,6 +18,7 @@ __tests__/bugs.md
 /output-backend-routine-check.md
 /output-master-check.md
 docker.md
+/*outputs
 
 # Node.js
 node_modules/

@@ -28,7 +28,7 @@ function safeSlug(value) {
 }
 
 function resolveNetworkId(rawConfig) {
-  // Copilot note: prefer stable IDs for repeatable, isolated provisioning workspaces.
+
   const candidate = rawConfig && (rawConfig.networkId || rawConfig.name || rawConfig.channelId);
   const slug = safeSlug(candidate);
   return slug || `net-${Date.now()}`;
@@ -63,7 +63,7 @@ async function initNetworkWorkspace(userId, rawConfig) {
   const workspace = getNetworkWorkspacePath(userWorkspace, networkId);
   await fs.ensureDir(workspace);
 
-  // Copilot note: keep per-network state/progress in the network workspace, not the user root.
+
   await fs.ensureDir(path.join(workspace, 'crypto-config'));
   await fs.ensureDir(path.join(workspace, 'channel-artifacts'));
 
@@ -145,7 +145,7 @@ async function provision(userId, rawConfig) {
 
     // write network configuration
     logger.debug('[DEBUG] Writing network configuration')
-    // Copilot note: write into the per-network workspace so multiple networks per user don't clash.
+
     await fs.writeFile(`${workspace}/configtx.yaml`, generateConfigtx(config));
     await fs.writeFile(`${workspace}/docker-compose.yml`, generateDockerCompose(userId, config));
     await progress({ step: 'config.written' });
@@ -165,7 +165,7 @@ async function provision(userId, rawConfig) {
     await progress({ step: 'configtxgen.genesis' });
     await generateGenesisBlock(workspace, config)
 
-    // Copilot note: provisioning flow expects a channel create transaction before creating the channel.
+
     await progress({ step: 'configtxgen.channelTx' });
     await generateChannelTx(workspace, config)
 
@@ -206,7 +206,6 @@ async function provision(userId, rawConfig) {
       await composeDownWithVolumes(workspace, userId)
     } catch (_) { }
     try {
-      // Copilot note: cleanup only the per-network workspace to avoid nuking other networks.
       await safeRemoveWorkspace(userWorkspace, workspace)
     } catch (_) { }
     throw err;
@@ -224,7 +223,7 @@ async function destroy(userId, networkId, opts = {}) {
     await composeDownWithVolumes(workspace, userId)
   } catch (_) { }
 
-  // Copilot note: remove the network workspace by default; optionally remove the entire user workspace.
+
   await safeRemoveWorkspace(userWorkspace, workspace)
 
   if (opts.destroyUserWorkspace) {
@@ -239,7 +238,6 @@ async function stop(userId, networkId) {
   const progress = createProgressLogger(workspace);
   await progress({ step: 'stop.start', networkId });
 
-  // Copilot note: stop should be resumable, so use `docker compose stop` rather than `down`.
   await composeStop(workspace, userId)
 
   const state = (await readWorkspaceState(workspace)) || { userId, networkId, workspace };

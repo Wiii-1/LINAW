@@ -1,4 +1,4 @@
-const { db } = require('../db/knex');
+const { db } = require('db/knex');
 
 const PORT_RANGE_START = 7100;
 const PORT_RANGE_END = 9900;

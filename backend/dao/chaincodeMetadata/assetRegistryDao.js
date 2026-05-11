@@ -1,4 +1,5 @@
-const db = require('../../db/db');
+const db = require('db/db');
+const AppError = require('../../utils/AppError');
 
 class AssetRegistryDao {
     async createAsset(data) {
@@ -30,7 +31,7 @@ class AssetRegistryDao {
 
             return asset;
         } catch (error) {
-            if (error.code === '23505') throw new Error('ASSET_ALREADY_EXISTS');
+            if (error.code === '23505') throw new AppError('Asset already exists', 409, 'ASSET_ALREADY_EXISTS');
             throw error;
         }
     }
@@ -55,7 +56,7 @@ class AssetRegistryDao {
 
             return asset || null;
         } catch (error) {
-            if (error.code === '23505') throw new Error('ASSET_TRANSFER_FAILED');
+            if (error.code === '23505') throw new AppError('Asset transfer failed', 409, 'ASSET_TRANSFER_FAILED');
             throw error;
         }
     }
@@ -86,7 +87,7 @@ class AssetRegistryDao {
 
             return asset || null;
         } catch (error) {
-            if (error.code === '23505') throw new Error('ASSET_UPDATE_FAILED');
+            if (error.code === '23505') throw new AppError('Asset update failed', 409, 'ASSET_UPDATE_FAILED');
             throw error;
         }
     }
