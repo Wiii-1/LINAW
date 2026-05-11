@@ -1,7 +1,7 @@
 const { exec } = require('child_process')
 const { promisify } = require('util')
 const logger = require('../utils/logger')
-const fabricBinPath = require(`../config/fabric`)
+const fabricBinPath = require(`../config/fabric/fabricConfig`)
 const promisifiedExec = promisify(exec)
 
 const fabricEnv = {

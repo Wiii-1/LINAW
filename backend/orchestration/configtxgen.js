@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs-extra');
-const { execAsync } = require('../../utils/execAsync');
-const logger = require('../../utils/logger');
+const { execAsync } = require('../utils/execAsync');
+const logger = require('../utils/logger');
 
 function getFabricToolsImage() {
 	const fabricVersion = process.env.FABRIC_VERSION || '2.5';

@@ -62,6 +62,8 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
       console.log("User registered:", response.user)
       postRegister(email, response.user.uid)
 
+      await syncAuthenticatedUser(response.user)
+
       await sendEmailVerification(response.user)
       console.log("Verification email sent")
       alert(

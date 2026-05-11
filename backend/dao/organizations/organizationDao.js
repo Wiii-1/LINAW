@@ -1,4 +1,4 @@
-const db = require("db/db");
+const db = require("../../db/db");
 
 class OrganizationDao {
 	async findById({ organization_id, tenant_id }) {
