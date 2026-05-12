@@ -1,8 +1,44 @@
 const { spawn } = require('child_process')
 
-function runCommand ({ command, args = [], cwd, env = []}) {
-    return new  Promise((resolve, reject) => {
-        const childEnv = { ...process.env, ...env}
+function normalizeEnvOverrides(envOverrides) {
+    if (envOverrides == null) return {}
+
+    if (Array.isArray(envOverrides)) {
+        throw new TypeError(
+            'env overrides must be an object (e.g. { KEY: "value" }); arrays are not supported'
+        )
+    }
+
+    if (typeof envOverrides !== 'object') {
+        throw new TypeError(
+            `env overrides must be an object; received ${typeof envOverrides}`
+        )
+    }
+
+    const normalized = {}
+    for (const [key, value] of Object.entries(envOverrides)) {
+        if (value === undefined || value === null) continue
+        normalized[key] = String(value)
+    }
+    return normalized
+}
+
+function runCommand ({ command, args = [], cwd, env, envOverrides } = {}) {
+    return new Promise((resolve, reject) => {
+        let finalEnvOverrides
+        try {
+            finalEnvOverrides = normalizeEnvOverrides(
+                envOverrides !== undefined ? envOverrides : env
+            )
+        } catch (error) {
+            reject({
+                type: 'invalid_env',
+                error,
+            })
+            return
+        }
+
+        const childEnv = { ...process.env, ...finalEnvOverrides }
 
         const child = spawn (command, args, {
             cwd,

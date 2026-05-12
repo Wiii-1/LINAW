@@ -23,7 +23,11 @@ async function assertComposeFileExists(workspace) {
 function composeCmd(workspace, userId) {
     const composeFile = getComposeFile(workspace)
     const project = getProjectName(userId)
-    return `docker compose -f "${composeFile}" --project-name ${project}`
+    // Effective path invariant for compose volumes:
+    // - docker-compose.yml lives in `workspace`
+    // - relative host paths (e.g. ./crypto-config/tls-ca) must resolve against `workspace`
+    //   so TLS-CA writes to: <workspace>/crypto-config/tls-ca
+    return `docker compose --project-directory "${workspace}" -f "${composeFile}" --project-name ${project}`
 }
 
 async function composeUp(workspace, userId, services = []) {

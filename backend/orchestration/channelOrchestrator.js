@@ -9,7 +9,8 @@ function getFabricToolsImage() {
 }
 
 function getProjectNetwork(userId) {
-	return `fabric-${userId}`;
+	const project = `fabric-${userId}`;
+	return `${project}_${project}`;
 }
 
 function shellQuote(value) {
@@ -20,8 +21,8 @@ function getChannelId(config) {
 	return (config && config.channelId) ? config.channelId : 'mainchannel';
 }
 
-function getPrimaryOrdererLabel() {
-	return 'orderer';
+function getPrimaryOrdererHost(userId) {
+	return `orderer-${userId}`;
 }
 
 function getChannelArtifactsDir(workspace) {
@@ -32,12 +33,12 @@ function getPeerMspPath(org) {
 	return `/workspace/crypto-config/${org.name}/users/Admin@${org.name}/msp`;
 }
 
-function getPeerTlsRootCertPath(org, peerIndex) {
-	return `/workspace/crypto-config/${org.name}/peers/peer${peerIndex}/tls/tlscacerts/tls-cert.pem`;
+function getPeerTlsRootCertDir(org, peerIndex) {
+	return `/workspace/crypto-config/${org.name}/peers/peer${peerIndex}/tls`;
 }
 
-function getOrdererTlsRootCertPath() {
-	return '/workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/tls-cert.pem';
+function getOrdererTlsRootCertDir() {
+	return '/workspace/crypto-config/ordererOrg/orderers/orderer/tls';
 }
 
 async function assertFileExists(filePath, hint) {
@@ -67,8 +68,8 @@ async function createChannel(workspace, userId, config, opts = {}) {
 	const channelId = getChannelId(config);
 	const progress = typeof opts.progress === 'function' ? opts.progress : null;
 	const channelTxPath = path.join(getChannelArtifactsDir(workspace), `${channelId}.tx`);
-	const ordererHost = getPrimaryOrdererLabel();
-	const ordererCa = getOrdererTlsRootCertPath();
+	const ordererHost = getPrimaryOrdererHost(userId);
+	const ordererTlsDir = getOrdererTlsRootCertDir();
 
 	await assertFileExists(channelTxPath, 'Channel create transaction not found');
 
@@ -79,7 +80,8 @@ async function createChannel(workspace, userId, config, opts = {}) {
 		workspace,
 		userId,
 		[
-			`export ORDERER_CA=${shellQuote(ordererCa)}`,
+			`export ORDERER_CA=$(ls ${ordererTlsDir}/tlscacerts/*.pem ${ordererTlsDir}/cacerts/*.pem 2>/dev/null | head -n1 || true)`,
+			'[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }',
 			`peer channel create -o ${shellQuote(`${ordererHost}:7050`)} --ordererTLSHostnameOverride ${shellQuote(ordererHost)} --tls --cafile "$ORDERER_CA" -c ${shellQuote(channelId)} -f ${shellQuote(`/workspace/channel-artifacts/${channelId}.tx`)}`,
 		].join('\n')
 	);
@@ -91,8 +93,8 @@ async function createChannel(workspace, userId, config, opts = {}) {
 async function joinPeersToChannel(workspace, userId, config, opts = {}) {
 	const channelId = getChannelId(config);
 	const progress = typeof opts.progress === 'function' ? opts.progress : null;
-	const ordererHost = getPrimaryOrdererLabel();
-	const ordererCa = getOrdererTlsRootCertPath();
+	const ordererHost = getPrimaryOrdererHost(userId);
+	const ordererTlsDir = getOrdererTlsRootCertDir();
 	const results = [];
 
 	logger.info(`[INFO] Joining peers to ${channelId} for ${getProjectNetwork(userId)}...`);
@@ -101,14 +103,18 @@ async function joinPeersToChannel(workspace, userId, config, opts = {}) {
 	for (const org of (config.orgs || [])) {
 		for (let peerIndex = 0; peerIndex < (org.peerCount || 0); peerIndex++) {
 			const peerAddress = `peer${peerIndex}.${org.name}:7051`;
+			const peerTlsDir = getPeerTlsRootCertDir(org, peerIndex);
 			const blockPath = `/workspace/channel-artifacts/${channelId}-${org.name}-peer${peerIndex}.block`;
 			const script = [
-				`export ORDERER_CA=${shellQuote(ordererCa)}`,
+				`export ORDERER_CA=$(ls ${ordererTlsDir}/tlscacerts/*.pem ${ordererTlsDir}/cacerts/*.pem 2>/dev/null | head -n1 || true)`,
+				'[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }',
+				`export PEER_TLS_CA=$(ls ${peerTlsDir}/tlscacerts/*.pem ${peerTlsDir}/cacerts/*.pem 2>/dev/null | head -n1 || true)`,
+				'[[ -n "$PEER_TLS_CA" ]] || { echo "Peer TLS CA cert not found"; exit 1; }',
 				`export CORE_PEER_LOCALMSPID=${shellQuote(org.mspId)}`,
 				`export CORE_PEER_MSPCONFIGPATH=${shellQuote(getPeerMspPath(org))}`,
 				`export CORE_PEER_TLS_ENABLED=true`,
 				`export CORE_PEER_ADDRESS=${shellQuote(peerAddress)}`,
-				`export CORE_PEER_TLS_ROOTCERT_FILE=${shellQuote(getPeerTlsRootCertPath(org, peerIndex))}`,
+				`export CORE_PEER_TLS_ROOTCERT_FILE="$PEER_TLS_CA"`,
 				`peer channel fetch 0 ${shellQuote(blockPath)} -o ${shellQuote(`${ordererHost}:7050`)} --ordererTLSHostnameOverride ${shellQuote(ordererHost)} --tls --cafile "$ORDERER_CA" -c ${shellQuote(channelId)}`,
 				`peer channel join -b ${shellQuote(blockPath)}`,
 			].join('\n');
@@ -128,8 +134,8 @@ async function updateAnchorPeers(workspace, userId, config, opts = {}) {
 	const { generateAnchorPeerUpdateTx } = require('./configtxgen');
 	const channelId = getChannelId(config);
 	const progress = typeof opts.progress === 'function' ? opts.progress : null;
-	const ordererHost = getPrimaryOrdererLabel();
-	const ordererCa = getOrdererTlsRootCertPath();
+	const ordererHost = getPrimaryOrdererHost(userId);
+	const ordererTlsDir = getOrdererTlsRootCertDir();
 	const results = [];
 
 	logger.info(`[INFO] Updating anchor peers for ${channelId} in ${getProjectNetwork(userId)}...`);
@@ -140,7 +146,8 @@ async function updateAnchorPeers(workspace, userId, config, opts = {}) {
 		await assertFileExists(anchorTxPath, 'Anchor peer update transaction not found');
 
 		const script = [
-			`export ORDERER_CA=${shellQuote(ordererCa)}`,
+			`export ORDERER_CA=$(ls ${ordererTlsDir}/tlscacerts/*.pem ${ordererTlsDir}/cacerts/*.pem 2>/dev/null | head -n1 || true)`,
+			'[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }',
 			`export CORE_PEER_LOCALMSPID=${shellQuote(org.mspId)}`,
 			`export CORE_PEER_MSPCONFIGPATH=${shellQuote(getPeerMspPath(org))}`,
 			`export CORE_PEER_TLS_ENABLED=true`,

@@ -7,7 +7,9 @@ const { composeUp, composeDown, composeStop, composeStart, composeUpCA, composeD
 const { generateCryptoMaterial } = require('./cryptoMaterialGenerator')
 const { createChannel, joinPeersToChannel, updateAnchorPeers } = require('./channelOrchestrator')
 const { generateGenesisBlock, generateChannelTx } = require('./configtxgen')
+const { execAsync } = require('../utils/execAsync');
 const logger = require('../utils/logger');
+
 
 /*
 NOTE:
@@ -29,13 +31,13 @@ function safeSlug(value) {
 
 function resolveNetworkId(rawConfig) {
 
-  const candidate = rawConfig && (rawConfig.networkId || rawConfig.name || rawConfig.channelId);
+  const candidate = rawConfig && (rawConfig.network_id || rawConfig.name || rawConfig.channelId);
   const slug = safeSlug(candidate);
   return slug || `net-${Date.now()}`;
 }
 
-function getNetworkWorkspacePath(userWorkspace, networkId) {
-  return path.join(userWorkspace, 'networks', networkId);
+function getNetworkWorkspacePath(userWorkspace, network_id) {
+  return path.join(userWorkspace, 'networks', network_id);
 }
 
 function stateFilePath(workspace) {
@@ -59,15 +61,22 @@ async function readWorkspaceState(workspace) {
 
 async function initNetworkWorkspace(userId, rawConfig) {
   const userWorkspace = await initWorkspace(userId);
-  const networkId = resolveNetworkId(rawConfig);
-  const workspace = getNetworkWorkspacePath(userWorkspace, networkId);
+  const network_id = resolveNetworkId(rawConfig);
+  const workspace = getNetworkWorkspacePath(userWorkspace, network_id);
+
+  // Effective workspace path (example):
+  // - userId = dev-user
+  // - network_id = test-network-1
+  // (a) workspace (absolute): /home/wii/LINAW/.workspaces/dev-user/networks/test-network-1
+  // The absolute-ness is enforced by `backend/utils/workspace.js` resolving the env base
+  // relative to the backend root, not the current working directory.
   await fs.ensureDir(workspace);
 
 
   await fs.ensureDir(path.join(workspace, 'crypto-config'));
   await fs.ensureDir(path.join(workspace, 'channel-artifacts'));
 
-  return { userWorkspace, workspace, networkId };
+  return { userWorkspace, workspace, network_id };
 }
 
 function createProgressLogger(workspace) {
@@ -90,6 +99,48 @@ async function safeRemoveWorkspace(userWorkspace, workspace) {
   await fs.remove(workspace);
 }
 
+// Wait until TLS-CA responds on /cainfo over HTTPS on the compose network
+async function waitForTlsCaReady(userId, tlsCaPort, timeoutMs = 60000) {
+  const project = `fabric-${userId}`;
+  const network = `${project}_${project}`; // must match your compose project network
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      await execAsync(
+        [
+          'docker run --rm',
+          `--network ${network}`,
+          '--entrypoint curl',
+          'curlimages/curl:8.7.1',
+          `-sk https://tls-ca-${userId}:${tlsCaPort}/cainfo`
+        ].join(' ')
+      );
+      return;
+    } catch (err) {
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+
+  throw new Error(`TLS-CA did not become healthy on port ${tlsCaPort} for user ${userId}`);
+}
+
+async function createChannelWithRetry(workspace, userId, config, progress, opts = {}) {
+  const retries = typeof opts.retries === 'number' ? opts.retries : 15;
+  const delayMs = typeof opts.delayMs === 'number' ? opts.delayMs : 3000;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await createChannel(workspace, userId, config, { progress });
+    } catch (err) {
+      const msg = String(err && err.message ? err.message : err);
+      const retriable = /connection refused|failed to create new connection|context deadline exceeded/i.test(msg);
+      if (!retriable || attempt === retries) throw err;
+      logger.warn(`[WARN] createChannel attempt ${attempt}/${retries} failed, retrying in ${delayMs}ms`);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+}
 function applyPortDefaults(rawConfig) {
   return {
     ordererCount: 1,
@@ -126,12 +177,12 @@ async function assignPorts(config) {
 async function provision(userId, rawConfig) {
   // assign available ports
   const config = await assignPorts(applyPortDefaults({ ...rawConfig }));
-  const { userWorkspace, workspace, networkId } = await initNetworkWorkspace(userId, rawConfig);
+  const { userWorkspace, workspace, network_id } = await initNetworkWorkspace(userId, rawConfig);
   const progress = createProgressLogger(workspace);
 
   const baseState = {
     userId,
-    networkId,
+    network_id,
     workspace,
     composeProject: `fabric-${userId}`,
     status: 'provisioning',
@@ -139,12 +190,11 @@ async function provision(userId, rawConfig) {
   };
 
   await writeWorkspaceState(workspace, baseState);
-  await progress({ step: 'workspace.ready', networkId });
+  await progress({ step: 'workspace.ready', network_id });
 
   try {
-
     // write network configuration
-    logger.debug('[DEBUG] Writing network configuration')
+    logger.debug('[DEBUG] Writing network configuration');
 
     await fs.writeFile(`${workspace}/configtx.yaml`, generateConfigtx(config));
     await fs.writeFile(`${workspace}/docker-compose.yml`, generateDockerCompose(userId, config));
@@ -153,39 +203,43 @@ async function provision(userId, rawConfig) {
     // start CA only 
     logger.debug('[DEBUG] Starting CA ')
     await progress({ step: 'docker.ca.up' });
-    await composeUpCA(workspace, userId)
+    await composeUpCA(workspace, userId);
 
-    // generate all cert using fabric CA (might get changed and use vault instead,
-    // it was recommended to use fabric CA for cert generation but imma look)
+    // Wait until TLS-CA is actually responding before running fabric-ca-client
+    if (typeof progress === 'function') {
+      await progress({ step: 'docker.ca.wait', message: 'Waiting for TLS-CA to be healthy' });
+    }
+    await waitForTlsCaReady(userId, config.tlsCaPort);
+
+    // generate all cert using fabric CA
     logger.debug('[DEBUG] Generating certificates')
     await progress({ step: 'crypto.generate' });
     await generateCryptoMaterial(workspace, userId, config, { progress })
 
-    logger.debug('[DEBUG] Generating genesis block')
+    logger.debug('[DEBUG] Generating genesis block');
     await progress({ step: 'configtxgen.genesis' });
-    await generateGenesisBlock(workspace, config)
-
+    await generateGenesisBlock(workspace, config);
 
     await progress({ step: 'configtxgen.channelTx' });
-    await generateChannelTx(workspace, config)
+    await generateChannelTx(workspace, config);
 
-    logger.debug('[DEBUG] Starting Orderer + Peers')
+    logger.debug('[DEBUG] Starting Orderer + Peers');
     await progress({ step: 'docker.network.up' });
-    await composeUp(workspace, userId)
+    await composeUp(workspace, userId);
 
-    logger.debug('[DEBUG] Creating Channel')
-    await createChannel(workspace, userId, config, { progress })
+    logger.debug('[DEBUG] Creating Channel');
+    await createChannelWithRetry(workspace, userId, config, progress);
 
-    logger.debug('[DEBUG] Joining Peers to channel')
-    await joinPeersToChannel(workspace, userId, config, { progress })
+    logger.debug('[DEBUG] Joining Peers to channel');
+    await joinPeersToChannel(workspace, userId, config, { progress });
 
-    logger.debug('[DEBUG] Updating Anchor Peers')
-    await updateAnchorPeers(workspace, userId, config, { progress })
+    logger.debug('[DEBUG] Updating Anchor Peers');
+    await updateAnchorPeers(workspace, userId, config, { progress });
 
     // need to get Docker container Ids
     // need to create a map for endpoints
     await progress({ step: 'endpoints.collect' });
-    const endpoints = await createEndpoints(workspace, userId, config)
+    const endpoints = await createEndpoints(workspace, userId, config);
 
     const finalState = {
       ...(await readWorkspaceState(workspace)),
@@ -195,29 +249,29 @@ async function provision(userId, rawConfig) {
     await writeWorkspaceState(workspace, finalState);
     await progress({ step: 'provision.done' });
 
-    logger.info(`[INFO] Network provisioning for ${userId} is done!`)
-    return { config, endpoints, workspace, networkId };
+    logger.info(`[INFO] Network provisioning for ${userId} is done!`);
+    return { config, endpoints, workspace, network_id };
 
   } catch (err) {
     logger.error(`[ERROR] Provisioning failed for ${err.message}`);
     try { await progress({ step: 'provision.error', message: err.message }); } catch (_) {}
     try {
       // docker compose down with volumes
-      await composeDownWithVolumes(workspace, userId)
-    } catch (_) { }
+      await composeDownWithVolumes(workspace, userId);
+    } catch (_) {}
     try {
-      await safeRemoveWorkspace(userWorkspace, workspace)
-    } catch (_) { }
+      await safeRemoveWorkspace(userWorkspace, workspace);
+    } catch (_) {}
     throw err;
   }
 }
 
 // destroy a blockchain network
-async function destroy(userId, networkId, opts = {}) {
+async function destroy(userId, network_id, opts = {}) {
   const userWorkspace = await getUserWorkspace(userId);
-  const workspace = getNetworkWorkspacePath(userWorkspace, networkId);
+  const workspace = getNetworkWorkspacePath(userWorkspace, network_id);
   const progress = createProgressLogger(workspace);
-  await progress({ step: 'destroy.start', networkId });
+  await progress({ step: 'destroy.start', network_id });
 
   try {
     await composeDownWithVolumes(workspace, userId)
@@ -232,18 +286,18 @@ async function destroy(userId, networkId, opts = {}) {
 }
 
 // stop the network and can be resumed
-async function stop(userId, networkId) {
+async function stop(userId, network_id) {
   const userWorkspace = await getUserWorkspace(userId);
-  const workspace = getNetworkWorkspacePath(userWorkspace, networkId);
+  const workspace = getNetworkWorkspacePath(userWorkspace, network_id);
   const progress = createProgressLogger(workspace);
-  await progress({ step: 'stop.start', networkId });
+  await progress({ step: 'stop.start', network_id });
 
   await composeStop(workspace, userId)
 
-  const state = (await readWorkspaceState(workspace)) || { userId, networkId, workspace };
+  const state = (await readWorkspaceState(workspace)) || { userId, network_id, workspace };
   state.status = 'stopped';
   await writeWorkspaceState(workspace, state);
-  await progress({ step: 'stop.done', networkId });
+  await progress({ step: 'stop.done', network_id });
 }
 
 async function createEndpoints(workspace, userId, config) {

@@ -120,6 +120,15 @@ function generateConfigtx(rawConfig) {
 
   logger.debug(`[DEBUG] configtxgen: ${ordererCount} orderer(s), consensus=${config.consensus}, policy=${config.channelPolicy}`);
 
+  const channelSection = {
+    Policies: {
+      Readers: { Type: 'ImplicitMeta', Rule: 'ANY Readers' },
+      Writers: { Type: 'ImplicitMeta', Rule: 'ANY Writers' },
+      Admins: { Type: 'ImplicitMeta', Rule: 'MAJORITY Admins' },
+    },
+    Capabilities: { V2_0: true },
+  };
+
   return yaml.dump({
     Organizations: [ordererOrg, ...orgDefs],
 
@@ -132,27 +141,27 @@ function generateConfigtx(rawConfig) {
     Application: applicationSection,
     Orderer: ordererSection,
 
-    Channel: {
-      Policies: {
-        Readers: { Type: 'ImplicitMeta', Rule: 'ANY Readers' },
-        Writers: { Type: 'ImplicitMeta', Rule: 'ANY Writers' },
-        Admins: { Type: 'ImplicitMeta', Rule: 'MAJORITY Admins' },
-      },
-      Capabilities: { V2_0: true },
-    },
+    Channel: channelSection,
 
     Profiles: {
       OrdererGenesis: {
+        Policies: channelSection.Policies,
+        Capabilities: channelSection.Capabilities,
         Orderer: ordererSection,
         Consortiums: { MainConsortium: { Organizations: orgDefs } },
       },
       MainChannel: {
+        Policies: channelSection.Policies,
+        Capabilities: channelSection.Capabilities,
         Consortium: 'MainConsortium',
         Application: applicationSection,
       },
     },
   });
 }
+
+const fabricCAVersion = process.env.FABRICCAVERSION || '1.5';
+const fabricCaImage = process.env.FABRIC_CA_IMAGE || `linaw/fabric-ca:${fabricCAVersion}`;
 
 // docker-compose.yml
 function generateDockerCompose(userId, rawConfig) {
@@ -185,8 +194,9 @@ function generateDockerCompose(userId, rawConfig) {
 
   // TLS CA
   services[`tls-ca-${userId}`] = {
-    image: `hyperledger/fabric-ca:${fabricCAVersion}`,
+    image: fabricCaImage,
     container_name: `tls-ca-${userId}`,
+    hostname: `tls-ca-${userId}`,
     environment: [
       'FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server',
       'FABRIC_CA_SERVER_CA_NAME=tls-ca',
@@ -199,6 +209,8 @@ function generateDockerCompose(userId, rawConfig) {
     ],
     command: `fabric-ca-server start -b tls-admin:tls-adminpw --port ${config.tlsCaPort}`,
     ports: [`${config.tlsCaPort}:${config.tlsCaPort}`],
+    // Volume host path must resolve to: <workspace>/crypto-config/tls-ca
+    // Example (dev-user / test-network-1): /home/wii/LINAW/.workspaces/dev-user/networks/test-network-1/crypto-config/tls-ca
     volumes: [`./crypto-config/tls-ca:/etc/hyperledger/fabric-ca-server`],
     networks: [net],
     logging: logConfig,
@@ -215,8 +227,9 @@ function generateDockerCompose(userId, rawConfig) {
 
   // Orderer CA 
   services[`ca-orderer-${userId}`] = {
-    image: `hyperledger/fabric-ca:${fabricCAVersion}`,
+    image: fabricCaImage,
     container_name: `ca-orderer-${userId}`,
+    hostname: `ca-orderer-${userId}`,
     environment: [
       'FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server',
       'FABRIC_CA_SERVER_CA_NAME=ca-orderer',
@@ -242,8 +255,9 @@ function generateDockerCompose(userId, rawConfig) {
   // Org CAs + Peers
   config.orgs.forEach(org => {
     services[`ca-${org.name}-${userId}`] = {
-      image: `hyperledger/fabric-ca:${fabricCAVersion}`,
+      image: fabricCaImage,
       container_name: `ca-${org.name}-${userId}`,
+      hostname: `ca-${org.name}-${userId}`,
       environment: [
         'FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server',
         `FABRIC_CA_SERVER_CA_NAME=ca-${org.name}`,

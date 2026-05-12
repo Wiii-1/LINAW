@@ -46,7 +46,16 @@ class networkAssetsService {
   // Copilot note: Blockchain/network methods - separated from asset registry operations
 async networkCreate({ body, user }) {
   const validated = this.validate("networkCreateSchema", body);
-  const { config } = validated;
+  let { config } = validated;
+  // Normalize org keys: tests and clients may send `msp_ID` or `msp_id`.
+  config = {
+    ...config,
+    orgs: (config.orgs || []).map(org => ({
+      ...org,
+      mspId: org.mspId || org.msp_ID || org.msp_id || org.msp || undefined,
+      peerCount: typeof org.peerCount === 'number' ? org.peerCount : (org.peerCount || 1),
+    })),
+  };
   const { name, orgs } = config;
 
   try {

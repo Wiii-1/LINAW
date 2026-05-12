@@ -5,7 +5,7 @@ const { nodeEnv } = require('../config/fabric/fabricConfig')
 // const nodeEnv = "development"
 
 const logger = winston.createLogger({
-  level: nodeEnv === 'production' ? 'info' : 'debug',
+  level: nodeEnv === "production" ? "info" : "debug",
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),

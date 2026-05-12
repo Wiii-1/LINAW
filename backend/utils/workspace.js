@@ -1,8 +1,18 @@
 const path = require('path');
 const fs = require('fs-extra');
 
+const BACKEND_ROOT = path.resolve(__dirname, '..');
+
+function getWorkspacesRoot() {
+  // IMPORTANT: Resolve relative paths against the backend root, not `process.cwd()`.
+  // This prevents accidental pathing into `<repoRoot>/docker/.workspaces/...` when
+  // orchestration is invoked from a different working directory.
+  const raw = process.env.WORKSPACES_ROOT || process.env.NETWORKS_PATH || '../.workspaces';
+  return path.isAbsolute(raw) ? raw : path.resolve(BACKEND_ROOT, raw);
+}
+
 function getUserWorkspace(userId) {
-  return path.join(process.env.NETWORKS_PATH, userId);
+  return path.join(getWorkspacesRoot(), userId);
 }
 
 async function initWorkspace(userId) {

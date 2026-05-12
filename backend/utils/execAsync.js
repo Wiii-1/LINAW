@@ -5,8 +5,8 @@ const fabricBinPath = require(`../config/fabric/fabricConfig`)
 const promisifiedExec = promisify(exec)
 
 const fabricEnv = {
-    ...process.env,
-    PATH: `${fabricBinPath}:${process.env.PATH}`,
+  ...process.env,
+  PATH: `${fabricBinPath}:${process.env.PATH}`,
 };
 
 // allow async cmd execution 
@@ -23,6 +23,32 @@ async function execAsync(cmd, options = {}) {
         logger.error(`[ERROR] execAsync: ${cmd}\n${error.message}`)
         throw error
     }
+}
+
+async function waitForTlsCaReady(userId, tlsCaPort, timeoutMs = 60000) {
+  const project = `fabric-${userId}`;
+  const network = `${project}_${project}`; // same as runFabricCaClient
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      // Use a tiny curl container on the same Docker network to hit /cainfo
+      await execAsync(
+        [
+          'docker run --rm',
+          `--network ${network}`,
+          '--entrypoint curl',
+          'curlimages/curl:8.7.1',
+          `-sk https://localhost:${tlsCaPort}/cainfo`
+        ].join(' ')
+      );
+      return; // success: TLS CA responded
+    } catch (err) {
+      await new Promise(r => setTimeout(r, 2000)); // wait 2s and retry
+    }
+  }
+
+  throw new Error(`TLS-CA did not become healthy on port ${tlsCaPort} for user ${userId}`);
 }
 
 /* Reference: 

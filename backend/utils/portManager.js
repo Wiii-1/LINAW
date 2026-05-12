@@ -64,8 +64,8 @@ function collectPortsFromValue(value, usedPorts) {
     return
   }
 
-  if (typeof value === 'object') {
-    for (const v of object.values(value)) {
+  if (typeof value === 'Object') {
+    for (const v of Object.values(value)) {
       collectPortsFromValue(v, usedPorts)
     }
   }
