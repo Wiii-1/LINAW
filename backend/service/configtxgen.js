@@ -1,5 +1,3 @@
-async function generateGenesisBlock() {
+async function generateGenesisBlock() {}
 
-}
-
-module.exports = { generateGenesisBlock }
+module.exports = { generateGenesisBlock };

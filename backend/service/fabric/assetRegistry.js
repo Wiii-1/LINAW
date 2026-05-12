@@ -21,7 +21,15 @@ function parseBuffer(resultBuffer) {
 }
 
 class assetRegistry {
-  async createAsset({ id, tenantId, color, size, owner, appraisedValue, requestedBy }) {
+  async createAsset({
+    id,
+    tenantId,
+    color,
+    size,
+    owner,
+    appraisedValue,
+    requestedBy,
+  }) {
     try {
       const contract = getContractFromGateway("assetRegistryContract");
 
@@ -80,7 +88,15 @@ class assetRegistry {
     }
   }
 
-  async assetUpdate({ id, tenantId, color, size, owner, appraisedValue, requestedBy }) {
+  async assetUpdate({
+    id,
+    tenantId,
+    color,
+    size,
+    owner,
+    appraisedValue,
+    requestedBy,
+  }) {
     try {
       const contract = getContractFromGateway("assetRegistryContract");
 
@@ -143,7 +159,11 @@ class assetRegistry {
     try {
       const contract = getContractFromGateway("assetRegistryContract");
 
-      const result = await contract.evaluateTransaction("ReadAsset", id, tenantId);
+      const result = await contract.evaluateTransaction(
+        "ReadAsset",
+        id,
+        tenantId,
+      );
 
       return {
         message: "Asset fetched successfully",
@@ -163,7 +183,10 @@ class assetRegistry {
     try {
       const contract = getContractFromGateway("assetRegistryContract");
 
-      const result = await contract.evaluateTransaction("GetAllAssets", tenantId);
+      const result = await contract.evaluateTransaction(
+        "GetAllAssets",
+        tenantId,
+      );
 
       return {
         message: "Assets fetched successfully",

@@ -1,10 +1,10 @@
-const userService = require('../service/application/userService')
+const userService = require("../service/application/userService");
 
 class userController {
-    async signup(req, res, next) {
+  async signup(req, res, next) {
     try {
       const email = req.body?.email;
-      
+
       if (!email) {
         return res.status(400).json({ message: "Email is required" });
       }
@@ -38,7 +38,6 @@ class userController {
           : "User already exists",
         data: result.user,
       });
-
     } catch (error) {
       if (error.message === "FIREBASE_UID_REQUIRED") {
         return res.status(400).json({ message: "Firebase UID is required" });
@@ -63,8 +62,8 @@ class userController {
         that doesn't need an auth is the signup. 
       */
       const user = await userService.login({
-                body: req.body,
-            });
+        body: req.body,
+      });
 
       if (!user) {
         return res.status(400).json({

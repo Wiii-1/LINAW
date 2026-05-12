@@ -1,5 +1,5 @@
-const path = require('path');
-const fs = require('fs-extra');
+const path = require("path");
+const fs = require("fs-extra");
 
 function getUserWorkspace(userId) {
   return path.join(process.env.NETWORKS_PATH, userId);

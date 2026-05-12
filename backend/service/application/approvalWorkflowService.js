@@ -4,209 +4,209 @@
     - [ ] Write unit tests for the functions in approvalWorkflowService.js to validate their functionality and reliability.
 */
 
-const crypto = require('crypto');
-const approvalWorkflowSchema = require('../../validators/fabric/approvalWorkflowsSchema');
-const AppError = require('../../utils/AppError');
-const approvalWorkflow = require('../fabric/approvalWorkflow');
-const submissionDao = require('../../dao/chaincodeMetadata/approvalWorkflowDao');
-const fileService = require('./fileService');
+const crypto = require("crypto");
+const approvalWorkflowSchema = require("../../validators/fabric/approvalWorkflowsSchema");
+const AppError = require("../../utils/AppError");
+const approvalWorkflow = require("../fabric/approvalWorkflow");
+const submissionDao = require("../../dao/chaincodeMetadata/approvalWorkflowDao");
+const fileService = require("./fileService");
 
 class ValidationError extends Error {
-    constructor(message, details = []) {
-        super(message);
-        this.name = 'ValidationError';
-        this.statusCode = 400;
-        this.details = details;
-    }
+  constructor(message, details = []) {
+    super(message);
+    this.name = "ValidationError";
+    this.statusCode = 400;
+    this.details = details;
+  }
 }
 
 class ApprovalWorkflowService {
-    constructor() {
-        this.schemas = approvalWorkflowSchema;
+  constructor() {
+    this.schemas = approvalWorkflowSchema;
+  }
+
+  validate(schemaKey, data) {
+    const schema = this.schemas[schemaKey];
+
+    if (!schema) {
+      throw new Error(`Validation schema not found for key: ${schemaKey}`);
     }
 
-    validate(schemaKey, data) {
-        const schema = this.schemas[schemaKey];
+    const { error, value } = schema.validate(data, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
 
-        if (!schema) {
-            throw new Error(`Validation schema not found for key: ${schemaKey}`);
-        }
-
-        const { error, value } = schema.validate(data, {
-            abortEarly: false,
-            stripUnknown: true,
-        });
-
-        if (error) {
-            throw new ValidationError(
-                'Validation failed',
-                error.details.map(d => d.message)
-            );
-        }
-
-        return value;
+    if (error) {
+      throw new ValidationError(
+        "Validation failed",
+        error.details.map((d) => d.message),
+      );
     }
 
-    async createSubmission({ body, user, file }) {
-        const validated = this.validate('createSubmission', { body });
-        const submissionId = `sub-${crypto.randomUUID()}`;
+    return value;
+  }
 
-        const { proposalType } = validated.body;
+  async createSubmission({ body, user, file }) {
+    const validated = this.validate("createSubmission", { body });
+    const submissionId = `sub-${crypto.randomUUID()}`;
 
-        const fileMeta = await fileService.processSubmissionFile({
-            file,
-            tenantId: user?.tenantId,
-            submissionId
-        });
+    const { proposalType } = validated.body;
 
-        await submissionDao.createSubmissionMetadata({
-            submissionId,
-            tenantId: user?.tenantId,
-            owner: user?.uid,
-            objectKey: fileMeta.objectKey,
-            docHash: fileMeta.docHash,
-            originalFileName: fileMeta.originalFileName,
-            mimeType: fileMeta.mimeType,
-            size: fileMeta.size
-        });
+    const fileMeta = await fileService.processSubmissionFile({
+      file,
+      tenantId: user?.tenantId,
+      submissionId,
+    });
 
-        await approvalWorkflow.createSubmission({
-            submissionId,
-            owner: user?.uid,
-            role: user?.role,
-            proposalType,
-            docHash: fileMeta.docHash
-        });
+    await submissionDao.createSubmissionMetadata({
+      submissionId,
+      tenantId: user?.tenantId,
+      owner: user?.uid,
+      objectKey: fileMeta.objectKey,
+      docHash: fileMeta.docHash,
+      originalFileName: fileMeta.originalFileName,
+      mimeType: fileMeta.mimeType,
+      size: fileMeta.size,
+    });
 
-        return {
-            submissionId,
-            status: 'DRAFT',
-            proposalType
-        };
+    await approvalWorkflow.createSubmission({
+      submissionId,
+      owner: user?.uid,
+      role: user?.role,
+      proposalType,
+      docHash: fileMeta.docHash,
+    });
+
+    return {
+      submissionId,
+      status: "DRAFT",
+      proposalType,
+    };
+  }
+
+  async deleteSubmission({ params, user }) {
+    const validated = this.validate("deleteSubmission", { params });
+    const submissionId = validated.params.submissionId;
+
+    const metadata = await submissionDao.getSubmissionById({ submissionId });
+
+    await approvalWorkflow.deleteSubmission({
+      submissionId,
+      owner: user?.uid,
+    });
+
+    if (metadata?.objectKey) {
+      await fileService.deleteSubmissionFile({
+        objectKey: metadata.objectKey,
+      });
     }
 
-    async deleteSubmission({ params, user }) {
-        const validated = this.validate('deleteSubmission', { params });
-        const submissionId = validated.params.submissionId;
+    await submissionDao.deleteSubmission({
+      submissionId,
+    });
 
-        const metadata = await submissionDao.getSubmissionById({ submissionId })
+    return {
+      message: "Deleted Successfully",
+    };
+  }
 
-        await approvalWorkflow.deleteSubmission({
-            submissionId,
-            owner: user?.uid
-        });
+  async submitForApproval({ params, user }) {
+    const validated = this.validate("submitForApproval", { params });
+    const submissionId = validated.params.submissionId;
 
-        if (metadata?.objectKey) {
-            await fileService.deleteSubmissionFile({
-                objectKey: metadata.objectKey
-            })
-        }
+    return await approvalWorkflow.submitForApproval({
+      submissionId,
+      owner: user?.uid,
+    });
+  }
 
-        await submissionDao.deleteSubmission({
-            submissionId
-        }) 
+  async approveSubmission({ params, body, user }) {
+    const validated = this.validate("approveSubmission", { params, body });
+    const submissionId = validated.params.submissionId;
+    const { remarks } = validated.body;
 
-        return {
-            message: 'Deleted Successfully'
-        };
-    }
+    return await approvalWorkflow.approveSubmission({
+      submissionId,
+      approver: user?.uid,
+      remarks,
+    });
+  }
 
-    async submitForApproval({ params, user }) {
-        const validated = this.validate('submitForApproval', { params });
-        const submissionId = validated.params.submissionId;
+  async requestChanges({ params, body, user }) {
+    const validated = this.validate("requestChanges", { params, body });
+    const submissionId = validated.params.submissionId;
+    const { remarks } = validated.body;
 
-        return await approvalWorkflow.submitForApproval({
-            submissionId,
-            owner: user?.uid
-        });
-    }
+    return await approvalWorkflow.requestChanges({
+      submissionId,
+      approver: user?.uid,
+      remarks,
+    });
+  }
 
-    async approveSubmission({ params, body, user }) {
-        const validated = this.validate('approveSubmission', { params, body });
-        const submissionId = validated.params.submissionId;
-        const { remarks } = validated.body;
+  async rejectSubmission({ params, body, user }) {
+    const validated = this.validate("rejectSubmission", { params, body });
+    const submissionId = validated.params.submissionId;
+    const { remarks } = validated.body;
 
-        return await approvalWorkflow.approveSubmission({
-            submissionId,
-            approver: user?.uid,
-            remarks
-        });
-    }
+    return await approvalWorkflow.rejectSubmission({
+      submissionId,
+      approver: user?.uid,
+      remarks,
+    });
+  }
 
-    async requestChanges({ params, body, user }) {
-        const validated = this.validate('requestChanges', { params, body });
-        const submissionId = validated.params.submissionId;
-        const { remarks } = validated.body;
+  async resubmitSubmission({ params, body, user, file }) {
+    const validated = this.validate("resubmitSubmission", { params, body });
+    const submissionId = validated.params.submissionId;
 
-        return await approvalWorkflow.requestChanges({
-            submissionId,
-            approver: user?.uid,
-            remarks
-        });
-    }
+    const fileMeta = await fileService.processSubmissionFile({
+      file,
+      tenantId: user?.tenantId,
+      submissionId,
+    });
 
-    async rejectSubmission({ params, body, user }) {
-        const validated = this.validate('rejectSubmission', { params, body });
-        const submissionId = validated.params.submissionId;
-        const { remarks } = validated.body;
+    await submissionDao.updateSubmission({
+      submissionId,
+      tenantId: user?.tenantId,
+      owner: user?.uid,
+      objectKey: fileMeta.objectKey,
+      docHash: fileMeta.docHash,
+      originalFileName: fileMeta.originalFileName,
+      mimeType: fileMeta.mimeType,
+      size: fileMeta.size,
+    });
 
-        return await approvalWorkflow.rejectSubmission({
-            submissionId,
-            approver: user?.uid,
-            remarks
-        });
-    }
+    await approvalWorkflow.resubmitSubmission({
+      submissionId,
+      owner: user?.uid,
+      newDocHash: fileMeta.docHash,
+    });
 
-    async resubmitSubmission({ params, body, user, file }) {
-        const validated = this.validate('resubmitSubmission', { params, body });
-        const submissionId = validated.params.submissionId;
+    return {
+      submissionId,
+      status: "RESUBMITTED",
+    };
+  }
 
-        const fileMeta = await fileService.processSubmissionFile({
-            file,
-            tenantId: user?.tenantId,
-            submissionId
-        });
+  async getSubmissionById({ params }) {
+    const validated = this.validate("getSubmissionById", { params });
+    const submissionId = validated.params.submissionId;
 
-        await submissionDao.updateSubmission({
-            submissionId,
-            tenantId: user?.tenantId,
-            owner: user?.uid,
-            objectKey: fileMeta.objectKey,
-            docHash: fileMeta.docHash,
-            originalFileName: fileMeta.originalFileName,
-            mimeType: fileMeta.mimeType,
-            size: fileMeta.size
-        });
+    return await approvalWorkflow.getSubmissionById({
+      submissionId,
+    });
+  }
 
-        await approvalWorkflow.resubmitSubmission({
-            submissionId,
-            owner: user?.uid,
-            newDocHash: fileMeta.docHash
-        });
+  async getSubmissionHistory({ params }) {
+    const validated = this.validate("getSubmissionHistory", { params });
+    const submissionId = validated.params.submissionId;
 
-        return {
-            submissionId,
-            status: 'RESUBMITTED'
-        };
-    }
-
-    async getSubmissionById({ params }) {
-        const validated = this.validate('getSubmissionById', { params });
-        const submissionId = validated.params.submissionId;
-
-        return await approvalWorkflow.getSubmissionById({
-            submissionId
-        });
-    }
-
-    async getSubmissionHistory({ params }) {
-        const validated = this.validate('getSubmissionHistory', { params });
-        const submissionId = validated.params.submissionId;
-
-        return await approvalWorkflow.getSubmissionHistory({
-            submissionId
-        });
-    }
+    return await approvalWorkflow.getSubmissionHistory({
+      submissionId,
+    });
+  }
 }
 
 module.exports = new ApprovalWorkflowService();

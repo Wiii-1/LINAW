@@ -1,3 +1,3 @@
-module.exports = { 
-    peerSchema: require('./peerSchema'),
-}
+module.exports = {
+  peerSchema: require("./peerSchema"),
+};

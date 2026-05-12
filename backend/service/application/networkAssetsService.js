@@ -1,4 +1,3 @@
-const db = require("../../db/db");
 class ValidationError extends Error {
   constructor(message, details = []) {
     super(message);
@@ -12,6 +11,7 @@ const fabricSchema = require("../../validators/fabric/fabricSchema");
 const AppError = require("../../utils/AppError");
 const assetService = require("../fabric/assetRegistry");
 const assetRegistryDao = require("../../dao/chaincodeMetadata/assetRegistryDao");
+const networkProvisioningService = require("../fabric/networkProvisioningService");
 
 class networkAssetsService {
   constructor() {
@@ -40,20 +40,34 @@ class networkAssetsService {
     return value;
   }
 
+  // const { name, description, orgs } = validated.body;
+
   // Copilot note: Blockchain/network methods - separated from asset registry operations
   async networkCreate({ body, user }) {
-    const validated = this.validate("networkCreateSchema", { body });
+    const validated = this.validate("networkCreateSchema", body);
+    const { config } = validated;
+    const { name, orgs } = config;
 
-    const { name, description, orgs } = validated.body;
+    try {
+      // const createdNetwork = await assetService.networkCreate({
+      //   name,
+      //   orgs,
+      //   requestedBy: user?.uid,
+      // });
 
-    return await assetService.networkCreate({
-      name,
-      description,
-      orgs,
-      requestedBy: user?.uid,
-    });
+      const orchestration = await networkProvisioningService.provisionNetwork({
+        user_id: user?.uid,
+        config,
+      });
+
+      return {
+        orchestration,
+      };
+    } catch (err) {
+      console.error("DEBUG networkCreate inner error:", err);
+      throw err;
+    }
   }
-
   async networkRead({ params, user }) {
     throw new AppError(
       "Network read is not implemented",

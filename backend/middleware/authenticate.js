@@ -1,37 +1,47 @@
-const { auth } = require('../config/firebase-config')
-const AppError = require('../utils/AppError')
+const { auth } = require("../config/firebase-config");
+const AppError = require("../utils/AppError");
 
 class authenticate {
-    async decodeToken (req, res, next) {
-        try {
-            const authHeader = req.headers.authorization
+  async decodeToken(req, res, next) {
+    try {
+      const authHeader = req.headers.authorization;
 
-            if (!authHeader || !authHeader.toLowerCase().startsWith('bearer ')){
-                return next(new AppError('Authorization header is required', 401, 'AUTH_MISSING'))
-            }
+      if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
+        return next(
+          new AppError("Authorization header is required", 401, "AUTH_MISSING"),
+        );
+      }
 
-            const token = authHeader.split(' ')[1]; 
+      const token = authHeader.split(" ")[1];
 
-            if (!token) {
-                return next(new AppError('Invalid authorization format. Use Bearer <token>', 401, 'AUTH_INVALID_FORMAT'))
-            }
+      if (!token) {
+        return next(
+          new AppError(
+            "Invalid authorization format. Use Bearer <token>",
+            401,
+            "AUTH_INVALID_FORMAT",
+          ),
+        );
+      }
 
-            const decodedToken = await auth.verifyIdToken(token)
+      const decodedToken = await auth.verifyIdToken(token);
 
-            req.user = {
-                uid: decodedToken.uid,
-                email: decodedToken.email || null,
-                email_verified: decodedToken.email_verified || false,
-                role: decodedToken.role || 'user',
-                tenantId: decodedToken.tenantId || null,
-                claims: decodedToken    
-            }
+      req.user = {
+        uid: decodedToken.uid,
+        email: decodedToken.email || null,
+        email_verified: decodedToken.email_verified || false,
+        role: decodedToken.role || "user",
+        tenantId: decodedToken.tenantId || null,
+        claims: decodedToken,
+      };
 
-            return next()
-        } catch (error) {
-            return next(new AppError('Unauthorized', 401, error.code || 'AUTH_FAILED'))
-        }
+      return next();
+    } catch (error) {
+      return next(
+        new AppError("Unauthorized", 401, error.code || "AUTH_FAILED"),
+      );
     }
+  }
 }
 
 module.exports = new authenticate();

@@ -14,9 +14,11 @@ class R2StorageDao {
 }
 
 // When running under Jest, expose mockable functions so tests can spy/mock reliably.
-if (typeof jest !== 'undefined') {
+if (typeof jest !== "undefined") {
   module.exports = {
-    upload: jest.fn(async ({ key, buffer, contentType, metadata }) => ({ objectKey: key })),
+    upload: jest.fn(async ({ key, buffer, contentType, metadata }) => ({
+      objectKey: key,
+    })),
     delete: jest.fn(async (objectKey) => true),
   };
 } else {

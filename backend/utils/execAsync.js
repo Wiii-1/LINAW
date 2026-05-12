@@ -1,28 +1,28 @@
-const { exec } = require('child_process')
-const { promisify } = require('util')
-const logger = require('../utils/logger')
-const fabricBinPath = require(`../config/fabric`)
-const promisifiedExec = promisify(exec)
+const { exec } = require("child_process");
+const { promisify } = require("util");
+const logger = require("../utils/logger");
+const fabricBinPath = require(`../config/fabric/fabricConfig`);
+const promisifiedExec = promisify(exec);
 
 const fabricEnv = {
-    ...process.env,
-    PATH: `${fabricBinPath}:${process.env.PATH}`,
+  ...process.env,
+  PATH: `${fabricBinPath}:${process.env.PATH}`,
 };
 
-// allow async cmd execution 
+// allow async cmd execution
 async function execAsync(cmd, options = {}) {
-    const opts = { env: fabricEnv, ...options }
-    logger.debug('[DEBUG] execAsync running cmd: ', { cmd, opts })
-    try {
-        const { stdout, stderr } = await promisifiedExec(cmd, opts)
-        if (stderr) {
-            logger.debug(`[DEBUG] stderr: ${stderr}`)
-        }
-        return { stdout, stderr }
-    } catch (error) {
-        logger.error(`[ERROR] execAsync: ${cmd}\n${error.message}`)
-        throw error
+  const opts = { env: fabricEnv, ...options };
+  logger.debug("[DEBUG] execAsync running cmd: ", { cmd, opts });
+  try {
+    const { stdout, stderr } = await promisifiedExec(cmd, opts);
+    if (stderr) {
+      logger.debug(`[DEBUG] stderr: ${stderr}`);
     }
+    return { stdout, stderr };
+  } catch (error) {
+    logger.error(`[ERROR] execAsync: ${cmd}\n${error.message}`);
+    throw error;
+  }
 }
 
 /* Reference: 
@@ -37,4 +37,4 @@ async function lsExample() {
 lsExample();
 
 */
-module.exports = { execAsync, fabricEnv } 
+module.exports = { execAsync, fabricEnv };

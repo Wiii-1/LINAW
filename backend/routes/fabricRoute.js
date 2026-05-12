@@ -7,14 +7,13 @@ const organizationInviteController = require("../controllers/organizationInviteC
 const authenticate = require("../middleware/authenticate");
 const { apiLimiter } = require("../middleware/rateLimiter");
 const uploadSubmissionFile = require("../middleware/uploadSubmissionFile.js");
-const db = require("../db/db");
 
-router.use(apiLimiter, authenticate.decodeToken);
+//router.use(apiLimiter, authenticate.decodeToken);
 
 // blockchain related routes
 
 router.post("/networks", fabricController.networkCreate);
-router.get("/networks", fabricController.networkRead);
+router.get("/networks/:network_id", fabricController.networkRead);
 
 router.post("/networks/:id/channels", fabricController.channelCreate);
 

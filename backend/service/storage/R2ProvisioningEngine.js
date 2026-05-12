@@ -1,6 +1,6 @@
-const AppError = require('../../utils/AppError');
-const tenantStorageDao = require('../../dao/tenantStorageDao');
-const cloudflareR2Dao = require('../../dao/cloudflareR2Dao');
+const AppError = require("../../utils/AppError");
+const tenantStorageDao = require("../../dao/tenantStorageDao");
+const cloudflareR2Dao = require("../../dao/cloudflareR2Dao");
 
 class R2ProvisioningEngine {
   constructor({ tenantStorageDao, cloudflareR2Dao }) {
@@ -9,23 +9,23 @@ class R2ProvisioningEngine {
   }
 
   buildBucketName(tenant_id, tenant_name) {
-    const slug = String(tenant_name || 'tenant')
+    const slug = String(tenant_name || "tenant")
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-+/, '')
-      .replace(/-+$/, '')
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-+/, "")
+      .replace(/-+$/, "")
       .slice(0, 30);
 
-    const shortId = String(tenant_id).replace(/-/g, '').slice(0, 12);
-    return `linaw-${slug || 'tenant'}-${shortId}`.slice(0, 63);
+    const shortId = String(tenant_id).replace(/-/g, "").slice(0, 12);
+    return `linaw-${slug || "tenant"}-${shortId}`.slice(0, 63);
   }
 
   async provisionTenantBucket({ tenant_id, tenant_name }) {
     if (!tenant_id) {
-      throw new AppError('Tenant ID is required', 400, 'MISSING_TENANT_ID');
+      throw new AppError("Tenant ID is required", 400, "MISSING_TENANT_ID");
     }
 
     const existing = await this.tenantStorageDao.findByTenantId(tenant_id);
@@ -37,7 +37,7 @@ class R2ProvisioningEngine {
 
     const record = await this.tenantStorageDao.create({
       tenant_id,
-      provider: 'cloudflare_r2',
+      provider: "cloudflare_r2",
       bucket_name: bucketName,
     });
 

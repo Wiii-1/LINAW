@@ -33,7 +33,7 @@ class UserService {
     if (error) {
       throw new ValidationError(
         "Validation failed",
-        error.details.map((d) => d.message)
+        error.details.map((d) => d.message),
       );
     }
 
@@ -61,7 +61,7 @@ class UserService {
       throw new AppError(
         "Disposable email addresses are not allowed",
         400,
-        "DISPOSABLE_EMAIL_NOT_ALLOWED"
+        "DISPOSABLE_EMAIL_NOT_ALLOWED",
       );
     }
 
@@ -91,17 +91,17 @@ class UserService {
     }
 
     const existingByFirebaseUid = await userDao.findByFirebaseUid(firebase_uid);
-      if (existingByFirebaseUid) {
-        return {
-          created: false,
-          user: existingByFirebaseUid,
-        };
-      }
+    if (existingByFirebaseUid) {
+      return {
+        created: false,
+        user: existingByFirebaseUid,
+      };
+    }
 
     const existingByEmail = await userDao.findUserByEmail(email);
-      if (existingByEmail) {
-        throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
-      }
+    if (existingByEmail) {
+      throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
+    }
 
     const createdUser = await userDao.signup({
       email,

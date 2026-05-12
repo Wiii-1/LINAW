@@ -1,7 +1,7 @@
-const logger = require('../utils/logger')
+const logger = require("../utils/logger");
 
 async function generateCryptoMaterial() {
-    /* 
+  /* 
     TODO:
     - bootstrap TLS CA
     - bootstrap Orderer CA
@@ -11,4 +11,4 @@ async function generateCryptoMaterial() {
     */
 }
 
-module.exports = { generateCryptoMaterial }
+module.exports = { generateCryptoMaterial };

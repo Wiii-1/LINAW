@@ -1,15 +1,9 @@
-const logger = require('../utils/logger')
+const logger = require("../utils/logger");
 
-async function createChannel() {
+async function createChannel() {}
 
-}
+async function joinPeersToChannel() {}
 
-async function joinPeersToChannel() {
+async function updateAnchorPeers() {}
 
-}
-
-async function updateAnchorPeers() {
-
-}
-
-module.exports = { createChannel, joinPeersToChannel, updateAnchorPeers }
+module.exports = { createChannel, joinPeersToChannel, updateAnchorPeers };
