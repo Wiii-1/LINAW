@@ -6,7 +6,6 @@ import {
   signOut,
 } from "firebase/auth"
 import { useState, type ComponentProps } from "react"
-import axios from "axios"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +16,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "./password-input"
 
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>
 
@@ -41,10 +41,11 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
     }
 
     try {
-      const resp = await axios.get(
+      const resp = await fetch(
         `/api/v1/disposable-email/${encodeURIComponent(email)}`
       )
-      if (resp?.data?.is_disposable) {
+      const data = await resp.json()
+      if (data?.is_disposable) {
         setError("Disposable email addresses are not allowed")
         setAuthorizing(false)
         return
@@ -96,7 +97,11 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
 
   const postRegister = async (email: string, firebase_uid: string) => {
     try {
-      await axios.post("/api/login", { email, firebase_uid })
+      await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, firebase_uid }),
+      })
     } catch (error) {
       console.error("Error posting register:", error)
     }
@@ -134,9 +139,9 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
         </Field>
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
+            name="password"
             required
             className="bg-background"
             value={password}
