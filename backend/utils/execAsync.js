@@ -12,7 +12,7 @@ const fabricEnv = {
 // allow async cmd execution
 async function execAsync(cmd, options = {}) {
   const opts = { env: fabricEnv, ...options };
-  logger.debug("[DEBUG] execAsync running cmd: ", { cmd, opts });
+  logger.debug("[DEBUG] execAsync running cmd: ", { cmd });
   try {
     const { stdout, stderr } = await promisifiedExec(cmd, opts);
     if (stderr) {
