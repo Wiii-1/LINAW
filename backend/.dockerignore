@@ -8,3 +8,4 @@ vault
 *.md
 *.config.js
 .gitignore
+knexfile.js

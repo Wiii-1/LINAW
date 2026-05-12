@@ -20,7 +20,8 @@ services:
       - "8054:8054"
       - "18054:18054"
     container_name: boot-ca
-    # Keep the container alive so .http requests can initialize and start the CA on demand.
-    command: sh -c "tail -f /dev/null"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    #Keep the container alive so .http requests can initialize and start the CA on demand.
+    #command: sh -c "tail -f /dev/null"
     networks:
       - test
