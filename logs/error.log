@@ -1,0 +1,871 @@
+2026-05-12T17:29:17.931Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -sk https://tls-ca-dev-user:7100/cainfo
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -sk https://tls-ca-dev-user:7100/cainfo
+
+2026-05-12T17:29:35.713Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host orderer-dev-user:172.21.0.5 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host orderer-dev-user:172.21.0.5 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp 172.21.0.5:7050: connect: connection refused"
+
+2026-05-12T17:29:39.114Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:29:42.490Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:29:45.834Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:29:49.194Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:29:52.619Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:29:56.037Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:29:59.417Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:30:06.002Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host orderer-dev-user:172.21.0.7 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host orderer-dev-user:172.21.0.7 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: context deadline exceeded
+
+2026-05-12T17:30:09.358Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:30:12.739Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:30:16.088Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:30:19.458Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:30:22.858Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:30:26.219Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:30:26.219Z [ERROR] [ERROR] Provisioning failed for Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:31:23.177Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -sk https://tls-ca-dev-user:7100/cainfo
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -sk https://tls-ca-dev-user:7100/cainfo
+
+2026-05-12T17:31:26.655Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/tls-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-peer0'\'' --id.secret '\''org1-peer0pw'\'' --id.type '\''peer'\'' -u '\''https://tls-admin:tls-adminpw@localhost:7100'\'' --tls.certfiles '\''/workspace/crypto-config/tls-ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/tls-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-peer0'\'' --id.secret '\''org1-peer0pw'\'' --id.type '\''peer'\'' -u '\''https://tls-admin:tls-adminpw@localhost:7100'\'' --tls.certfiles '\''/workspace/crypto-config/tls-ca/tls-cert.pem'\'''
+2026/05/12 17:31:26 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/tls-ca-admin/fabric-ca-client-config.yaml
+2026/05/12 17:31:26 [INFO] TLS Enabled
+2026/05/12 17:31:26 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'org1-peer0' is already registered
+
+
+2026-05-12T17:31:27.753Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/tls-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''orderer'\'' --id.secret '\''ordererpw'\'' --id.type '\''orderer'\'' -u '\''https://tls-admin:tls-adminpw@localhost:7100'\'' --tls.certfiles '\''/workspace/crypto-config/tls-ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/tls-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''orderer'\'' --id.secret '\''ordererpw'\'' --id.type '\''orderer'\'' -u '\''https://tls-admin:tls-adminpw@localhost:7100'\'' --tls.certfiles '\''/workspace/crypto-config/tls-ca/tls-cert.pem'\'''
+2026/05/12 17:31:27 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/tls-ca-admin/fabric-ca-client-config.yaml
+2026/05/12 17:31:27 [INFO] TLS Enabled
+2026/05/12 17:31:27 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'orderer' is already registered
+
+
+2026-05-12T17:31:29.894Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-orderer-dev-user:172.21.0.3 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.3 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/orderer-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''ordererOrg-admin'\'' --id.secret '\''ordererOrg-adminpw'\'' --id.type '\''admin'\'' -u '\''https://localhost:7101'\'' --tls.certfiles '\''/workspace/crypto-config/ordererOrg/ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-orderer-dev-user:172.21.0.3 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.3 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/orderer-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''ordererOrg-admin'\'' --id.secret '\''ordererOrg-adminpw'\'' --id.type '\''admin'\'' -u '\''https://localhost:7101'\'' --tls.certfiles '\''/workspace/crypto-config/ordererOrg/ca/tls-cert.pem'\'''
+2026/05/12 17:31:29 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/orderer-ca-admin/fabric-ca-client-config.yaml
+2026/05/12 17:31:29 [INFO] TLS Enabled
+2026/05/12 17:31:29 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'ordererOrg-admin' is already registered
+
+
+2026-05-12T17:31:31.837Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-orderer-dev-user:172.21.0.3 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.3 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/orderer-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''orderer-msp'\'' --id.secret '\''orderer-msppw'\'' --id.type '\''orderer'\'' -u '\''https://localhost:7101'\'' --tls.certfiles '\''/workspace/crypto-config/ordererOrg/ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-orderer-dev-user:172.21.0.3 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.3 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/orderer-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''orderer-msp'\'' --id.secret '\''orderer-msppw'\'' --id.type '\''orderer'\'' -u '\''https://localhost:7101'\'' --tls.certfiles '\''/workspace/crypto-config/ordererOrg/ca/tls-cert.pem'\'''
+2026/05/12 17:31:31 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/orderer-ca-admin/fabric-ca-client-config.yaml
+2026/05/12 17:31:31 [INFO] TLS Enabled
+2026/05/12 17:31:31 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'orderer-msp' is already registered
+
+
+2026-05-12T17:31:33.745Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-org1-dev-user:172.21.0.4 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.4 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/org-ca-admin-org1' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-admin'\'' --id.secret '\''org1-adminpw'\'' --id.type '\''admin'\'' -u '\''https://localhost:7103'\'' --tls.certfiles '\''/workspace/crypto-config/org1/ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-org1-dev-user:172.21.0.4 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.4 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/org-ca-admin-org1' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-admin'\'' --id.secret '\''org1-adminpw'\'' --id.type '\''admin'\'' -u '\''https://localhost:7103'\'' --tls.certfiles '\''/workspace/crypto-config/org1/ca/tls-cert.pem'\'''
+2026/05/12 17:31:33 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/org-ca-admin-org1/fabric-ca-client-config.yaml
+2026/05/12 17:31:33 [INFO] TLS Enabled
+2026/05/12 17:31:33 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'org1-admin' is already registered
+
+
+2026-05-12T17:31:35.672Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-org1-dev-user:172.21.0.4 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.4 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/org-ca-admin-org1' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-peer0-msp'\'' --id.secret '\''org1-peer0-msppw'\'' --id.type '\''peer'\'' -u '\''https://localhost:7103'\'' --tls.certfiles '\''/workspace/crypto-config/org1/ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-org1-dev-user:172.21.0.4 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.4 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/org-ca-admin-org1' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-peer0-msp'\'' --id.secret '\''org1-peer0-msppw'\'' --id.type '\''peer'\'' -u '\''https://localhost:7103'\'' --tls.certfiles '\''/workspace/crypto-config/org1/ca/tls-cert.pem'\'''
+2026/05/12 17:31:35 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/org-ca-admin-org1/fabric-ca-client-config.yaml
+2026/05/12 17:31:35 [INFO] TLS Enabled
+2026/05/12 17:31:35 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'org1-peer0-msp' is already registered
+
+
+2026-05-12T17:31:38.192Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp 172.21.0.6:7050: connect: connection refused"
+
+2026-05-12T17:31:41.566Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:31:44.955Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:31:48.362Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:31:51.723Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:31:55.108Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:31:58.488Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:32:01.876Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:32:08.524Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host orderer-dev-user:172.21.0.7 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host orderer-dev-user:172.21.0.7 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: context deadline exceeded
+
+2026-05-12T17:32:11.935Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:32:15.322Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:32:18.679Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:32:22.051Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:32:25.446Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:32:28.827Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:32:28.827Z [ERROR] [ERROR] Provisioning failed for Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:32:44.676Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -sk https://tls-ca-dev-user:7100/cainfo
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -sk https://tls-ca-dev-user:7100/cainfo
+
+2026-05-12T17:32:48.168Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/tls-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-peer0'\'' --id.secret '\''org1-peer0pw'\'' --id.type '\''peer'\'' -u '\''https://tls-admin:tls-adminpw@localhost:7100'\'' --tls.certfiles '\''/workspace/crypto-config/tls-ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/tls-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-peer0'\'' --id.secret '\''org1-peer0pw'\'' --id.type '\''peer'\'' -u '\''https://tls-admin:tls-adminpw@localhost:7100'\'' --tls.certfiles '\''/workspace/crypto-config/tls-ca/tls-cert.pem'\'''
+2026/05/12 17:32:47 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/tls-ca-admin/fabric-ca-client-config.yaml
+2026/05/12 17:32:47 [INFO] TLS Enabled
+2026/05/12 17:32:47 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'org1-peer0' is already registered
+
+
+2026-05-12T17:32:49.258Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/tls-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''orderer'\'' --id.secret '\''ordererpw'\'' --id.type '\''orderer'\'' -u '\''https://tls-admin:tls-adminpw@localhost:7100'\'' --tls.certfiles '\''/workspace/crypto-config/tls-ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/tls-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''orderer'\'' --id.secret '\''ordererpw'\'' --id.type '\''orderer'\'' -u '\''https://tls-admin:tls-adminpw@localhost:7100'\'' --tls.certfiles '\''/workspace/crypto-config/tls-ca/tls-cert.pem'\'''
+2026/05/12 17:32:49 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/tls-ca-admin/fabric-ca-client-config.yaml
+2026/05/12 17:32:49 [INFO] TLS Enabled
+2026/05/12 17:32:49 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'orderer' is already registered
+
+
+2026-05-12T17:32:51.470Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-orderer-dev-user:172.21.0.4 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.4 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/orderer-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''ordererOrg-admin'\'' --id.secret '\''ordererOrg-adminpw'\'' --id.type '\''admin'\'' -u '\''https://localhost:7101'\'' --tls.certfiles '\''/workspace/crypto-config/ordererOrg/ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-orderer-dev-user:172.21.0.4 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.4 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/orderer-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''ordererOrg-admin'\'' --id.secret '\''ordererOrg-adminpw'\'' --id.type '\''admin'\'' -u '\''https://localhost:7101'\'' --tls.certfiles '\''/workspace/crypto-config/ordererOrg/ca/tls-cert.pem'\'''
+2026/05/12 17:32:51 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/orderer-ca-admin/fabric-ca-client-config.yaml
+2026/05/12 17:32:51 [INFO] TLS Enabled
+2026/05/12 17:32:51 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'ordererOrg-admin' is already registered
+
+
+2026-05-12T17:32:53.692Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-orderer-dev-user:172.21.0.4 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.4 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/orderer-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''orderer-msp'\'' --id.secret '\''orderer-msppw'\'' --id.type '\''orderer'\'' -u '\''https://localhost:7101'\'' --tls.certfiles '\''/workspace/crypto-config/ordererOrg/ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-orderer-dev-user:172.21.0.4 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.4 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/orderer-ca-admin' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''orderer-msp'\'' --id.secret '\''orderer-msppw'\'' --id.type '\''orderer'\'' -u '\''https://localhost:7101'\'' --tls.certfiles '\''/workspace/crypto-config/ordererOrg/ca/tls-cert.pem'\'''
+2026/05/12 17:32:53 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/orderer-ca-admin/fabric-ca-client-config.yaml
+2026/05/12 17:32:53 [INFO] TLS Enabled
+2026/05/12 17:32:53 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'orderer-msp' is already registered
+
+
+2026-05-12T17:32:55.658Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-org1-dev-user:172.21.0.3 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.3 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/org-ca-admin-org1' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-admin'\'' --id.secret '\''org1-adminpw'\'' --id.type '\''admin'\'' -u '\''https://localhost:7103'\'' --tls.certfiles '\''/workspace/crypto-config/org1/ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-org1-dev-user:172.21.0.3 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.3 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/org-ca-admin-org1' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-admin'\'' --id.secret '\''org1-adminpw'\'' --id.type '\''admin'\'' -u '\''https://localhost:7103'\'' --tls.certfiles '\''/workspace/crypto-config/org1/ca/tls-cert.pem'\'''
+2026/05/12 17:32:55 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/org-ca-admin-org1/fabric-ca-client-config.yaml
+2026/05/12 17:32:55 [INFO] TLS Enabled
+2026/05/12 17:32:55 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'org1-admin' is already registered
+
+
+2026-05-12T17:32:57.568Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-org1-dev-user:172.21.0.3 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.3 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/org-ca-admin-org1' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-peer0-msp'\'' --id.secret '\''org1-peer0-msppw'\'' --id.type '\''peer'\'' -u '\''https://localhost:7103'\'' --tls.certfiles '\''/workspace/crypto-config/org1/ca/tls-cert.pem'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --add-host ca-org1-dev-user:172.21.0.3 --add-host tls-ca-dev-user:172.21.0.2 --add-host localhost:172.21.0.3 --add-host localhost:172.21.0.2 -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" -e FABRIC_CA_CLIENT_HOME='/workspace/crypto-config/.ca-client/org-ca-admin-org1' --workdir /workspace hyperledger/fabric-ca:1.5 bash -lc 'set -euo pipefail
+fabric-ca-client register --id.name '\''org1-peer0-msp'\'' --id.secret '\''org1-peer0-msppw'\'' --id.type '\''peer'\'' -u '\''https://localhost:7103'\'' --tls.certfiles '\''/workspace/crypto-config/org1/ca/tls-cert.pem'\'''
+2026/05/12 17:32:57 [INFO] Configuration file location: /workspace/crypto-config/.ca-client/org-ca-admin-org1/fabric-ca-client-config.yaml
+2026/05/12 17:32:57 [INFO] TLS Enabled
+2026/05/12 17:32:57 [INFO] TLS Enabled
+Error: Response from server: Error Code: 74 - Identity 'org1-peer0-msp' is already registered
+
+
+2026-05-12T17:33:00.266Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp 172.21.0.6:7050: connect: connection refused"
+
+2026-05-12T17:33:03.644Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:07.010Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:10.407Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:13.833Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:17.216Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:20.602Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:23.966Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:27.337Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp 172.21.0.7:7050: connect: connection refused"
+
+2026-05-12T17:33:30.697Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:34.111Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:37.540Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:40.930Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:44.320Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:47.718Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T17:33:47.718Z [ERROR] [ERROR] Provisioning failed for Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user -v "/home/wii/LINAW/.workspaces/dev-user/networks/mychannel:/workspace" --workdir /workspace hyperledger/fabric-tools:2.5 bash -lc 'set -euo pipefail
+export ORDERER_CA=$(ls /workspace/crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/*.pem /workspace/crypto-config/ordererOrg/orderers/orderer/tls/cacerts/*.pem 2>/dev/null | head -n1 || true)
+[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }
+peer channel create -o '\''orderer-dev-user:7050'\'' --ordererTLSHostnameOverride '\''orderer-dev-user'\'' --tls --cafile "$ORDERER_CA" -c '\''mychannel'\'' -f '\''/workspace/channel-artifacts/mychannel.tx'\'''
+Error: failed to create deliver client for orderer: orderer client failed to connect to orderer-dev-user:7050: failed to create new connection: connection error: desc = "transport: error while dialing: dial tcp: lookup orderer-dev-user on 127.0.0.11:53: no such host"
+
+2026-05-12T18:46:54.528Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -sk https://tls-ca-dev-user:7100/cainfo
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -sk https://tls-ca-dev-user:7100/cainfo
+
+2026-05-12T18:47:11.861Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:12.425Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:14.779Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:15.082Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:17.405Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:17.734Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:20.041Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:20.357Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:22.720Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:23.071Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:25.417Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:25.747Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:28.150Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:28.563Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:30.996Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:31.411Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:33.726Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:34.060Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:36.358Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:36.655Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:39.081Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:39.500Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:41.818Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:42.141Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:44.473Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:44.873Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:47.206Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:47.506Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:49.806Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:50.134Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:52.455Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:52.746Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:55.066Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:55.382Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:47:57.696Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:47:57.981Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:00.303Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:00.595Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:02.932Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:03.250Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:05.566Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:05.882Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:08.195Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:08.516Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:10.856Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:11.170Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:13.539Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:13.886Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:16.212Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:16.562Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:18.916Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:19.234Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:21.564Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:21.923Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:24.263Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:24.602Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:26.928Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:27.239Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:29.587Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:29.900Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:32.244Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:32.576Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:34.909Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:35.218Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:37.646Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:37.991Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:40.352Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:40.671Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:43.012Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:43.331Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:45.664Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:46.042Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:48.442Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:48.841Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:51.154Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:51.475Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:53.781Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:54.103Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:56.590Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:56.896Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:48:59.239Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:48:59.541Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:49:01.867Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:49:02.179Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:49:04.483Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:49:04.795Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:49:07.135Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:49:07.522Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:49:09.903Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer:9444/healthz
+
+2026-05-12T18:49:10.228Z [ERROR] [ERROR] execAsync: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+Command failed: docker run --rm --network fabric-dev-user_fabric-dev-user --entrypoint curl curlimages/curl:8.7.1 -s http://orderer-dev-user:9444/healthz
+
+2026-05-12T18:49:12.229Z [ERROR] [ERROR] Provisioning failed for Orderer did not become healthy on port 9444 for user dev-user

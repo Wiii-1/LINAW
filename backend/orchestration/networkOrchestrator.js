@@ -141,6 +141,50 @@ async function createChannelWithRetry(workspace, userId, config, progress, opts 
     }
   }
 }
+
+// Wait until orderer responds on its health endpoint inside the compose network
+async function waitForOrdererReady(userId, ordererHealthPort = 9444, timeoutMs = 120000) {
+  const project = `fabric-${userId}`;
+  const network = `${project}_${project}`;
+  const start = Date.now();
+
+  const hostsToTry = [`orderer`, `orderer-${userId}`];
+
+  while (Date.now() - start < timeoutMs) {
+    for (const host of hostsToTry) {
+      try {
+        await execAsync([
+          'docker run --rm',
+          `--network ${network}`,
+          '--entrypoint curl',
+          'curlimages/curl:8.7.1',
+          `-s http://${host}:${ordererHealthPort}/healthz`
+        ].join(' '));
+        return;
+      } catch (err) {
+        // try next host
+      }
+    }
+    await new Promise(r => setTimeout(r, 2000));
+  }
+
+  throw new Error(`Orderer did not become healthy on port ${ordererHealthPort} for user ${userId}`);
+}
+
+async function waitForOrdererTlsCert(workspace, timeoutMs = 60000) {
+  const rels = [
+    'crypto-config/ordererOrg/orderers/orderer/tls/tlscacerts/tls-cert.pem',
+    'crypto-config/ordererOrg/orderers/orderer/tls/cacerts/ca-cert.pem',
+  ];
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    for (const rel of rels) {
+      if (await fs.pathExists(path.join(workspace, rel))) return rel;
+    }
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  throw new Error('Orderer TLS cert not found in workspace (expected under crypto-config/ordererOrg/orderers/orderer/tls)');
+}
 function applyPortDefaults(rawConfig) {
   return {
     ordererCount: 1,
@@ -227,6 +271,14 @@ async function provision(userId, rawConfig) {
     await progress({ step: 'docker.network.up' });
     await composeUp(workspace, userId);
 
+    logger.debug('[DEBUG] Waiting for orderer to be healthy');
+    await progress({ step: 'docker.orderer.wait', message: 'Waiting for orderer health endpoint' });
+    await waitForOrdererReady(userId, 9444, 120000);
+
+    logger.debug('[DEBUG] Ensuring orderer TLS certs are present');
+    await progress({ step: 'docker.orderer.tls.wait', message: 'Waiting for orderer TLS cert files' });
+    await waitForOrdererTlsCert(workspace, 60000);
+
     logger.debug('[DEBUG] Creating Channel');
     await createChannelWithRetry(workspace, userId, config, progress);
 
@@ -259,9 +311,16 @@ async function provision(userId, rawConfig) {
       // docker compose down with volumes
       await composeDownWithVolumes(workspace, userId);
     } catch (_) {}
-    try {
-      await safeRemoveWorkspace(userWorkspace, workspace);
-    } catch (_) {}
+    // Respect an env var to preserve the workspace for debugging.
+    // Set KEEP_WORKSPACE_ON_ERROR=1 or KEEP_WORKSPACE_ON_ERROR=true to keep artifacts.
+    const keep = String(process.env.KEEP_WORKSPACE_ON_ERROR || '').toLowerCase();
+    if (keep === '1' || keep === 'true') {
+      logger.warn('[WARN] KEEP_WORKSPACE_ON_ERROR set — preserving workspace for debugging: ' + workspace);
+    } else {
+      try {
+        await safeRemoveWorkspace(userWorkspace, workspace);
+      } catch (_) {}
+    }
     throw err;
   }
 }

@@ -5,6 +5,7 @@
 **/IssuerPublicKey
 **/IssuerRevocationPublicKey
 **/tls-cert.pem
+/vault
 
 #documentation
 __tests__/bugs.md
@@ -19,6 +20,9 @@ __tests__/bugs.md
 /output-master-check.md
 docker.md
 /*outputs
+TODO.md
+*.config.js
+
 
 # Node.js
 node_modules/
@@ -27,7 +31,7 @@ package-lock.json/
 config/serviceAccount.json
 db/knexfile.js
 .npm/
-.env*
+.env
 logs/
 .cache/
 .next/
@@ -37,3 +41,5 @@ logs/
 .serverless/
 .pnp.*   
 /graphify-out
+vault
+

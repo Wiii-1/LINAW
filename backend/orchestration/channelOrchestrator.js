@@ -48,19 +48,48 @@ async function assertFileExists(filePath, hint) {
 	}
 }
 
+async function getContainerIp(containerName) {
+	try {
+		const { stdout } = await execAsync(
+			`docker inspect --format "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" ${containerName}`
+		);
+		const ip = stdout?.trim();
+		if (ip) return ip;
+	} catch (err) {
+		logger.warn(`[WARN] Could not inspect container ${containerName} for IP: ${err.message}`);
+	}
+	return null;
+}
+
 async function runPeerCommand(workspace, userId, script) {
 	const img = getFabricToolsImage();
 	const network = getProjectNetwork(userId);
-	const cmd = [
+	const ordererName = `orderer-${userId}`;
+	
+	// Build docker run command with orderer IP mapping for DNS resolution
+	const cmdParts = [
 		'docker run --rm',
 		`--network ${network}`,
+	];
+	
+	// Add explicit --add-host mapping for orderer to resolve DNS in transient container
+	const ordererIp = await getContainerIp(ordererName);
+	if (ordererIp) {
+		cmdParts.push(`--add-host ${ordererName}:${ordererIp}`);
+		logger.debug(`[DEBUG] Added host mapping: ${ordererName}:${ordererIp}`);
+	} else {
+		logger.warn(`[WARN] Orderer container IP could not be determined; DNS resolution may fail`);
+	}
+	
+	cmdParts.push(
 		`-v "${workspace}:/workspace"`,
 		'--workdir /workspace',
 		img,
 		'bash -lc',
-		shellQuote(`set -euo pipefail\n${script}`),
-	].join(' ');
-
+		shellQuote(`set -euo pipefail\n${script}`)
+	);
+	
+	const cmd = cmdParts.join(' ');
 	return execAsync(cmd);
 }
 
@@ -75,19 +104,65 @@ async function createChannel(workspace, userId, config, opts = {}) {
 
 	logger.info(`[INFO] Creating channel ${channelId} for ${getProjectNetwork(userId)}...`);
 	if (progress) await progress({ step: 'channel.create.start', channelId });
+	try {
+		const result = await runPeerCommand(
+			workspace,
+			userId,
+			[
+				`export ORDERER_CA=$(ls ${ordererTlsDir}/tlscacerts/*.pem ${ordererTlsDir}/cacerts/*.pem 2>/dev/null | head -n1 || true)`,
+				'[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }',
+				`peer channel create -o ${shellQuote(`${ordererHost}:7050`)} --ordererTLSHostnameOverride ${shellQuote(ordererHost)} --tls --cafile "$ORDERER_CA" -c ${shellQuote(channelId)} -f ${shellQuote(`/workspace/channel-artifacts/${channelId}.tx`)}`,
+			].join('\n')
+		);
 
-	const result = await runPeerCommand(
-		workspace,
-		userId,
-		[
-			`export ORDERER_CA=$(ls ${ordererTlsDir}/tlscacerts/*.pem ${ordererTlsDir}/cacerts/*.pem 2>/dev/null | head -n1 || true)`,
-			'[[ -n "$ORDERER_CA" ]] || { echo "Orderer TLS CA cert not found"; exit 1; }',
-			`peer channel create -o ${shellQuote(`${ordererHost}:7050`)} --ordererTLSHostnameOverride ${shellQuote(ordererHost)} --tls --cafile "$ORDERER_CA" -c ${shellQuote(channelId)} -f ${shellQuote(`/workspace/channel-artifacts/${channelId}.tx`)}`,
-		].join('\n')
-	);
+		if (progress) await progress({ step: 'channel.create.done', channelId });
+		return { channelId, orderer: ordererHost, stdout: result?.stdout, stderr: result?.stderr };
+	} catch (err) {
+		try {
+			const logDir = getChannelArtifactsDir(workspace);
+			const logPath = path.join(logDir, `${channelId}.create.error.log`);
+			const payload = {
+				ts: new Date().toISOString(),
+				message: String(err && err.message ? err.message : err),
+				stack: err && err.stack ? err.stack : undefined,
+				stdout: err && err.stdout ? err.stdout : undefined,
+				stderr: err && err.stderr ? err.stderr : undefined,
+			};
+			// Add diagnostic info: container IPs and simple `docker ps` snippets
+			try {
+				const ordererName = `orderer-${userId}`;
+				const tlsCaName = `tls-ca-${userId}`;
+				const ordererIp = await getContainerIp(ordererName);
+				const tlsCaIp = await getContainerIp(tlsCaName);
+				payload.orderer = { name: ordererName, ip: ordererIp };
+				payload.tlsCa = { name: tlsCaName, ip: tlsCaIp };
 
-	if (progress) await progress({ step: 'channel.create.done', channelId });
-	return { channelId, orderer: ordererHost, stdout: result?.stdout, stderr: result?.stderr };
+				try {
+					const { stdout: psOrderer } = await execAsync(`docker ps --filter "name=${ordererName}" --format \"{{.ID}} {{.Names}} {{.Status}}\"`);
+					payload.orderer.ps = psOrderer && psOrderer.trim();
+				} catch (psErr) {
+					payload.orderer.ps_error = String(psErr && psErr.message ? psErr.message : psErr);
+				}
+				try {
+					const { stdout: psTls } = await execAsync(`docker ps --filter "name=${tlsCaName}" --format \"{{.ID}} {{.Names}} {{.Status}}\"`);
+					payload.tlsCa.ps = psTls && psTls.trim();
+				} catch (psErr) {
+					payload.tlsCa.ps_error = String(psErr && psErr.message ? psErr.message : psErr);
+				}
+			} catch (diagErr) {
+				// Don't let diagnostics obscure the original error
+				payload.diagnostics_error = String(diagErr && diagErr.message ? diagErr.message : diagErr);
+			}
+			await fs.ensureDir(logDir);
+			await fs.writeFile(logPath, JSON.stringify(payload, null, 2));
+			logger.error(`[ERROR] Channel create failed; details written to ${logPath}`);
+			if (progress) await progress({ step: 'channel.create.failed', channelId, errorLog: logPath });
+		} catch (writeErr) {
+			logger.error('[ERROR] Failed to write channel create error log: ' + (writeErr && writeErr.message));
+		}
+
+		throw err;
+	}
 }
 
 async function joinPeersToChannel(workspace, userId, config, opts = {}) {

@@ -25,3 +25,4 @@ solution.md
 /*.yml
 .env
 /graphify-out
+/backend/vault/
