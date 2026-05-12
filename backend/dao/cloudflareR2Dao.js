@@ -1,5 +1,5 @@
 const { CreateBucketCommand } = require("@aws-sdk/client-s3");
-const AppError = require("../utils/appError");
+const AppError = require("../utils/AppError");
 const { r2Client } = require("../config/r2Client");
 
 class cloudflareR2Dao {
