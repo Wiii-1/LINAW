@@ -8,9 +8,9 @@ const assetIdParam = joi
 
 const createAssetSchema = joi
   .object({
-    params: assetIdParam,
     body: joi
       .object({
+        id: joi.string().trim().min(1).max(128).required(), // <-- Move id here
         color: joi.string().trim().min(1).max(50).required(),
         size: joi.number().integer().positive().max(1000000).required(),
         owner: joi.string().trim().min(1).max(128).required(),
