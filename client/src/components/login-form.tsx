@@ -9,10 +9,10 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "./password-input"
 import { useState, type ComponentProps } from "react"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
 import { useNavigate } from "react-router-dom"
-import axios from "axios"
 
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>
 
@@ -24,10 +24,13 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-
   const postLogin = async (email: string, firebase_uid: string) => {
     try {
-      await axios.post("/api/login", { email, firebase_uid })
+      await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, firebase_uid }),
+      })
     } catch (error) {
       console.error("Error posting login:", error)
     }
@@ -136,9 +139,9 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
                     Forgot your password?
                   </a>
                 </div>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
+                  name="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

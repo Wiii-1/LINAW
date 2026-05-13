@@ -5,7 +5,7 @@
 **/IssuerPublicKey
 **/IssuerRevocationPublicKey
 **/tls-cert.pem
-/vault
+
 
 #documentation
 __tests__/bugs.md
