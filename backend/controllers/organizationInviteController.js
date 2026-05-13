@@ -1,4 +1,6 @@
 const organizationInviteService = require('../service/application/organizationInviteService')
+const userDao = require('../dao/userDao')
+const AppError = require('../utils/AppError')
 
 class organizationInviteController {
 
@@ -7,8 +9,20 @@ class organizationInviteController {
             const organization_id = req.params?.organization_id ?? req.body?.organization_id
             const invitedEmail = req.body?.invitedEmail ?? req.body?.invited_email
             const role = req.body?.role
-            const invitedByUserId = req.user?.uid
+            const firebaseUid = req.user?.uid
             const tenant_id = req.user?.tenantId
+
+            let invitedByUserId = null
+            if (!firebaseUid) {
+                throw new AppError('Authentication required to create an invitation', 401, 'UNAUTHORIZED')
+            }
+
+            const dbUser = await userDao.findByFirebaseUid(firebaseUid)
+            if (!dbUser) {
+                throw new AppError('Authenticated user not found in database', 404, 'USER_NOT_FOUND')
+            }
+
+            invitedByUserId = dbUser.user_id
 
             const invite = await organizationInviteService.createInvite({
                 organization_id,
@@ -39,8 +53,37 @@ class organizationInviteController {
     async acceptInvite(req, res, next) {
         try {
             const token = req.params?.token ?? req.body?.token
-            const user_id = req.user?.uid
+            const firebaseUid = req.user?.uid
             const tenant_id = req.user?.tenantId
+
+            if (!firebaseUid) {
+                throw new AppError('Authentication required to accept an invitation', 401, 'UNAUTHORIZED')
+            }
+
+            const dbUser = await userDao.findByFirebaseUid(firebaseUid)
+            if (!dbUser) {
+                // If the authenticated Firebase user has no DB row yet, instruct frontend
+                // to redirect the user to signup so they create their DB record first.
+                const inviteResp = await organizationInviteService.getInviteByToken(token)
+                const invite = inviteResp && inviteResp.data ? inviteResp.data : null
+
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
+                const invitedEmail = invite?.invited_email || null
+                const signupRedirect = `${frontendUrl}/signup?token=${encodeURIComponent(token)}${invitedEmail ? `&email=${encodeURIComponent(invitedEmail)}` : ''}`
+
+                return res.status(409).json({
+                    success: false,
+                    code: 'INVITE_REQUIRES_SIGNUP',
+                    message: 'Authenticated user not found in database; please sign up before accepting the invite',
+                    data: {
+                        invitedEmail,
+                        signupRedirect,
+                        token,
+                    }
+                })
+            }
+
+            const user_id = dbUser.user_id
 
             const accepted = await organizationInviteService.acceptInvite({
                 token,

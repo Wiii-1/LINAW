@@ -21,7 +21,7 @@ exports.up = async function (knex) {
 
     table.foreign('tenant_id').references('tenant_id').inTable('tenants').onDelete('CASCADE');
     table.unique(['tenant_id', 'user_email']);
-    table.unique(['tenant_id', 'username']);
+    table.unique(['tenant_id']);
     table.index(['tenant_id']);
   });
 

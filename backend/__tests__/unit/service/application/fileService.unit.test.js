@@ -1,3 +1,8 @@
+// Ensure R2 env vars are present for tests that import r2 client
+process.env.R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || 'test-account';
+process.env.R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || 'test-access-key';
+process.env.R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || 'test-secret';
+
 vi.mock('../../../../dao/r2StorageDao');
 
 const crypto = require('crypto');

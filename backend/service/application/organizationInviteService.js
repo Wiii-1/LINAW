@@ -145,7 +145,7 @@ class organizationInviteService {
         }
 
         if (invite.tenant_id !== tenant_id) {
-            throw new AppError("Invitationn does not belong to this tenant", 403, "INVALID_TENANT_INVITATION")
+            throw new AppError("Invitation does not belong to this tenant", 403, "INVALID_TENANT_INVITATION")
         }
 
         if (invite.status !== 'pending'){
@@ -156,7 +156,7 @@ class organizationInviteService {
             throw new AppError("Invitation has expired", 410, "INVITATION_EXPIRED")
         }
 
-        if (user.email.toLowerCase() !== invite.invited_email.toLowerCase()){
+        if (user.user_email.toLowerCase() !== invite.invited_email.toLowerCase()){
             throw new AppError('This invitation is for a different email address', 403, 'INVITATION_EMAIL_MISMATCH');
         }
 

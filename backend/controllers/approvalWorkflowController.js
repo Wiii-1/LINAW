@@ -95,10 +95,8 @@ class approvalWorkflowController {
 
     async getSubmissionById(req, res, next) {
         try {
-            const { submissionId } = req.params;
-
             const result = await approvalWorkflowService.getSubmissionById({
-                submissionId,
+                params: req.params,
                 user: req.user
             });
 

@@ -23,16 +23,16 @@ describe('backend/controllers/userController', () => {
     });
 
     it('signup returns 201 with success payload', async () => {
-        const mockUser = { user_id: 'u1', email: 'alice@example.com', tenant_id: 'tenant-1' };
+        const mockUser = { email: 'alice@example.com', tenant_id: 'tenant-generated', message: 'Signup request accepted' };
         userService.signup.mockResolvedValue(mockUser);
 
-        const req = { body: { email: 'alice@example.com' }, user: { uid: 'uid-1' } };
+        const req = { body: { email: 'alice@example.com' } };
         const res = makeRes();
         const next = vi.fn();
 
         await userController.signup(req, res, next);
 
-        expect(userService.signup).toHaveBeenCalledWith({ email: 'alice@example.com' }, { uid: 'uid-1' });
+        expect(userService.signup).toHaveBeenCalledWith({ email: 'alice@example.com' });
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({
             message: 'Signup successful',
@@ -110,13 +110,13 @@ describe('backend/controllers/userController', () => {
         const mockUser = { user_id: 'u1', email: 'alice@example.com' };
         userService.login.mockResolvedValue(mockUser);
 
-        const req = { body: { email: 'alice@example.com' }, user: { uid: 'uid-1' } };
+        const req = { body: { email: 'alice@example.com' } };
         const res = makeRes();
         const next = vi.fn();
 
         await userController.login(req, res, next);
 
-        expect(userService.login).toHaveBeenCalledWith('alice@example.com', { uid: 'uid-1' });
+        expect(userService.login).toHaveBeenCalledWith('alice@example.com');
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({
             message: 'Login Successful',

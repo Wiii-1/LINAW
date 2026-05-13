@@ -3,7 +3,7 @@ const userService = require('../service/application/userService')
 class userController {
     async signup(req, res, next) {
     try {
-        const userResult = await userService.signup(req.body, req.user);
+        const userResult = await userService.signup(req.body);
 
         // userService.signup returns either the user object or existing user
         const user = userResult?.user || userResult;
@@ -54,12 +54,11 @@ class userController {
   async login(req, res, next) {
     try {
       /* 
-        this is login, the user already has a valid UID from firebase the only thing
-        that doesn't need an auth is the signup. 
+        login can stay public; sync-user owns the trusted Firebase identity binding.
       */
       const { email } = req.body || {};
 
-      const userRow = await userService.login(email, req.user);
+      const userRow = await userService.login(email);
 
       if (!userRow) {
         return res.status(400).json({ message: 'login failed' });

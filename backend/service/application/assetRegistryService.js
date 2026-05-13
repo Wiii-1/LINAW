@@ -46,7 +46,9 @@ class assetRegistryService {
 
     const validated = this.validate("createAssetSchema", { body });
 
-    const { id, color, size, owner, appraisedValue } = validated.body;
+    // allow id to come from either body or params (backwards compatibility)
+    const id = validated.body.id || (validated.params && validated.params.id)
+    const { color, size, owner, appraisedValue } = validated.body;
 
     await assetRegistryDao.createAsset({
       id,

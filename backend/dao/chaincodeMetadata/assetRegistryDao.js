@@ -4,6 +4,7 @@ const AppError = require('../../utils/AppError');
 class AssetRegistryDao {
     async createAsset(data) {
         try {
+
             const {
                 id,
                 tenantId,
@@ -14,9 +15,10 @@ class AssetRegistryDao {
                 requestedBy
             } = data;
 
+            // Insert using `asset_id` as the external identifier. Keep numeric `id` as PK.
             const [asset] = await db('asset_registry')
                 .insert({
-                    id,
+                    asset_id: id,
                     tenant_id: tenantId,
                     color,
                     size,
@@ -38,6 +40,7 @@ class AssetRegistryDao {
 
     async assetTransfer(data) {
         try {
+
             const {
                 id,
                 tenantId,
@@ -46,7 +49,7 @@ class AssetRegistryDao {
             } = data;
 
             const [asset] = await db('asset_registry')
-                .where({ id, tenant_id: tenantId })
+                .where({ asset_id: id, tenant_id: tenantId })
                 .update({
                     owner,
                     updated_by: requestedBy,
@@ -63,6 +66,7 @@ class AssetRegistryDao {
 
     async assetUpdate(data) {
         try {
+
             const {
                 id,
                 tenantId,
@@ -74,7 +78,7 @@ class AssetRegistryDao {
             } = data;
 
             const [asset] = await db('asset_registry')
-                .where({ id, tenant_id: tenantId })
+                .where({ asset_id: id, tenant_id: tenantId })
                 .update({
                     color,
                     size,
@@ -94,10 +98,11 @@ class AssetRegistryDao {
 
     async assetDelete(data) {
         try {
+
             const { id, tenantId } = data;
 
             const deletedRows = await db('asset_registry')
-                .where({ id, tenant_id: tenantId })
+                .where({ asset_id: id, tenant_id: tenantId })
                 .del();
 
             return deletedRows > 0;
@@ -108,11 +113,12 @@ class AssetRegistryDao {
 
     async assetRead(data) {
         try {
+
             const { id, tenantId } = data;
 
             const asset = await db('asset_registry')
                 .select('*')
-                .where({ id, tenant_id: tenantId })
+                .where({ asset_id: id, tenant_id: tenantId })
                 .first();
 
             return asset || null;

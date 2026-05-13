@@ -1,4 +1,4 @@
-const { describe, it, expect } = require('vitest')
+// Vitest globals (describe/it/expect) are provided by test runner
 const userService = require('../../../service/application/userService')
 const ValidationError = require('../../../service/application/userService').ValidationError || null
 

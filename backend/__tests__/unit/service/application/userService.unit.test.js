@@ -27,6 +27,7 @@ describe('backend/service/application/userService', () => {
         logger.warn = vi.fn();
         userDao.signup = vi.fn();
         userDao.login = vi.fn();
+        userDao.findUserByEmail = vi.fn().mockResolvedValue(null);
         vi.spyOn(userService, 'createDefaultTenant').mockResolvedValue('tenant-generated');
     });
 
@@ -41,45 +42,32 @@ describe('backend/service/application/userService', () => {
             error: null,
             value: { body: { email: 'alice@example.com' } }
         });
-        userDao.findByFirebaseUid = vi.fn().mockResolvedValue(null);
-        userDao.findUserByEmail = vi.fn().mockResolvedValue(null);
-        userDao.signup = vi.fn().mockResolvedValue({ user_id: 'u1', email: 'alice@example.com', tenant_id: 'tenant-1' });
+        userDao.findUserByEmail.mockResolvedValue(null);
 
-        const result = await userService.signup({ email: 'alice@example.com' }, { uid: 'uid-1', tenantId: 'tenant-1' });
+        const result = await userService.signup({ email: 'alice@example.com' });
 
-        expect(userDao.signup).toHaveBeenCalledWith({ 
-            email: 'alice@example.com', 
-            firebase_uid: 'uid-1',
-            tenant_id: 'tenant-1'
-        });
-        expect(userService.createDefaultTenant).not.toHaveBeenCalled();
+        expect(userDao.findUserByEmail).toHaveBeenCalledWith('alice@example.com');
+        expect(userService.createDefaultTenant).toHaveBeenCalledWith('alice@example.com');
+        expect(userDao.signup).not.toHaveBeenCalled();
         expect(result).toEqual({
-            created: true,
-            user: { user_id: 'u1', email: 'alice@example.com', tenant_id: 'tenant-1' }
+            email: 'alice@example.com',
+            tenant_id: 'tenant-generated',
+            message: 'Signup request accepted'
         });
     });
 
-    it('signup creates a default tenant when the token has no tenantId', async () => {
+    it('signup rejects existing email addresses', async () => {
         validators.signupSchema.validate.mockReturnValue({
             error: null,
             value: { body: { email: 'alice@example.com' } }
         });
-        userDao.findByFirebaseUid = vi.fn().mockResolvedValue(null);
-        userDao.findUserByEmail = vi.fn().mockResolvedValue(null);
-        userDao.signup = vi.fn().mockResolvedValue({ user_id: 'u1', email: 'alice@example.com', tenant_id: 'tenant-generated' });
+        userDao.findUserByEmail.mockResolvedValue({ user_id: 'u1', user_email: 'alice@example.com' });
 
-        const result = await userService.signup({ email: 'alice@example.com' }, { uid: 'uid-1' });
+        await expect(userService.signup({ email: 'alice@example.com' })).rejects.toMatchObject({
+            code: 'EMAIL_ALREADY_EXISTS',
+        });
 
-        expect(userService.createDefaultTenant).toHaveBeenCalledWith('alice@example.com');
-        expect(userDao.signup).toHaveBeenCalledWith({ 
-            email: 'alice@example.com', 
-            firebase_uid: 'uid-1',
-            tenant_id: 'tenant-generated'
-        });
-        expect(result).toEqual({
-            created: true,
-            user: { user_id: 'u1', email: 'alice@example.com', tenant_id: 'tenant-generated' }
-        });
+        expect(userDao.signup).not.toHaveBeenCalled();
     });
 
     it('login validates payload and delegates to userDao.login', async () => {

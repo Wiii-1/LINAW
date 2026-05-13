@@ -9,6 +9,7 @@ const approvalWorkflowSchema = require('../../validators/fabric/approvalWorkflow
 const AppError = require('../../utils/AppError');
 const approvalWorkflow = require('../fabric/approvalWorkflow');
 const submissionDao = require('../../dao/chaincodeMetadata/approvalWorkflowDao');
+const userDao = require('../../dao/userDao');
 const fileService = require('./fileService');
 
 class ValidationError extends Error {
@@ -53,16 +54,23 @@ class ApprovalWorkflowService {
 
         const { proposalType } = validated.body;
 
+        // Look up user_id from database using firebase_uid
+        const dbUser = await userDao.findByFirebaseUid(user?.uid);
+        if (!dbUser) {
+            throw new AppError('User not found in database', 404, 'USER_NOT_FOUND');
+        }
+
         const fileMeta = await fileService.processSubmissionFile({
             file,
             tenantId: user?.tenantId,
             submissionId
         });
 
+        // Store metadata with database user_id (for SQL FK)
         await submissionDao.createSubmissionMetadata({
             submissionId,
             tenantId: user?.tenantId,
-            owner: user?.uid,
+            owner: dbUser.user_id,
             objectKey: fileMeta.objectKey,
             docHash: fileMeta.docHash,
             originalFileName: fileMeta.originalFileName,
@@ -70,6 +78,7 @@ class ApprovalWorkflowService {
             size: fileMeta.size
         });
 
+        // Pass firebase_uid to fabric service (for chaincode)
         await approvalWorkflow.createSubmission({
             submissionId,
             owner: user?.uid,
@@ -91,6 +100,10 @@ class ApprovalWorkflowService {
 
         const metadata = await submissionDao.getSubmissionById({ submissionId })
 
+        if (!metadata) {
+            throw new AppError('Submission not found', 404, 'SUBMISSION_NOT_FOUND');
+        }
+
         await approvalWorkflow.deleteSubmission({
             submissionId,
             owner: user?.uid
@@ -102,8 +115,10 @@ class ApprovalWorkflowService {
             })
         }
 
+        // Copilot note: Use metadata.owner (which is user_id from database) for DAO deletion
         await submissionDao.deleteSubmission({
-            submissionId
+            submissionId,
+            owner: metadata.owner
         }) 
 
         return {

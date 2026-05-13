@@ -1,19 +1,6 @@
-vi.mock('firebase-admin/app', () => ({
-    initializeApp: vi.fn(() => ({})),
-    cert: vi.fn(() => ({}))
-}));
-
-vi.mock('firebase-admin/auth', () => ({
-    getAuth: vi.fn(() => ({
-        verifyIdToken: vi.fn()
-    }))
-}));
-
-process.env.FIREBASE_SERVICE_ACCOUNT_JSON ||= JSON.stringify({
-    project_id: 'test-project',
-    client_email: 'test@example.com',
-    private_key: '-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----\n'
-});
+const { createFirebaseAuthMock, registerFirebaseAdminMocks } = require('../../helpers/firebaseTestSetup');
+const auth = createFirebaseAuthMock(vi);
+registerFirebaseAdminMocks(vi, auth);
 
 vi.mock('../../../controllers/blockchainController', () => ({
     networkCreate: vi.fn(),
@@ -53,9 +40,7 @@ vi.mock('../../../dao/r2StorageDao', () => ({
     getSignedUrl: vi.fn()
 }));
 vi.mock('../../../config/firebase-config', () => ({
-    auth: {
-        verifyIdToken: vi.fn()
-    }
+    auth
 }));
 vi.mock('../../../middleware/uploadSubmissionFile.js', () => ({
     single: vi.fn(() => vi.fn((req, res, next) => next()))

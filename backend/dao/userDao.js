@@ -7,7 +7,7 @@ class UserDao {
       const { email, firebase_uid, tenant_id } = data;
 
       const insertObj = {
-        email,
+        user_email: email,
         firebase_uid,
         created_at: db.fn.now(),
         updated_at: db.fn.now(),
@@ -37,12 +37,11 @@ class UserDao {
 
   async login(data) {
     try {
-      const { email, firebase_uid } = data;
+      const { email } = data;
 
       const user = await db("users")
-        .where({ firebase_uid })
-        .orWhere("email", email)
-        .select("user_id", "email", "firebase_uid", "tenant_id", "created_at", "updated_at")
+        .where("user_email", email)
+        .select("user_id", "user_email", "tenant_id", "created_at", "updated_at")
         .first();
 
       return user || null;
@@ -55,7 +54,7 @@ class UserDao {
   async findByFirebaseUid(firebase_uid) {
     const user = await db("users")
       .where({ firebase_uid })
-      .select("user_id", "email", "firebase_uid", "tenant_id", "created_at", "updated_at")
+      .select("user_id", "user_email", "firebase_uid", "tenant_id", "created_at", "updated_at")
       .first();
 
     return user || null;
@@ -63,8 +62,8 @@ class UserDao {
 
   async findUserByEmail(email) {
     const user = await db("users")
-      .where({ email })
-      .select("user_id", "email", "firebase_uid", "tenant_id", "created_at", "updated_at")
+      .where("user_email", email)
+      .select("user_id", "user_email", "firebase_uid", "tenant_id", "created_at", "updated_at")
       .first();
 
     return user || null;
@@ -73,7 +72,7 @@ class UserDao {
   async findById(user_id) {
     const user = await db("users")
       .where({ user_id })
-      .select("user_id", "email", "firebase_uid", "tenant_id", "created_at", "updated_at")
+      .select("user_id", "user_email", "firebase_uid", "tenant_id", "created_at", "updated_at")
       .first();
 
     return user || null;

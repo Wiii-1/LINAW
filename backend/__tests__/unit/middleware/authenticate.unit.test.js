@@ -1,23 +1,8 @@
-vi.mock('firebase-admin/app', () => ({
-    initializeApp: vi.fn(() => ({})),
-    cert: vi.fn(() => ({}))
-}));
-
-vi.mock('firebase-admin/auth', () => ({
-    getAuth: vi.fn(() => ({
-        verifyIdToken: vi.fn()
-    }))
-}));
-
-vi.mock('../../../config/firebase-config', () => {
-    return {
-        auth: {
-            verifyIdToken: vi.fn(),
-        },
-    };
-});
-
 const { auth } = require('../../../config/firebase-config');
+
+if (!auth.verifyIdToken || typeof auth.verifyIdToken.mockResolvedValue !== 'function') {
+    auth.verifyIdToken = vi.fn();
+}
 const authenticate = require('../../../middleware/authenticate');
 
 function makeRes() {

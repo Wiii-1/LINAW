@@ -1,11 +1,13 @@
 vi.mock('../../../../validators/fabric/approvalWorkflowsSchema');
-vi.mock('../../../../dao/approvalWorkflowDao');
+vi.mock('../../../../dao/chaincodeMetadata/approvalWorkflowDao');
+vi.mock('../../../../dao/userDao');
 vi.mock('../../../../service/application/fileService');
 vi.mock('../../../../service/fabric/approvalWorkflow');
 
 const crypto = require('crypto');
 const schemas = require('../../../../validators/fabric/approvalWorkflowsSchema');
-const submissionDao = require('../../../../dao/approvalWorkflowDao');
+const submissionDao = require('../../../../dao/chaincodeMetadata/approvalWorkflowDao');
+const userDao = require('../../../../dao/userDao');
 const fileService = require('../../../../service/application/fileService');
 const approvalWorkflow = require('../../../../service/fabric/approvalWorkflow');
 const approvalWorkflowService = require('../../../../service/application/approvalWorkflowService');
@@ -31,6 +33,9 @@ describe('backend/service/application/approvalWorkflowService', () => {
         submissionDao.getSubmissionById = vi.fn();
         submissionDao.deleteSubmission = vi.fn();
         submissionDao.getSubmissionHistory = vi.fn();
+        
+        // Set up userDao mocks
+        userDao.findByFirebaseUid = vi.fn();
         
         // Set up file service mocks
         fileService.processSubmissionFile = vi.fn();
@@ -68,6 +73,14 @@ describe('backend/service/application/approvalWorkflowService', () => {
     it('createSubmission validates input and coordinates file + DAO + workflow calls', async () => {
         vi.spyOn(crypto, 'randomUUID').mockReturnValue('fixed-uuid');
 
+        // Mock user lookup
+        userDao.findByFirebaseUid.mockResolvedValue({
+            user_id: 'db-user-id-1',
+            firebase_uid: 'u-1',
+            user_email: 'user@example.com',
+            tenant_id: 'tenant-1'
+        });
+
         fileService.processSubmissionFile.mockResolvedValue({
             objectKey: 'obj-1',
             docHash: 'hash-1',
@@ -84,6 +97,9 @@ describe('backend/service/application/approvalWorkflowService', () => {
             file: { buffer: Buffer.from('a'), mimetype: 'application/pdf', originalname: 'proposal.pdf' }
         });
 
+        // Verify user lookup was called
+        expect(userDao.findByFirebaseUid).toHaveBeenCalledWith('u-1');
+
         expect(fileService.processSubmissionFile).toHaveBeenCalledWith({
             file: { buffer: Buffer.from('a'), mimetype: 'application/pdf', originalname: 'proposal.pdf' },
             tenantId: 'tenant-1',
@@ -93,7 +109,7 @@ describe('backend/service/application/approvalWorkflowService', () => {
         expect(submissionDao.createSubmissionMetadata).toHaveBeenCalledWith({
             submissionId: 'sub-fixed-uuid',
             tenantId: 'tenant-1',
-            owner: 'u-1',
+            owner: 'db-user-id-1',
             objectKey: 'obj-1',
             docHash: 'hash-1',
             originalFileName: 'proposal.pdf',

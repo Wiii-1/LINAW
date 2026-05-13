@@ -14,11 +14,11 @@ class ApprovalWorkflowDao {
                 size
             } = data;
 
-            const [submission] = await db('submission')
+            const [submission] = await db('submissions')
                 .insert({
                     submission_id: submissionId,
                     tenant_id: tenantId,
-                    owner_id: owner,
+                    owner: owner,
                     object_key: objectKey,
                     doc_hash: docHash,
                     original_file_name: originalFileName,
@@ -40,10 +40,10 @@ class ApprovalWorkflowDao {
         try {
             const { submissionId, owner } = data;
 
-            const affectedRows = await db('submission')
+            const affectedRows = await db('submissions')
                 .where({
                     submission_id: submissionId,
-                    owner_id: owner
+                    owner: owner
                 })
                 .del();
 
@@ -66,11 +66,11 @@ class ApprovalWorkflowDao {
                 size
             } = data;
 
-            const [submission] = await db('submission')
+            const [submission] = await db('submissions')
                 .where({
                     submission_id: submissionId,
                     tenant_id: tenantId,
-                    owner_id: owner
+                    owner: owner
                 })
                 .update({
                     object_key: objectKey,
@@ -91,7 +91,7 @@ class ApprovalWorkflowDao {
 
     async getSubmissionById ({ submissionId }) {
         try {
-            const submission = await db('submission')
+            const submission = await db('submissions')
                 .select('*')
                 .where({ submission_id: submissionId })
                 .first();
@@ -104,12 +104,10 @@ class ApprovalWorkflowDao {
 
     async getSubmissionHistory ({ submissionId }) {
         try {
-            const history = await db('submission_history')
-                .select('*')
-                .where({ submission_id: submissionId })
-                .orderBy('created_at', 'asc');
-
-            return history || [];
+            // Copilot note: submission_history table does not exist in current schema.
+            // History is tracked in the Fabric chaincode, not in SQL.
+            // This method is retained for API compatibility but returns empty array.
+            return [];
         } catch (error) {
             throw error;
         }

@@ -71,17 +71,21 @@ describe('usersRoute integration', () => {
   });
 
   test('POST /api/signup - success', async () => {
-    userService.signup.mockResolvedValue({ email: 'alice@example.com' });
+    userService.signup.mockResolvedValue({ email: 'alice@example.com', tenant_id: 'tenant-generated', message: 'Signup request accepted' });
 
     const app = makeApp();
     const res = await request(app)
       .post('/api/signup')
-      .send({ email: 'alice@example.com', firebase_uid: 'fb1' });
+      .send({ email: 'alice@example.com' });
 
     expect(res.status).toBe(201);
     expect(res.body).toEqual({
-      email: 'alice@example.com',
       message: 'Signup successful',
+      data: {
+        email: 'alice@example.com',
+        tenant_id: 'tenant-generated',
+        message: 'Signup request accepted'
+      }
     });
   });
 

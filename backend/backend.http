@@ -14,8 +14,7 @@ POST {{api}}/signup
 Content-Type: application/json
 
 {
-  "email": "alice@example.com",
-  "firebase_uid": "firebase-uid-123"
+  "email": "alice@example.com"
 }
 
 ### Login

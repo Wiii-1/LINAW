@@ -1,4 +1,4 @@
-const { describe, it, expect, vi } = require('vitest')
+// Vitest globals (describe/it/expect/vi) are provided by the test runner
 
 vi.mock('../../config/firebase-config', () => {
   return {
@@ -9,6 +9,11 @@ vi.mock('../../config/firebase-config', () => {
 })
 
 const { auth } = require('../../../../config/firebase-config')
+
+// Make sure auth.verifyIdToken is a vi.fn when tests run (config may short-circuit)
+if (!auth.verifyIdToken || typeof auth.verifyIdToken.mockResolvedValue !== 'function') {
+  auth.verifyIdToken = vi.fn();
+}
 const authenticate = require('../../../../middleware/authenticate')
 const AppError = require('../../../../utils/AppError')
 

@@ -55,13 +55,9 @@ class UserService {
     return value;
   }
 
-  async signup(body, user) {
+  async signup(body) {
     const validated = this.validate("signupSchema", { body });
     const { email } = validated.body;
-
-    if (!user?.uid) {
-      throw new AppError("User not authenticated", 401, "UNAUTHORIZED");
-    }
 
     let disposableCheck = null;
     try {
@@ -80,29 +76,18 @@ class UserService {
       );
     }
 
-    const existingByFirebaseUid = await userDao.findByFirebaseUid(user.uid);
-    if (existingByFirebaseUid) {
-      return existingByFirebaseUid;
-    }
-
     const existingByEmail = await userDao.findUserByEmail(email);
     if (existingByEmail) {
       throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
     }
 
-    const tenantId = user?.tenantId || null;
+    const tenant_id = await this.createDefaultTenant(email);
 
-    // If no tenantId provided in token, create a default tenant for this user
-    let assignedTenantId = tenantId;
-    if (!assignedTenantId) {
-      assignedTenantId = await this.createDefaultTenant(email);
-    }
-
-    return await this.syncAuthenticatedUser({
+    return {
       email,
-      firebase_uid: user.uid,
-      tenant_id: assignedTenantId,
-    });
+      tenant_id,
+      message: "Signup request accepted",
+    };
   }
 
   async syncAuthenticatedUser({ email, firebase_uid, tenant_id = null }) {
@@ -139,17 +124,13 @@ class UserService {
     };
   }
 
-  async login(email, user) {
+  async login(email, user = {}) {
     // validate email format via existing schema
     this.validate("loginSchema", { body: { email } });
 
-    if (!user?.uid) {
-      throw new AppError("User not authenticated", 401, "UNAUTHORIZED");
-    }
-
     const userRow = await userDao.login({
       email,
-      firebase_uid: user.uid,
+      firebase_uid: user?.uid,
     });
 
     return userRow;

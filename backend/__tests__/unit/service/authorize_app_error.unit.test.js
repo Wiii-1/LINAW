@@ -1,7 +1,8 @@
-const { describe, it, expect, vi } = require('vitest')
 const authorization = require('../../../middleware/authorize')
 const AppError = require('../../../utils/AppError')
 const permission = require('../../../config/authorization/permission')
+
+// Vitest globals (describe/it/expect/vi) are used; no explicit require needed
 
 describe('authorization middleware (AppError mode)', () => {
   it('calls next with AppError UNAUTHORIZED when no user', () => {

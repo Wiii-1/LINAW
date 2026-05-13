@@ -8,7 +8,7 @@ class fabricController {
 // Blockchain
     async networkCreate(req, res, next) {
         try {
-        console.log('DEBUG networkCreate body:', req.body);
+        // Debug logging removed to avoid noisy output in production
 
         if (!req.user) {
             return next(new AppError('Authorization required', 401, 'AUTH_MISSING'))
