@@ -141,6 +141,45 @@ async function normalizeMspDir(mspDir) {
     }
 }
 
+async function assertOrdererTlsGenerated(workspace, relTlsDir, ordererLabel) {
+    const absTlsDir = path.join(workspace, relTlsDir);
+    const required = [
+        path.join(absTlsDir, 'keystore', 'key.pem'),
+        path.join(absTlsDir, 'signcerts', 'cert.pem'),
+        path.join(absTlsDir, 'tlscacerts', 'tls-cert.pem'),
+    ];
+
+    const missing = [];
+    const diagnostics = [];
+    try {
+        if (!(await fs.pathExists(absTlsDir))) {
+            throw new Error(`TLS dir missing: ${absTlsDir}`);
+        }
+        const parentListing = await fs.readdir(path.dirname(absTlsDir)).catch(() => []);
+        diagnostics.push(`parent:${path.dirname(absTlsDir)} -> ${parentListing.join(', ') || '(empty)'}`);
+    } catch (err) {
+        diagnostics.push(`dir-check-error: ${err.message}`);
+    }
+
+    for (const f of required) {
+        try {
+            if (!(await fs.pathExists(f))) {
+                missing.push(f);
+            } else {
+                const st = await fs.stat(f);
+                diagnostics.push(`${f}: mode=${(st.mode & 0o777).toString(8)} uid=${st.uid} gid=${st.gid}`);
+            }
+        } catch (err) {
+            diagnostics.push(`${f}: stat-error=${err.message}`);
+        }
+    }
+
+    if (missing.length) {
+        const msg = `Orderer TLS generation incomplete for ${ordererLabel}. Missing files: ${missing.join(', ')}. Diagnostics:\n- ${diagnostics.join('\n- ')}`;
+        throw new Error(msg);
+    }
+}
+
 async function runFabricCaClient(workspace, userId, clientHomeRel, args, env = {}) {
     const img = getFabricCaImage();
 
@@ -212,8 +251,14 @@ async function runFabricCaClient(workspace, userId, clientHomeRel, args, env = {
         }
     }
 
+    // Run container as the same UID/GID as the current process so files created
+    // inside the mounted workspace are owned by the host user instead of root.
+    const hostUid = (typeof process.getuid === 'function') ? process.getuid() : 0;
+    const hostGid = (typeof process.getgid === 'function') ? process.getgid() : 0;
+
     const cmd = [
         'docker run --rm',
+        `-u ${hostUid}:${hostGid}`,
         `--network ${network}`,
         addHostArgs.join(' '),
         `-v "${workspace}:/workspace"`,
@@ -260,6 +305,48 @@ async function generateCryptoMaterial(workspace, userId, config, opts = {}) {
     await fs.ensureDir(path.join(workspace, 'crypto-config'));
     await fs.ensureDir(path.join(workspace, 'channel-artifacts'));
 
+    // Pre-create directories where CA servers will write cert material.
+    // This ensures they exist and are owned by the host user before CA containers
+    // (which run as root) try to write into them.
+    const dirsToCreate = [
+        'crypto-config/tls-ca',
+        'crypto-config/ordererOrg',
+        'crypto-config/ordererOrg/ca',
+    ];
+    for (const org of (config.orgs || [])) {
+        dirsToCreate.push(`crypto-config/${org.name}`);
+        dirsToCreate.push(`crypto-config/${org.name}/ca`);
+        dirsToCreate.push(`crypto-config/${org.name}/peers`);
+        dirsToCreate.push(`crypto-config/${org.name}/users`);
+        dirsToCreate.push(`crypto-config/${org.name}/msp`);
+    }
+    dirsToCreate.push('crypto-config/ordererOrg/orderers');
+    dirsToCreate.push('crypto-config/ordererOrg/msp');
+    dirsToCreate.push('crypto-config/ordererOrg/users');
+    for (let i = 0; i < (config.ordererCount || 1); i++) {
+        const ordererLabel = i === 0 ? 'orderer' : `orderer${i + 1}`;
+        dirsToCreate.push(`crypto-config/ordererOrg/orderers/${ordererLabel}`);
+    }
+    
+    for (const dir of dirsToCreate) {
+        await fs.ensureDir(path.join(workspace, dir));
+    }
+
+    // Preflight: detect crypto-config ownership problems caused by prior container runs
+    try {
+        const cryptoDir = path.join(workspace, 'crypto-config');
+        if (await fs.pathExists(cryptoDir)) {
+            const st = await fs.stat(cryptoDir).catch(() => null);
+            const currentUid = (typeof process.getuid === 'function') ? process.getuid() : 0;
+            const currentGid = (typeof process.getgid === 'function') ? process.getgid() : 0;
+            if (st && (st.uid !== currentUid || st.gid !== currentGid)) {
+                throw new Error(`Detected crypto-config owned by ${st.uid}:${st.gid}. This prevents the CA client from writing TLS files as the host user. Remediation: either remove or change ownership of the directory. Example commands:\n  sudo rm -rf ${cryptoDir} || sudo chown -R ${currentUid}:${currentGid} ${cryptoDir}`);
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+
     // --- Locate TLS/CA cert files on disk ---
 
     // TLS-CA: try tls-cert.pem first, fall back to ca-cert.pem
@@ -290,7 +377,13 @@ async function generateCryptoMaterial(workspace, userId, config, opts = {}) {
 
     const tlsCaUrl = `https://tls-admin:tls-adminpw@localhost:${config.tlsCaPort}`;
     const ordererCaUrl = `https://ca-orderer-${userId}:${config.ordererCaPort}`;
-    const clientRoot = 'crypto-config/.ca-client';
+    // Use a workspace-root client home to avoid writing into possibly root-owned
+    // `crypto-config` directories. This avoids permission errors when `crypto-config`
+    // was created by a previous container run as root.
+    const clientRoot = '.ca-client';
+
+    // Ensure the clientRoot exists and is writable by the current process.
+    await fs.ensureDir(path.join(workspace, clientRoot));
 
     // === TLS CA admin enroll ===
     if (typeof progress === 'function') progress({ step: 'crypto.enroll.tlsCaAdmin', channelId });
@@ -388,6 +481,8 @@ async function generateCryptoMaterial(workspace, userId, config, opts = {}) {
             `--enrollment.profile tls ${hosts}`
         );
         await normalizeTlsDir(path.join(workspace, tlsOutRel));
+        // Verify TLS files exist and provide diagnostics on failure to help debugging
+        await assertOrdererTlsGenerated(workspace, tlsOutRel, ordererLabel);
     }
 
     // === Orderer CA admin, org admin, MSPs, peers MSPs ===

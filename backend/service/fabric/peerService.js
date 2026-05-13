@@ -128,7 +128,7 @@ async function runInContainer(containerName, command) {
       {
         stdout: error?.stdout ?? "",
         stderr: error?.stderr ?? "",
-        exitCode: error?.code,
+        exitCode: error?.code,  
         dockerCmd,
       },
     );

@@ -3,6 +3,7 @@ const { userSchema } = require("../../validators/user");
 const AppError = require("../../utils/AppError");
 const disposableService = require("./disposableEmailService");
 const logger = require("../../utils/logger");
+const db = require("../../db/db");
 
 class ValidationError extends Error {
   constructor(message, details = []) {
@@ -16,6 +17,17 @@ class ValidationError extends Error {
 class UserService {
   constructor() {
     this.schemas = userSchema;
+  }
+
+  async createDefaultTenant(user_email) {
+    const baseName = (user_email || 'tenant').split('@')[0];
+    const tenantName = `${baseName}-tenant`;
+
+    const [tenant] = await db('tenants')
+      .insert({ tenant_name: tenantName })
+      .returning(['tenant_id']);
+
+    return tenant.tenant_id;
   }
 
   validate(schemaKey, data) {
@@ -33,7 +45,10 @@ class UserService {
     if (error) {
       throw new ValidationError(
         "Validation failed",
-        error.details.map((d) => d.message)
+        error.details.map((d) => ({
+          field: (d.context && (d.context.label || (d.path && d.path[0]))) || null,
+          message: d.message,
+        }))
       );
     }
 
@@ -75,13 +90,22 @@ class UserService {
       throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
     }
 
+    const tenantId = user?.tenantId || null;
+
+    // If no tenantId provided in token, create a default tenant for this user
+    let assignedTenantId = tenantId;
+    if (!assignedTenantId) {
+      assignedTenantId = await this.createDefaultTenant(email);
+    }
+
     return await this.syncAuthenticatedUser({
       email,
       firebase_uid: user.uid,
+      tenant_id: assignedTenantId,
     });
   }
 
-  async syncAuthenticatedUser({ email, firebase_uid }) {
+  async syncAuthenticatedUser({ email, firebase_uid, tenant_id = null }) {
     if (!firebase_uid) {
       throw new AppError("User not authenticated", 401, "UNAUTHORIZED");
     }
@@ -106,6 +130,7 @@ class UserService {
     const createdUser = await userDao.signup({
       email,
       firebase_uid,
+      tenant_id,
     });
 
     return {
@@ -114,9 +139,9 @@ class UserService {
     };
   }
 
-  async login(body, user) {
-    const validated = this.validate("loginSchema", { body });
-    const { email } = validated.body;
+  async login(email, user) {
+    // validate email format via existing schema
+    this.validate("loginSchema", { body: { email } });
 
     if (!user?.uid) {
       throw new AppError("User not authenticated", 401, "UNAUTHORIZED");

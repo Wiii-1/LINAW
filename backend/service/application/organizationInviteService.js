@@ -74,7 +74,7 @@ class organizationInviteService {
             invited_by: invitedByUserId,
         })
 
-        const frontendUrl = 'http://localhost:5173'
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
         const inviteLink = `${frontendUrl}/invitations/accept?token=${rawToken}`
 
         return {

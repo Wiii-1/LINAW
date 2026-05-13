@@ -18,13 +18,22 @@ class authenticate {
 
             const decodedToken = await auth.verifyIdToken(token)
 
+            // Basic required claims validation
+            if (!decodedToken || !decodedToken.uid) {
+                return next(new AppError('Missing uid claim', 401, 'INVALID_TOKEN'))
+            }
+
+            if (!decodedToken.email) {
+                return next(new AppError('Missing email claim', 401, 'INVALID_TOKEN'))
+            }
+
             req.user = {
                 uid: decodedToken.uid,
                 email: decodedToken.email || null,
                 email_verified: decodedToken.email_verified || false,
                 role: decodedToken.role || 'user',
                 tenantId: decodedToken.tenantId || null,
-                claims: decodedToken    
+                claims: decodedToken
             }
 
             return next()

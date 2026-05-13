@@ -1,28 +1,26 @@
-vi.mock('../../../controllers/fabricController', () => ({
+vi.mock('firebase-admin/app', () => ({
+    initializeApp: vi.fn(() => ({})),
+    cert: vi.fn(() => ({}))
+}));
+
+vi.mock('firebase-admin/auth', () => ({
+    getAuth: vi.fn(() => ({
+        verifyIdToken: vi.fn()
+    }))
+}));
+
+process.env.FIREBASE_SERVICE_ACCOUNT_JSON ||= JSON.stringify({
+    project_id: 'test-project',
+    client_email: 'test@example.com',
+    private_key: '-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----\n'
+});
+
+vi.mock('../../../controllers/blockchainController', () => ({
     networkCreate: vi.fn(),
     networkRead: vi.fn(),
     channelCreate: vi.fn(),
     smartContract: vi.fn(),
-    contractReadAll: vi.fn(),
-    addMember: vi.fn(),
-    updateMemberRole: vi.fn(),
-    getOrganizationMemebrs: vi.fn(),
-    deleteMember: vi.fn(),
-    createAsset: vi.fn(),
-    assetTransfer: vi.fn(),
-    assetUpdate: vi.fn(),
-    assetDelete: vi.fn(),
-    assetRead: vi.fn(),
-    assetReadAll: vi.fn(),
-    createSubmission: vi.fn(),
-    submitForApproval: vi.fn(),
-    approveSubmission: vi.fn(),
-    rejectSubmission: vi.fn(),
-    requestChanges: vi.fn(),
-    resubmitSubmission: vi.fn(),
-    getSubmissionById: vi.fn(),
-    getSubmissionHistory: vi.fn(),
-    deleteSubmission: vi.fn()
+    contractReadAll: vi.fn()
 }));
 
 vi.mock('../../../controllers/organizationInviteController', () => ({
@@ -54,6 +52,14 @@ vi.mock('../../../dao/r2StorageDao', () => ({
     deleteObject: vi.fn(),
     getSignedUrl: vi.fn()
 }));
+vi.mock('../../../config/firebase-config', () => ({
+    auth: {
+        verifyIdToken: vi.fn()
+    }
+}));
+vi.mock('../../../middleware/uploadSubmissionFile.js', () => ({
+    single: vi.fn(() => vi.fn((req, res, next) => next()))
+}));
 
 vi.mock('../../../middleware/authenticate', () => ({
     decodeToken: vi.fn((req, res, next) => next())
@@ -63,8 +69,10 @@ vi.mock('../../../middleware/rateLimiter', () => ({
     apiLimiter: vi.fn((req, res, next) => next())
 }));
 
-const fabricController = require('../../../controllers/blockchainController');
+const blockchainController = require('../../../controllers/blockchainController');
+const assetRegistryController = require('../../../controllers/assetRegistryController');
 const organizationInviteController = require('../../../controllers/organizationInviteController');
+const approvalWorkflowController = require('../../../controllers/approvalWorkflowController');
 const authenticate = require('../../../middleware/authenticate');
 const { apiLimiter } = require('../../../middleware/rateLimiter');
 const { router } = require('../../../routes/fabricRoute');
@@ -85,10 +93,11 @@ describe('backend/routes/fabricRoute', () => {
     });
 
     it('registers core blockchain routes with expected handlers', () => {
-        expect(findRoute('/networks', 'post').route.stack[0].handle).toBe(fabricController.networkCreate);
-        expect(findRoute('/networks/:id/channels', 'post').route.stack[0].handle).toBe(fabricController.channelCreate);
-        expect(findRoute('/channel/:channel_id/contracts', 'post').route.stack[0].handle).toBe(fabricController.smartContract);
-        expect(findRoute('/channel/:channel_id/contracts', 'get').route.stack[0].handle).toBe(fabricController.contractReadAll);
+        expect(findRoute('/networks', 'post').route.stack[0].handle).toBe(blockchainController.networkCreate);
+        expect(findRoute('/networks/:network_id', 'get').route.stack[0].handle).toBe(blockchainController.networkRead);
+        expect(findRoute('/networks/:id/channels', 'post').route.stack[0].handle).toBe(blockchainController.channelCreate);
+        expect(findRoute('/channel/:channel_id/contracts', 'post').route.stack[0].handle).toBe(blockchainController.smartContract);
+        expect(findRoute('/channel/:channel_id/contracts', 'get').route.stack[0].handle).toBe(blockchainController.contractReadAll);
     });
 
     it('registers member-management routes with current controller methods', () => {
@@ -98,25 +107,25 @@ describe('backend/routes/fabricRoute', () => {
     });
 
     it('registers asset registry routes with expected handlers', () => {
-        expect(findRoute('/assets', 'post').route.stack[0].handle).toBe(fabricController.createAsset);
-        expect(findRoute('/assets/:id/transfer', 'post').route.stack[0].handle).toBe(fabricController.assetTransfer);
-        expect(findRoute('/assets/:id', 'put').route.stack[0].handle).toBe(fabricController.assetUpdate);
-        expect(findRoute('/assets/:id', 'delete').route.stack[0].handle).toBe(fabricController.assetDelete);
-        expect(findRoute('/assets/:id', 'get').route.stack[0].handle).toBe(fabricController.assetRead);
-        expect(findRoute('/assets', 'get').route.stack[0].handle).toBe(fabricController.assetReadAll);
+        expect(findRoute('/assets', 'post').route.stack[0].handle).toBe(assetRegistryController.createAsset);
+        expect(findRoute('/assets/:id/transfer', 'post').route.stack[0].handle).toBe(assetRegistryController.assetTransfer);
+        expect(findRoute('/assets/:id', 'put').route.stack[0].handle).toBe(assetRegistryController.assetUpdate);
+        expect(findRoute('/assets/:id', 'delete').route.stack[0].handle).toBe(assetRegistryController.assetDelete);
+        expect(findRoute('/assets/:id', 'get').route.stack[0].handle).toBe(assetRegistryController.assetRead);
+        expect(findRoute('/assets', 'get').route.stack[0].handle).toBe(assetRegistryController.assetReadAll);
     });
 
     it('registers approval workflow routes with expected handlers', () => {
         const createSubmissionRoute = findRoute('/submissions', 'post');
-        expect(createSubmissionRoute.route.stack[createSubmissionRoute.route.stack.length - 1].handle).toBe(fabricController.createSubmission);
-        expect(findRoute('/submissions/:submissionId/submit', 'post').route.stack[0].handle).toBe(fabricController.submitForApproval);
-        expect(findRoute('/submissions/:submissionId/approve', 'patch').route.stack[0].handle).toBe(fabricController.approveSubmission);
-        expect(findRoute('/submissions/:submissionId/reject', 'patch').route.stack[0].handle).toBe(fabricController.rejectSubmission);
-        expect(findRoute('/submissions/:submissionId/request-changes', 'patch').route.stack[0].handle).toBe(fabricController.requestChanges);
+        expect(createSubmissionRoute.route.stack[createSubmissionRoute.route.stack.length - 1].handle).toBe(approvalWorkflowController.createSubmission);
+        expect(findRoute('/submissions/:submissionId/submit', 'post').route.stack[0].handle).toBe(approvalWorkflowController.submitForApproval);
+        expect(findRoute('/submissions/:submissionId/approve', 'patch').route.stack[0].handle).toBe(approvalWorkflowController.approveSubmission);
+        expect(findRoute('/submissions/:submissionId/reject', 'patch').route.stack[0].handle).toBe(approvalWorkflowController.rejectSubmission);
+        expect(findRoute('/submissions/:submissionId/request-changes', 'patch').route.stack[0].handle).toBe(approvalWorkflowController.requestChanges);
         const resubmitRoute = findRoute('/submissions/:submissionId/resubmit', 'patch');
-        expect(resubmitRoute.route.stack[resubmitRoute.route.stack.length - 1].handle).toBe(fabricController.resubmitSubmission);
-        expect(findRoute('/submissions/:submissionId', 'get').route.stack[0].handle).toBe(fabricController.getSubmissionById);
-        expect(findRoute('/submissions/:submissionId/history', 'get').route.stack[0].handle).toBe(fabricController.getSubmissionHistory);
-        expect(findRoute('/submissions/:submissionId', 'delete').route.stack[0].handle).toBe(fabricController.deleteSubmission);
+        expect(resubmitRoute.route.stack[resubmitRoute.route.stack.length - 1].handle).toBe(approvalWorkflowController.resubmitSubmission);
+        expect(findRoute('/submissions/:submissionId', 'get').route.stack[0].handle).toBe(approvalWorkflowController.getSubmissionById);
+        expect(findRoute('/submissions/:submissionId/history', 'get').route.stack[0].handle).toBe(approvalWorkflowController.getSubmissionHistory);
+        expect(findRoute('/submissions/:submissionId', 'delete').route.stack[0].handle).toBe(approvalWorkflowController.deleteSubmission);
     });
 });

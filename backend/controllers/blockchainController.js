@@ -1,5 +1,8 @@
 const networkAssetsService = require('../service/application/networkAssetsService')
+const AppError = require('../utils/AppError')
 
+// blockchainController: Network and channel provisioning
+// assetRegistryController: Asset lifecycle (create, read, update, delete, transfer)
 class fabricController {
 
 // Blockchain
@@ -7,12 +10,15 @@ class fabricController {
         try {
         console.log('DEBUG networkCreate body:', req.body);
 
-        const fakeUser = req.user || { uid: 'dev-user' }; // TEMP fallback
+        if (!req.user) {
+            return next(new AppError('Authorization required', 401, 'AUTH_MISSING'))
+        }
+
+        const user = req.user
 
         const network = await networkAssetsService.networkCreate({
             body: req.body,
-            // user: req.user,
-            user: fakeUser
+            user: user
         }); 
         return res.status(201).json(network);
         } catch (error) {
@@ -83,85 +89,6 @@ class fabricController {
             })
 
             return res.status(200).json(contracts)
-        } catch (error) {
-            next(error)
-        }
-    }
-
-    async createAsset(req, res, next) {
-        try {
-            const asset = await networkAssetsService.createAsset({
-                body: req.body,
-                user: req.user
-            })
-
-            return res.status(201).json(asset)
-        } catch (error) {
-            next(error)
-        }
-    }
-
-    async assetTransfer(req, res, next) {
-        try {
-            const transfer = await networkAssetsService.assetTransfer({
-                params: req.params,
-                body: req.body,
-                user: req.user
-            })
-
-            return res.status(200).json(transfer)
-        } catch (error) {
-            next(error)
-        }
-    }
-
-    async assetUpdate(req, res, next) {
-        try {
-            const update = await networkAssetsService.assetUpdate({
-                params: req.params,
-                body: req.body,
-                user: req.user
-            })
-
-            return res.status(200).json(update)
-        } catch (error) {
-            next(error)
-        }
-    }
-
-    async assetDelete(req, res, next) {
-        try {
-            const deleted = await networkAssetsService.assetDelete({
-                params: req.params,
-                user: req.user
-            })
-
-            return res.status(200).json(deleted)
-        } catch (error) {
-            next(error)
-        }
-    }
-
-    async assetRead(req, res, next) {
-        try {
-            const asset = await networkAssetsService.assetRead({
-                params: req.params,
-                user: req.user
-            })
-
-            return res.status(200).json(asset)
-        } catch (error) {
-            next(error)
-        }
-    }
-
-    async assetReadAll(req, res, next) {
-        try {
-            const assets = await networkAssetsService.assetReadAll({
-                user: req.user
-            })
-
-            return res.status(200).json(assets)
         } catch (error) {
             next(error)
         }

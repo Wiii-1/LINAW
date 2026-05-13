@@ -40,12 +40,27 @@ class networkAssetsService {
     return value;
   }
 
-  // const { name, description, orgs } = validated.body;
+
 
 
   // Copilot note: Blockchain/network methods - separated from asset registry operations
 async networkCreate({ body, user }) {
-  const validated = this.validate("networkCreateSchema", body);
+  // Body should contain: { name, description?, orgs }
+  // Convert body to config format expected by schema and validation
+  const configData = {
+    config: {
+      name: body.name,
+      orgs: body.orgs || [],
+      // Use provided values or defaults
+      consensus: body.consensus || 'etcdraft',
+      channelPolicy: body.channelPolicy || 'MAJORITY',
+      channelId: body.channelId || 'mychannel',
+      stateDb: body.stateDb || 'couchdb',
+      ordererCount: body.ordererCount || 1,
+    }
+  };
+
+  const validated = this.validate("networkCreateSchema", configData);
   let { config } = validated;
   // Normalize org keys: tests and clients may send `msp_ID` or `msp_id`.
   config = {
@@ -138,27 +153,43 @@ async networkCreate({ body, user }) {
       throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
     }
 
-    const validated = this.validate("createAssetSchema", { body });
+    // Extract id from body if present, otherwise generate or require from params
+    const { id, color, size, owner, appraisedValue } = body;
+    
+    if (!id) {
+      throw new AppError('Asset ID is required', 400, 'ASSET_ID_REQUIRED');
+    }
 
-    const { id, color, size, owner, appraisedValue } = validated.body;
+    // Validate using a simpler validation that just checks body fields
+    const validated = {
+      id,
+      color: color && typeof color === 'string' ? color.trim() : null,
+      size: typeof size === 'number' ? size : null,
+      owner: owner && typeof owner === 'string' ? owner.trim() : null,
+      appraisedValue: typeof appraisedValue === 'number' ? appraisedValue : null
+    };
+
+    if (!validated.color || !validated.size || !validated.owner || !validated.appraisedValue) {
+      throw new ValidationError('Validation failed', ['Required fields missing in asset creation']);
+    }
 
     await assetRegistryDao.createAsset({
       id,
       tenantId: user.tenantId,
-      color,
-      size,
-      owner,
-      appraisedValue,
+      color: validated.color,
+      size: validated.size,
+      owner: validated.owner,
+      appraisedValue: validated.appraisedValue,
       requestedBy: user.uid,
     });
 
     return await assetService.createAsset({
       id,
       tenantId: user.tenantId,
-      color,
-      size,
-      owner,
-      appraisedValue,
+      color: validated.color,
+      size: validated.size,
+      owner: validated.owner,
+      appraisedValue: validated.appraisedValue,
       requestedBy: user.uid,
     });
   }

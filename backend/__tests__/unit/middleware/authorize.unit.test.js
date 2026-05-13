@@ -23,9 +23,11 @@ describe('backend/middleware/authorize', () => {
 
         middleware(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({ message: 'UNAUTHORIZED' });
-        expect(next).not.toHaveBeenCalled();
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            name: 'AppError',
+            statusCode: 401
+        }));
+        expect(res.status).not.toHaveBeenCalled();
     });
 
     it('returns 403 when user lacks required permission', () => {
@@ -40,9 +42,11 @@ describe('backend/middleware/authorize', () => {
 
         middleware(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(403);
-        expect(res.json).toHaveBeenCalledWith({ message: 'FORBIDDEN' });
-        expect(next).not.toHaveBeenCalled();
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            name: 'AppError',
+            statusCode: 403
+        }));
+        expect(res.status).not.toHaveBeenCalled();
     });
 
     it('returns 403 when policy check fails', () => {
@@ -60,9 +64,11 @@ describe('backend/middleware/authorize', () => {
         middleware(req, res, next);
 
         expect(policies.create_network).toHaveBeenCalledWith(req.user, req, res);
-        expect(res.status).toHaveBeenCalledWith(403);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Policy check failed' });
-        expect(next).not.toHaveBeenCalled();
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            name: 'AppError',
+            statusCode: 403
+        }));
+        expect(res.status).not.toHaveBeenCalled();
     });
 
     it('calls next when permission and policy checks pass', () => {

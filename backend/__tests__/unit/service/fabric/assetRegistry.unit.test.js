@@ -42,6 +42,7 @@ describe('backend/service/fabric/assetRegistry', () => {
 
         const result = await assetRegistry.createAsset({
             id: 'asset-1',
+            tenantId: 'tenant-1',
             color: 'blue',
             size: 10,
             owner: 'alice',
@@ -53,6 +54,7 @@ describe('backend/service/fabric/assetRegistry', () => {
         expect(contract.submitTransaction).toHaveBeenCalledWith(
             'CreateAsset',
             'asset-1',
+            'tenant-1',
             'blue',
             '10',
             'alice',
@@ -94,10 +96,10 @@ describe('backend/service/fabric/assetRegistry', () => {
         };
         getContract.mockReturnValue(contract);
 
-        const result = await assetRegistry.assetRead({ id: 'asset-1', requestedBy: 'uid-2' });
+        const result = await assetRegistry.assetRead({ id: 'asset-1', tenantId: 'tenant-1', requestedBy: 'uid-2' });
 
         expect(getContract).toHaveBeenCalledWith('assetRegistryContract');
-        expect(contract.evaluateTransaction).toHaveBeenCalledWith('ReadAsset', 'asset-1');
+        expect(contract.evaluateTransaction).toHaveBeenCalledWith('ReadAsset', 'asset-1', 'tenant-1');
         expect(result).toEqual({
             message: 'Asset fetched successfully',
             requested_by: 'uid-2',
@@ -111,9 +113,9 @@ describe('backend/service/fabric/assetRegistry', () => {
         };
         getContract.mockReturnValue(contract);
 
-        const result = await assetRegistry.assetReadAll({ requestedBy: 'uid-3' });
+        const result = await assetRegistry.assetReadAll({ tenantId: 'tenant-1', requestedBy: 'uid-3' });
 
-        expect(contract.evaluateTransaction).toHaveBeenCalledWith('GetAllAssets');
+        expect(contract.evaluateTransaction).toHaveBeenCalledWith('GetAllAssets', 'tenant-1');
         expect(result.data).toEqual([{ id: 'asset-1' }]);
     });
 
@@ -129,12 +131,13 @@ describe('backend/service/fabric/assetRegistry', () => {
 
         const result = await assetRegistry.assetTransfer({
             id: 'asset-2',
+            tenantId: 'tenant-1',
             owner: 'bob',
             requestedBy: 'uid-10'
         });
 
         expect(contract.submitAsync).toHaveBeenCalledWith('TransferAsset', {
-            arguments: ['asset-2', 'bob']
+            arguments: ['asset-2', 'tenant-1', 'bob']
         });
         expect(result).toEqual({
             message: 'Asset Transferred Successfully',
@@ -156,6 +159,7 @@ describe('backend/service/fabric/assetRegistry', () => {
         await expect(
             assetRegistry.assetTransfer({
                 id: 'asset-2',
+                tenantId: 'tenant-1',
                 owner: 'bob',
                 requestedBy: 'uid-10'
             })
@@ -174,6 +178,7 @@ describe('backend/service/fabric/assetRegistry', () => {
 
         const result = await assetRegistry.assetUpdate({
             id: 'asset-3',
+            tenantId: 'tenant-1',
             color: 'red',
             size: 6,
             owner: 'alice',
@@ -184,6 +189,7 @@ describe('backend/service/fabric/assetRegistry', () => {
         expect(contract.submitTransaction).toHaveBeenCalledWith(
             'UpdateAsset',
             'asset-3',
+            'tenant-1',
             'red',
             '6',
             'alice',
@@ -204,11 +210,12 @@ describe('backend/service/fabric/assetRegistry', () => {
 
         const result = await assetRegistry.assetDelete({
             id: 'asset-4',
+            tenantId: 'tenant-1',
             requestedBy: 'uid-12'
         });
 
         expect(contract.submitAsync).toHaveBeenCalledWith('DeleteAsset', {
-            arguments: ['asset-4']
+            arguments: ['asset-4', 'tenant-1']
         });
         expect(result.data).toEqual({ id: 'asset-4', deleted: true });
     });
@@ -222,6 +229,7 @@ describe('backend/service/fabric/assetRegistry', () => {
         await expect(
             assetRegistry.assetRead({
                 id: 'asset-5',
+                tenantId: 'tenant-1',
                 requestedBy: 'uid-13'
             })
         ).rejects.toMatchObject({
