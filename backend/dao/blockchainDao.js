@@ -2,222 +2,210 @@ const db = require("../db/db");
 const AppError = require("../utils/AppError");
 
 class BlockchainDao {
-  // Network operations
+	// Network operations
 
-  async findNetworkByTenantAndName({ tenant_id, network_name }) {
-    if (!tenant_id || !network_name) {
-      return null;
-    }
 
-    const network = await db("blockchain_network")
-      .where({ tenant_id, network_name })
-      .first();
+	async findNetworkByTenantAndName({ tenant_id, network_name }) {
+		if (!tenant_id || !network_name) {
+			return null;
+		}
 
-    return network || null;
-  }
+		const network = await db("blockchain_network")
+			.where({ tenant_id, network_name })
+			.first();
 
-  async getNetworkById(network_id) {
-    if (!network_id) {
-      return null;
-    }
+		return network || null;
+	}
 
-    const network = await db("blockchain_network")
-      .where({ network_id })
-      .first();
 
-    return network || null;
-  }
+	async getNetworkById(network_id) {
+		if (!network_id) {
+			return null;
+		}
 
-  async createNetwork({ tenant_id, network_name, created_by }) {
-    const [network] = await db("blockchain_network")
-      .insert({
-        tenant_id,
-        network_name,
-        created_by: created_by || null,
-        created_at: db.fn.now(),
-        updated_at: db.fn.now(),
-      })
-      .returning("*");
+		const network = await db("blockchain_network")
+			.where({ network_id })
+			.first();
 
-    return network;
-  }
+		return network || null;
+	}
 
-  async updateNetwork({ network_id, updateData }) {
-    const [network] = await db("blockchain_network")
-      .where({ network_id })
-      .update({
-        ...updateData,
-        updated_at: db.fn.now(),
-      })
-      .returning("*");
 
-    return network || null;
-  }
+	async createNetwork({ tenant_id, network_name, created_by }) {
+		const [network] = await db("blockchain_network")
+			.insert({
+				tenant_id,
+				network_name,
+				created_by: created_by || null,
+				created_at: db.fn.now(),
+				updated_at: db.fn.now(),
+			})
+			.returning("*");
 
-  async upsertNetwork({ tenant_id, network_name, created_by }) {
-    const [network] = await db("blockchain_network")
-      .insert({
-        tenant_id,
-        network_name,
-        created_by: created_by || null,
-        created_at: db.fn.now(),
-        updated_at: db.fn.now(),
-      })
-      .onConflict(["tenant_id", "network_name"])
-      .merge({
-        // Preserve created_by if already set, otherwise use the provided value
-        created_by: db.raw("COALESCE(??, EXCLUDED.??)", [
-          "created_by",
-          "created_by",
-        ]),
-        updated_at: db.fn.now(),
-      })
-      .returning("*");
+		return network;
+	}
 
-    return network;
-  }
 
-  async getNetworksByTenant(tenant_id) {
-    if (!tenant_id) {
-      return [];
-    }
+	async updateNetwork({ network_id, updateData }) {
+		const [network] = await db("blockchain_network")
+			.where({ network_id })
+			.update({
+				...updateData,
+				updated_at: db.fn.now(),
+			})
+			.returning("*");
 
-    const networks = await db("blockchain_network")
-      .where({ tenant_id })
-      .orderBy("network_name", "asc");
+		return network || null;
+	}
 
-    return networks;
-  }
 
-  // Channel operations
+	async upsertNetwork({ tenant_id, network_name, created_by }) {
+		const [network] = await db("blockchain_network")
+			.insert({
+				tenant_id,
+				network_name,
+				created_by: created_by || null,
+				created_at: db.fn.now(),
+				updated_at: db.fn.now(),
+			})
+			.onConflict(["tenant_id", "network_name"])
+			.merge({
+				// Preserve created_by if already set, otherwise use the provided value
+				created_by: db.raw("COALESCE(??, EXCLUDED.??)", ["created_by", "created_by"]),
+				updated_at: db.fn.now(),
+			})
+			.returning("*");
 
-  async findChannelByTenantNetworkAndName({
-    tenant_id,
-    network_id,
-    channel_name,
-  }) {
-    if (!tenant_id || !network_id || !channel_name) {
-      return null;
-    }
+		return network;
+	}
 
-    const channel = await db("channel")
-      .where({ tenant_id, network_id, channel_name })
-      .first();
+	async getNetworksByTenant(tenant_id) {
+		if (!tenant_id) {
+			return [];
+		}
 
-    return channel || null;
-  }
+		const networks = await db("blockchain_network")
+			.where({ tenant_id })
+			.orderBy("network_name", "asc");
 
-  async createChannel({
-    channel_id,
-    tenant_id,
-    network_id,
-    channel_name,
-    created_by,
-  }) {
-    const [channel] = await db("channel")
-      .insert({
-        channel_id,
-        tenant_id,
-        network_id,
-        channel_name,
-        created_by: created_by || null,
-        created_at: db.fn.now(),
-        updated_at: db.fn.now(),
-      })
-      .returning("*");
+		return networks;
+	}
 
-    return channel;
-  }
+	// Channel operations
 
-  async updateChannel({ channel_id, updateData }) {
-    const [channel] = await db("channel")
-      .where({ channel_id })
-      .update({
-        ...updateData,
-        updated_at: db.fn.now(),
-      })
-      .returning("*");
+	async findChannelByTenantNetworkAndName({ tenant_id, network_id, channel_name }) {
+		if (!tenant_id || !network_id || !channel_name) {
+			return null;
+		}
 
-    return channel || null;
-  }
+		const channel = await db("channel")
+			.where({ tenant_id, network_id, channel_name })
+			.first();
 
-  async upsertChannel({
-    channel_id,
-    tenant_id,
-    network_id,
-    channel_name,
-    created_by,
-  }) {
-    const [channel] = await db("channel")
-      .insert({
-        channel_id,
-        tenant_id,
-        network_id,
-        channel_name,
-        created_by: created_by || null,
-        created_at: db.fn.now(),
-        updated_at: db.fn.now(),
-      })
-      .onConflict(["tenant_id", "channel_name"])
-      .merge({
-        network_id,
-        // Preserve created_by if already set, otherwise use the provided value
-        created_by: db.raw("COALESCE(??, EXCLUDED.??)", [
-          "created_by",
-          "created_by",
-        ]),
-        updated_at: db.fn.now(),
-      })
-      .returning("*");
+		return channel || null;
+	}
 
-    return channel;
-  }
+	async createChannel({ channel_id, tenant_id, network_id, channel_name, created_by }) {
+		const [channel] = await db("channel")
+			.insert({
+				channel_id,
+				tenant_id,
+				network_id,
+				channel_name,
+				created_by: created_by || null,
+				created_at: db.fn.now(),
+				updated_at: db.fn.now(),
+			})
+			.returning("*");
 
-  async getChannelsByNetworkId(network_id) {
-    if (!network_id) {
-      return [];
-    }
+		return channel;
+	}
 
-    const channels = await db("channel")
-      .where({ network_id })
-      .orderBy("channel_name", "asc");
 
-    return channels;
-  }
+	async updateChannel({ channel_id, updateData }) {
+		const [channel] = await db("channel")
+			.where({ channel_id })
+			.update({
+				...updateData,
+				updated_at: db.fn.now(),
+			})
+			.returning("*");
 
-  async getChannelsByTenant(tenant_id) {
-    if (!tenant_id) {
-      return [];
-    }
+		return channel || null;
+	}
 
-    const channels = await db("channel")
-      .where({ tenant_id })
-      .orderBy("channel_name", "asc");
 
-    return channels;
-  }
+	async upsertChannel({ channel_id, tenant_id, network_id, channel_name, created_by }) {
+		const [channel] = await db("channel")
+			.insert({
+				channel_id,
+				tenant_id,
+				network_id,
+				channel_name,
+				created_by: created_by || null,
+				created_at: db.fn.now(),
+				updated_at: db.fn.now(),
+			})
+			.onConflict(["tenant_id", "channel_name"])
+			.merge({
+				network_id,
+				// Preserve created_by if already set, otherwise use the provided value
+				created_by: db.raw("COALESCE(??, EXCLUDED.??)", ["created_by", "created_by"]),
+				updated_at: db.fn.now(),
+			})
+			.returning("*");
 
-  async getBlockchainMetadataByTenant(tenant_id) {
-    if (!tenant_id) {
-      return {
-        networks: [],
-        channels: [],
-      };
-    }
+		return channel;
+	}
 
-    const networks = await db("blockchain_network")
-      .where({ tenant_id })
-      .orderBy("network_name", "asc");
 
-    const channels = await db("channel")
-      .where({ tenant_id })
-      .orderBy("channel_name", "asc");
+	async getChannelsByNetworkId(network_id) {
+		if (!network_id) {
+			return [];
+		}
 
-    return {
-      networks,
-      channels,
-    };
-  }
+		const channels = await db("channel")
+			.where({ network_id })
+			.orderBy("channel_name", "asc");
+
+		return channels;
+	}
+
+
+	async getChannelsByTenant(tenant_id) {
+		if (!tenant_id) {
+			return [];
+		}
+
+		const channels = await db("channel")
+			.where({ tenant_id })
+			.orderBy("channel_name", "asc");
+
+		return channels;
+	}
+
+
+	async getBlockchainMetadataByTenant(tenant_id) {
+		if (!tenant_id) {
+			return {
+				networks: [],
+				channels: [],
+			};
+		}
+
+		const networks = await db("blockchain_network")
+			.where({ tenant_id })
+			.orderBy("network_name", "asc");
+
+		const channels = await db("channel")
+			.where({ tenant_id })
+			.orderBy("channel_name", "asc");
+
+		return {
+			networks,
+			channels,
+		};
+	}
 }
 
 module.exports = new BlockchainDao();

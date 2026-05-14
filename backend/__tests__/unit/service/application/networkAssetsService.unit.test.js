@@ -1,9 +1,11 @@
 vi.mock('../../../../dao/chaincodeMetadata/assetRegistryDao');
 vi.mock('../../../../service/fabric/assetRegistry.js');
+vi.mock('../../../../service/fabric/networkProvisioningService.js');
 
 const networkAssetsService = require('../../../../service/application/networkAssetsService.js');
 const assetRegistryDao = require('../../../../dao/chaincodeMetadata/assetRegistryDao');
 const assetService = require('../../../../service/fabric/assetRegistry.js');
+const networkProvisioningService = require('../../../../service/fabric/networkProvisioningService.js');
 const AppError = require('../../../../utils/AppError.js');
 
 describe('backend/service/application/networkAssetsService', () => {
@@ -27,6 +29,8 @@ describe('backend/service/application/networkAssetsService', () => {
         assetService.assetDelete = vi.fn();
         assetService.assetRead = vi.fn();
         assetService.assetReadAll = vi.fn();
+        // Set up network provisioning mock
+        networkProvisioningService.provisionNetwork = vi.fn();
     });
 
     it('createAsset validates payload and passes tenant and requestedBy through', async () => {
@@ -87,8 +91,27 @@ describe('backend/service/application/networkAssetsService', () => {
         });
     });
 
+    it.each([
+        ['assetTransfer', { params: { id: 'asset-1' }, body: { owner: 'bob' } }],
+        ['assetUpdate', { params: { id: 'asset-2' }, body: { color: 'black', size: 5, owner: 'eve', appraisedValue: 750 } }],
+        ['assetDelete', { params: { id: 'asset-3' } }],
+        ['assetRead', { params: { id: 'asset-4' } }],
+        ['assetReadAll', {}]
+    ])('%s rejects missing tenant context', async (method, payload) => {
+        await expect(
+            networkAssetsService[method]({
+                ...payload,
+                user: { uid: 'firebase-uid-1' }
+            })
+        ).rejects.toMatchObject({
+            name: 'AppError',
+            statusCode: 403,
+            code: 'MISSING_TENANT_CONTEXT'
+        });
+    });
+
     it('networkCreate validates payload and passes requestedBy through', async () => {
-        assetService.networkCreate.mockResolvedValue({ id: 'n-1' });
+        networkProvisioningService.provisionNetwork.mockResolvedValue({ networkId: 'n-1' });
 
         const result = await networkAssetsService.networkCreate({
             body: {
@@ -104,18 +127,15 @@ describe('backend/service/application/networkAssetsService', () => {
             user: { uid: 'firebase-uid-2' }
         });
 
-        expect(assetService.networkCreate).toHaveBeenCalledWith({
-            name: 'net-a',
-            description: 'desc',
-            orgs: [
-                {
-                    name: 'Org1',
-                    msp_ID: 'Org1MSP'
-                }
-            ],
-            requestedBy: 'firebase-uid-2'
-        });
-        expect(result).toEqual({ id: 'n-1' });
+        expect(networkProvisioningService.provisionNetwork).toHaveBeenCalledWith(
+            expect.objectContaining({
+                user_id: 'firebase-uid-2',
+                config: expect.objectContaining({
+                    name: 'net-a'
+                })
+            })
+        );
+        expect(result).toEqual({ orchestration: { networkId: 'n-1' } });
     });
 
     it('createAsset throws validation error for invalid payload', async () => {

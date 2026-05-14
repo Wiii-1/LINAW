@@ -3,7 +3,7 @@ const router = express.Router();
 const fabricController = require("../controllers/blockchainController.js");
 const assetRegistryController = require("../controllers/assetRegistryController.js");
 const approvalWorkflowController = require("../controllers/approvalWorkflowController.js");
-const organizationInviteController = require("../controllers/organizationInviteController");
+const organizationInviteController = require("../controllers/organizationInviteController")
 const authenticate = require("../middleware/authenticate");
 const { apiLimiter } = require("../middleware/rateLimiter");
 const uploadSubmissionFile = require("../middleware/uploadSubmissionFile.js");
@@ -11,6 +11,7 @@ const uploadSubmissionFile = require("../middleware/uploadSubmissionFile.js");
 router.use(apiLimiter, authenticate.decodeToken);
 
 // blockchain related routes
+
 
 router.post("/networks", fabricController.networkCreate);
 router.get("/networks/:network_id", fabricController.networkRead);
@@ -22,18 +23,9 @@ router.get("/channel/:channel_id/contracts", fabricController.contractReadAll);
 
 // member addition
 
-router.post(
-  "/organizations/:organization_id/invitations",
-  organizationInviteController.createInvite,
-);
-router.get(
-  "/organizations-invitations/:token",
-  organizationInviteController.getInviteByToken,
-);
-router.post(
-  "/organizations-invitations/:token/accept",
-  organizationInviteController.acceptInvite,
-);
+router.post("/organizations/:organization_id/invitations", organizationInviteController.createInvite)
+router.get("/organizations-invitations/:token",organizationInviteController.getInviteByToken)
+router.post("/organizations-invitations/:token/accept", organizationInviteController.acceptInvite)
 
 // asset registry
 router.post("/assets", assetRegistryController.createAsset);
@@ -71,18 +63,12 @@ router.patch(
   uploadSubmissionFile.single("file"),
   approvalWorkflowController.resubmitSubmission,
 );
-router.get(
-  "/submissions/:submissionId",
-  approvalWorkflowController.getSubmissionById,
-);
+router.get("/submissions/:submissionId", approvalWorkflowController.getSubmissionById);
 router.get(
   "/submissions/:submissionId/history",
   approvalWorkflowController.getSubmissionHistory,
 );
-router.delete(
-  "/submissions/:submissionId",
-  approvalWorkflowController.deleteSubmission,
-);
+router.delete("/submissions/:submissionId", approvalWorkflowController.deleteSubmission);
 
 // accounting contract
 

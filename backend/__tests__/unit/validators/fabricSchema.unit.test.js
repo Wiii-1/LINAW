@@ -3,8 +3,8 @@ const fabricSchema = require('../../../validators/fabric/fabricSchema');
 describe('backend/validators/fabric/fabricSchema', () => {
     it('createAssetSchema accepts valid payload', () => {
         const { error } = fabricSchema.createAssetSchema.validate({
+            params: { id: 'asset-1' },
             body: {
-                id: 'asset-1',
                 color: 'blue',
                 size: 1,
                 owner: 'alice',
@@ -37,9 +37,8 @@ describe('backend/validators/fabric/fabricSchema', () => {
 
     it('networkCreateSchema accepts a valid network payload', () => {
         const { error } = fabricSchema.networkCreateSchema.validate({
-            body: {
+            config: {
                 name: 'network-1',
-                description: 'desc',
                 orgs: [
                     {
                         name: 'Org1',
@@ -54,7 +53,7 @@ describe('backend/validators/fabric/fabricSchema', () => {
 
     it('networkCreateSchema rejects duplicate msp_ID entries', () => {
         const { error } = fabricSchema.networkCreateSchema.validate({
-            body: {
+            config: {
                 name: 'network-1',
                 orgs: [
                     { name: 'Org1', msp_ID: 'SameMSP' },

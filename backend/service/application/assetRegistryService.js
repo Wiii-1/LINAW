@@ -41,23 +41,21 @@ class assetRegistryService {
 
   async createAsset({ body, user }) {
     if (!user?.tenantId) {
-      throw new AppError(
-        "Tenant context required",
-        403,
-        "MISSING_TENANT_CONTEXT",
-      );
+      throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
     }
 
     const validated = this.validate("createAssetSchema", { body });
 
-    const { id, color, size, owner, appraisedValue } = validated.body;
+    // allow id to come from either body or params (backwards compatibility)
+    const id = validated.body.id || (validated.params && validated.params.id)
+    const { color, size, owner, appraisedValue } = validated.body;
 
     await assetRegistryDao.createAsset({
       id,
       tenantId: user.tenantId,
       color,
       size,
-      owner: user.uid,
+      owner: user.uid, 
       appraisedValue,
       requestedBy: user.uid,
     });
@@ -75,11 +73,7 @@ class assetRegistryService {
 
   async assetTransfer({ params, body, user }) {
     if (!user?.tenantId) {
-      throw new AppError(
-        "Tenant context required",
-        403,
-        "MISSING_TENANT_CONTEXT",
-      );
+      throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
     }
 
     const validated = this.validate("assetTransferSchema", { params, body });
@@ -104,11 +98,7 @@ class assetRegistryService {
 
   async assetUpdate({ params, body, user }) {
     if (!user?.tenantId) {
-      throw new AppError(
-        "Tenant context required",
-        403,
-        "MISSING_TENANT_CONTEXT",
-      );
+      throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
     }
 
     const validated = this.validate("assetUpdateSchema", { params, body });
@@ -139,11 +129,7 @@ class assetRegistryService {
 
   async assetDelete({ params, user }) {
     if (!user?.tenantId) {
-      throw new AppError(
-        "Tenant context required",
-        403,
-        "MISSING_TENANT_CONTEXT",
-      );
+      throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
     }
 
     const validated = this.validate("assetDeleteSchema", { params });
@@ -165,11 +151,7 @@ class assetRegistryService {
 
   async assetRead({ params, user }) {
     if (!user?.tenantId) {
-      throw new AppError(
-        "Tenant context required",
-        403,
-        "MISSING_TENANT_CONTEXT",
-      );
+      throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
     }
 
     const validated = this.validate("assetReadSchema", { params });
@@ -185,11 +167,7 @@ class assetRegistryService {
 
   async assetReadAll({ user }) {
     if (!user?.tenantId) {
-      throw new AppError(
-        "Tenant context required",
-        403,
-        "MISSING_TENANT_CONTEXT",
-      );
+      throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
     }
 
     return await assetService.assetReadAll({

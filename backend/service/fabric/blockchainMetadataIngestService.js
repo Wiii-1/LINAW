@@ -1,13 +1,13 @@
-const fs = require("fs-extra");
-const path = require("path");
-const yaml = require("js-yaml");
+const fs = require('fs-extra');
+const path = require('path');
+const yaml = require('js-yaml');
 
-const db = require("../../db/db");
-const AppError = require("../../utils/AppError");
-const { loadFabricConfig } = require("../../config/fabric/fabricConfig");
+const db = require('../../db/db');
+const AppError = require('../../utils/AppError');
+const { loadFabricConfig } = require('../../config/fabric/fabricConfig');
 
 function isNonEmptyString(value) {
-  return typeof value === "string" && value.trim().length > 0;
+  return typeof value === 'string' && value.trim().length > 0;
 }
 
 function normalizeString(value) {
@@ -56,16 +56,16 @@ async function readYamlOrJsonFile(filePath) {
     return null;
   }
 
-  const raw = await fs.readFile(absolutePath, "utf8");
+  const raw = await fs.readFile(absolutePath, 'utf8');
 
   try {
     const parsed = yaml.load(raw);
-    return parsed && typeof parsed === "object" ? parsed : null;
+    return parsed && typeof parsed === 'object' ? parsed : null;
   } catch (error) {
     throw new AppError(
       `Unable to parse Fabric metadata file ${absolutePath}: ${error.message}`,
       400,
-      "FABRIC_METADATA_PARSE_FAILED",
+      'FABRIC_METADATA_PARSE_FAILED',
       { filePath: absolutePath },
     );
   }
@@ -87,47 +87,37 @@ function collectOrganizationsFromConfigTx(configTx) {
     }
 
     for (const organization of section) {
-      if (!organization || typeof organization !== "object") {
+      if (!organization || typeof organization !== 'object') {
         continue;
       }
 
-      uniquePush(
-        organizations,
-        organization.Name || organization.name,
-        organization.ID || organization.Id || organization.id,
-      );
+      uniquePush(organizations, organization.Name || organization.name, organization.ID || organization.Id || organization.id);
     }
   }
 
   return organizations;
 }
 
-function collectOrganizationsFromConnectionProfile(
-  connectionProfile,
-  channelName,
-) {
+function collectOrganizationsFromConnectionProfile(connectionProfile, channelName) {
   const organizations = new Map();
   const profileOrganizations = connectionProfile?.organizations;
 
-  if (profileOrganizations && typeof profileOrganizations === "object") {
+  if (profileOrganizations && typeof profileOrganizations === 'object') {
     for (const [name, organization] of Object.entries(profileOrganizations)) {
-      if (!organization || typeof organization !== "object") {
+      if (!organization || typeof organization !== 'object') {
         continue;
       }
 
       uniquePush(
         organizations,
         organization.name || name,
-        organization.mspid ||
-          organization.mspId ||
-          organization.msp_id ||
-          organization.ID,
+        organization.mspid || organization.mspId || organization.msp_id || organization.ID,
       );
     }
   }
 
   const channels = connectionProfile?.channels;
-  if (channels && typeof channels === "object") {
+  if (channels && typeof channels === 'object') {
     const channelEntry = channelName ? channels[channelName] : null;
     const channelNames = channelEntry ? [channelName] : Object.keys(channels);
 
@@ -137,49 +127,27 @@ function collectOrganizationsFromConnectionProfile(
 
       if (Array.isArray(channelOrganizations)) {
         for (const organizationName of channelOrganizations) {
-          uniquePush(
-            organizations,
-            organizationName,
-            profileOrganizations?.[organizationName]?.mspid ||
-              profileOrganizations?.[organizationName]?.mspId ||
-              profileOrganizations?.[organizationName]?.msp_id,
-          );
+          uniquePush(organizations, organizationName, profileOrganizations?.[organizationName]?.mspid || profileOrganizations?.[organizationName]?.mspId || profileOrganizations?.[organizationName]?.msp_id);
         }
-      } else if (
-        channelOrganizations &&
-        typeof channelOrganizations === "object"
-      ) {
-        for (const [organizationName, organization] of Object.entries(
-          channelOrganizations,
-        )) {
+      } else if (channelOrganizations && typeof channelOrganizations === 'object') {
+        for (const [organizationName, organization] of Object.entries(channelOrganizations)) {
           uniquePush(
             organizations,
             organization?.name || organizationName,
-            organization?.mspid ||
-              organization?.mspId ||
-              organization?.msp_id ||
-              organization?.ID ||
-              profileOrganizations?.[organizationName]?.mspid ||
-              profileOrganizations?.[organizationName]?.mspId ||
-              profileOrganizations?.[organizationName]?.msp_id,
+            organization?.mspid || organization?.mspId || organization?.msp_id || organization?.ID || profileOrganizations?.[organizationName]?.mspid || profileOrganizations?.[organizationName]?.mspId || profileOrganizations?.[organizationName]?.msp_id,
           );
         }
       }
     }
   }
 
-  const clientOrganization = normalizeString(
-    connectionProfile?.client?.organization,
-  );
+  const clientOrganization = normalizeString(connectionProfile?.client?.organization);
   if (clientOrganization) {
     const clientOrg = profileOrganizations?.[clientOrganization];
     uniquePush(
       organizations,
       clientOrganization,
-      clientOrg?.mspid ||
-        clientOrg?.mspId ||
-        clientOrg?.msp_id ||
-        clientOrg?.ID,
+      clientOrg?.mspid || clientOrg?.mspId || clientOrg?.msp_id || clientOrg?.ID,
     );
   }
 
@@ -192,10 +160,7 @@ async function collectWorkspaceChannelName(workspacePath) {
   }
 
   const absoluteWorkspacePath = path.resolve(workspacePath);
-  const channelArtifactsDir = path.join(
-    absoluteWorkspacePath,
-    "channel-artifacts",
-  );
+  const channelArtifactsDir = path.join(absoluteWorkspacePath, 'channel-artifacts');
   const exists = await fs.pathExists(channelArtifactsDir);
   if (!exists) {
     return null;
@@ -203,11 +168,11 @@ async function collectWorkspaceChannelName(workspacePath) {
 
   const files = await fs.readdir(channelArtifactsDir);
   const txFiles = files
-    .filter((fileName) => fileName.toLowerCase().endsWith(".tx"))
+    .filter((fileName) => fileName.toLowerCase().endsWith('.tx'))
     .sort((left, right) => left.localeCompare(right));
 
   if (txFiles.length === 1) {
-    return path.basename(txFiles[0], ".tx");
+    return path.basename(txFiles[0], '.tx');
   }
 
   return null;
@@ -219,7 +184,7 @@ async function collectWorkspaceOrganizations(workspacePath) {
   }
 
   const absoluteWorkspacePath = path.resolve(workspacePath);
-  const configTxPath = path.join(absoluteWorkspacePath, "configtx.yaml");
+  const configTxPath = path.join(absoluteWorkspacePath, 'configtx.yaml');
   const configTx = await readYamlOrJsonFile(configTxPath);
 
   if (!configTx) {
@@ -242,7 +207,7 @@ function upsertRow(trx, tableName, conflictTarget, insertData, mergeData) {
     .insert(insertData)
     .onConflict(conflictTarget)
     .merge(mergeData)
-    .returning("*");
+    .returning('*');
 }
 
 function mapNetworkRow(row) {
@@ -277,11 +242,7 @@ class BlockchainMetadataIngestService {
     workspacePath,
   }) {
     if (!isNonEmptyString(tenantId)) {
-      throw new AppError(
-        "tenantId is required to sync Fabric metadata",
-        400,
-        "FABRIC_METADATA_TENANT_REQUIRED",
-      );
+      throw new AppError('tenantId is required to sync Fabric metadata', 400, 'FABRIC_METADATA_TENANT_REQUIRED');
     }
 
     const normalizedTenantId = tenantId.trim();
@@ -289,16 +250,9 @@ class BlockchainMetadataIngestService {
     const requestedNetworkName = normalizeString(networkName);
     const requestedChannelName = normalizeString(channelName);
     const normalizedWorkspacePath = normalizeString(workspacePath);
-    const normalizedConnectionProfilePath = normalizeString(
-      connectionProfilePath,
-    );
+    const normalizedConnectionProfilePath = normalizeString(connectionProfilePath);
 
-    const [
-      workspaceOrganizations,
-      connectionProfile,
-      workspaceChannelName,
-      fabricConfigFallback,
-    ] = await Promise.all([
+    const [workspaceOrganizations, connectionProfile, workspaceChannelName, fabricConfigFallback] = await Promise.all([
       collectWorkspaceOrganizations(normalizedWorkspacePath),
       readYamlOrJsonFile(normalizedConnectionProfilePath),
       collectWorkspaceChannelName(normalizedWorkspacePath),
@@ -308,17 +262,12 @@ class BlockchainMetadataIngestService {
     const resolvedNetworkName =
       requestedNetworkName ||
       normalizeString(connectionProfile?.name) ||
-      (normalizedWorkspacePath
-        ? normalizeString(path.basename(path.resolve(normalizedWorkspacePath)))
-        : null);
+      (normalizedWorkspacePath ? normalizeString(path.basename(path.resolve(normalizedWorkspacePath))) : null);
 
     const resolvedChannelName =
       requestedChannelName ||
       workspaceChannelName ||
-      normalizeString(
-        connectionProfile?.channels &&
-          Object.keys(connectionProfile.channels)[0],
-      ) ||
+      normalizeString(connectionProfile?.channels && Object.keys(connectionProfile.channels)[0]) ||
       normalizeString(fabricConfigFallback?.channel_name);
 
     const organizations = new Map();
@@ -329,10 +278,7 @@ class BlockchainMetadataIngestService {
       });
     }
 
-    const profileOrganizations = collectOrganizationsFromConnectionProfile(
-      connectionProfile,
-      resolvedChannelName,
-    );
+    const profileOrganizations = collectOrganizationsFromConnectionProfile(connectionProfile, resolvedChannelName);
     for (const [key, organization] of profileOrganizations.entries()) {
       const existing = organizations.get(key);
       if (!existing) {
@@ -350,25 +296,25 @@ class BlockchainMetadataIngestService {
 
     if (!resolvedNetworkName) {
       throw new AppError(
-        "Unable to resolve a Fabric network name from the provided metadata sources",
+        'Unable to resolve a Fabric network name from the provided metadata sources',
         400,
-        "FABRIC_METADATA_NETWORK_REQUIRED",
+        'FABRIC_METADATA_NETWORK_REQUIRED',
       );
     }
 
     if (!resolvedChannelName) {
       throw new AppError(
-        "Unable to resolve a Fabric channel name from the provided metadata sources",
+        'Unable to resolve a Fabric channel name from the provided metadata sources',
         400,
-        "FABRIC_METADATA_CHANNEL_REQUIRED",
+        'FABRIC_METADATA_CHANNEL_REQUIRED',
       );
     }
 
     if (organizations.size === 0) {
       throw new AppError(
-        "Unable to resolve Fabric organizations from the provided metadata sources",
+        'Unable to resolve Fabric organizations from the provided metadata sources',
         400,
-        "FABRIC_METADATA_ORGANIZATIONS_REQUIRED",
+        'FABRIC_METADATA_ORGANIZATIONS_REQUIRED',
       );
     }
 
@@ -376,8 +322,8 @@ class BlockchainMetadataIngestService {
       return await db.transaction(async (trx) => {
         const [networkRow] = await upsertRow(
           trx,
-          "blockchain_network",
-          ["tenant_id", "network_name"],
+          'blockchain_network',
+          ['tenant_id', 'network_name'],
           {
             tenant_id: normalizedTenantId,
             network_name: resolvedNetworkName,
@@ -386,18 +332,15 @@ class BlockchainMetadataIngestService {
             updated_at: trx.fn.now(),
           },
           {
-            created_by: trx.raw("COALESCE(??, EXCLUDED.??)", [
-              "created_by",
-              "created_by",
-            ]),
+            created_by: trx.raw('COALESCE(??, EXCLUDED.??)', ['created_by', 'created_by']),
             updated_at: trx.fn.now(),
           },
         );
 
         const [channelRow] = await upsertRow(
           trx,
-          "channel",
-          ["tenant_id", "channel_name"],
+          'channel',
+          ['tenant_id', 'channel_name'],
           {
             channel_id: resolvedChannelName,
             tenant_id: normalizedTenantId,
@@ -409,10 +352,7 @@ class BlockchainMetadataIngestService {
           },
           {
             network_id: networkRow.network_id,
-            created_by: trx.raw("COALESCE(??, EXCLUDED.??)", [
-              "created_by",
-              "created_by",
-            ]),
+            created_by: trx.raw('COALESCE(??, EXCLUDED.??)', ['created_by', 'created_by']),
             updated_at: trx.fn.now(),
           },
         );
@@ -437,8 +377,8 @@ class BlockchainMetadataIngestService {
 
           const [organizationRow] = await upsertRow(
             trx,
-            "organizations",
-            ["tenant_id", "organization_name"],
+            'organizations',
+            ['tenant_id', 'organization_name'],
             insertData,
             mergeData,
           );
@@ -458,9 +398,9 @@ class BlockchainMetadataIngestService {
       }
 
       throw new AppError(
-        error.message || "Failed to sync Fabric metadata",
+        error.message || 'Failed to sync Fabric metadata',
         500,
-        "FABRIC_METADATA_SYNC_FAILED",
+        'FABRIC_METADATA_SYNC_FAILED',
       );
     }
   }

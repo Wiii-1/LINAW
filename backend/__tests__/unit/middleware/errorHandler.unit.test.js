@@ -107,6 +107,56 @@ describe('backend/middleware/errorHandler', () => {
         });
     });
 
+    it('normalizes Multer file size errors', () => {
+        const req = makeReq();
+        const res = makeRes();
+        const next = vi.fn();
+
+        errorHandler(
+            {
+                name: 'MulterError',
+                code: 'LIMIT_FILE_SIZE',
+                message: 'File too large'
+            },
+            req,
+            res,
+            next
+        );
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({
+            error: {
+                code: 'FILE_TOO_LARGE',
+                message: 'File size exceeds 10MB limit'
+            }
+        });
+    });
+
+    it('normalizes Multer file count errors', () => {
+        const req = makeReq();
+        const res = makeRes();
+        const next = vi.fn();
+
+        errorHandler(
+            {
+                name: 'MulterError',
+                code: 'LIMIT_FILE_COUNT',
+                message: 'Too many files'
+            },
+            req,
+            res,
+            next
+        );
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({
+            error: {
+                code: 'TOO_MANY_FILES',
+                message: 'Too many files uploaded'
+            }
+        });
+    });
+
     it('calls next when headers already sent', () => {
         const req = makeReq();
         const res = makeRes(true);

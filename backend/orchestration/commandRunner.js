@@ -1,57 +1,89 @@
-const { spawn } = require("child_process");
+const { spawn } = require('child_process')
 
-function runCommand({ command, args = [], cwd, env = {} }) {
-  // Optional: runtime check for env type
-  if (typeof env !== "object" || Array.isArray(env)) {
-    throw new TypeError("env must be an object.");
-  }
+function normalizeEnvOverrides(envOverrides) {
+    if (envOverrides == null) return {}
 
-  return new Promise((resolve, reject) => {
-    const childEnv = { ...process.env, ...env };
+    if (Array.isArray(envOverrides)) {
+        throw new TypeError(
+            'env overrides must be an object (e.g. { KEY: "value" }); arrays are not supported'
+        )
+    }
 
-    const child = spawn(command, args, {
-      cwd,
-      env: childEnv,
-      shell: false,
-    });
+    if (typeof envOverrides !== 'object') {
+        throw new TypeError(
+            `env overrides must be an object; received ${typeof envOverrides}`
+        )
+    }
 
-    let stdout = "";
-    let stderr = "";
+    const normalized = {}
+    for (const [key, value] of Object.entries(envOverrides)) {
+        if (value === undefined || value === null) continue
+        normalized[key] = String(value)
+    }
+    return normalized
+}
 
-    child.stdout.on("data", (data) => {
-      stdout += data.toString();
-    });
+function runCommand ({ command, args = [], cwd, env, envOverrides } = {}) {
+    return new Promise((resolve, reject) => {
+        let finalEnvOverrides
+        try {
+            finalEnvOverrides = normalizeEnvOverrides(
+                envOverrides !== undefined ? envOverrides : env
+            )
+        } catch (error) {
+            reject({
+                type: 'invalid_env',
+                error,
+            })
+            return
+        }
 
-    child.stderr.on("data", (data) => {
-      stderr += data.toString();
-    });
+        const childEnv = { ...process.env, ...finalEnvOverrides }
 
-    child.on("error", (error) => {
-      reject({
-        type: "spawn_error",
-        error,
-      });
-    });
+        const child = spawn (command, args, {
+            cwd,
+            env: childEnv,
+            shell: false,
+        })
 
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve({
-          exitCode: code,
-          stdout,
-          stderr,
-        });
-      } else {
-        reject({
-          type: "non_zero_exit",
-          exitCode: code,
-          stdout,
-          stderr,
-        });
-      }
-    });
-  });
+        let stdout = ''
+        let stderr = ''
+
+        child.stdout.on('data', (data) => {
+            stdout += data.toString()
+        })
+
+        child.stderr.on('data', (data) => {
+            stderr += data.toString()
+        })
+
+        child.on('error', (error) => {
+            reject({
+                type: 'spawn_error',
+                error
+            })
+        })
+
+        child.on('close', (code) => {
+            if(code === 0 ) {
+                resolve({
+                    exitCode: code,
+                    stdout,
+                    stderr
+                })
+            } else {
+                reject({
+                    type: 'non_zero_exit',
+                    exitCode: code,
+                    stdout,
+                    stderr
+                })
+            }
+        })
+
+    })
 }
 
 module.exports = {
-  runCommand,
-};
+    runCommand
+}

@@ -3,6 +3,7 @@ const { userSchema } = require("../../validators/user");
 const AppError = require("../../utils/AppError");
 const disposableService = require("./disposableEmailService");
 const logger = require("../../utils/logger");
+const db = require("../../db/db");
 
 class ValidationError extends Error {
   constructor(message, details = []) {
@@ -16,6 +17,17 @@ class ValidationError extends Error {
 class UserService {
   constructor() {
     this.schemas = userSchema;
+  }
+
+  async createDefaultTenant(user_email) {
+    const baseName = (user_email || 'tenant').split('@')[0];
+    const tenantName = `${baseName}-tenant`;
+
+    const [tenant] = await db('tenants')
+      .insert({ tenant_name: tenantName })
+      .returning(['tenant_id']);
+
+    return tenant.tenant_id;
   }
 
   validate(schemaKey, data) {
@@ -33,20 +45,19 @@ class UserService {
     if (error) {
       throw new ValidationError(
         "Validation failed",
-        error.details.map((d) => d.message),
+        error.details.map((d) => ({
+          field: (d.context && (d.context.label || (d.path && d.path[0]))) || null,
+          message: d.message,
+        }))
       );
     }
 
     return value;
   }
 
-  async signup(body, user) {
+  async signup(body) {
     const validated = this.validate("signupSchema", { body });
     const { email } = validated.body;
-
-    if (!user?.uid) {
-      throw new AppError("User not authenticated", 401, "UNAUTHORIZED");
-    }
 
     let disposableCheck = null;
     try {
@@ -61,13 +72,8 @@ class UserService {
       throw new AppError(
         "Disposable email addresses are not allowed",
         400,
-        "DISPOSABLE_EMAIL_NOT_ALLOWED",
+        "DISPOSABLE_EMAIL_NOT_ALLOWED"
       );
-    }
-
-    const existingByFirebaseUid = await userDao.findByFirebaseUid(user.uid);
-    if (existingByFirebaseUid) {
-      return existingByFirebaseUid;
     }
 
     const existingByEmail = await userDao.findUserByEmail(email);
@@ -75,13 +81,16 @@ class UserService {
       throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
     }
 
-    return await this.syncAuthenticatedUser({
+    const tenant_id = await this.createDefaultTenant(email);
+
+    return {
       email,
-      firebase_uid: user.uid,
-    });
+      tenant_id,
+      message: "Signup request accepted",
+    };
   }
 
-  async syncAuthenticatedUser({ email, firebase_uid }) {
+  async syncAuthenticatedUser({ email, firebase_uid, tenant_id = null }) {
     if (!firebase_uid) {
       throw new AppError("User not authenticated", 401, "UNAUTHORIZED");
     }
@@ -91,21 +100,22 @@ class UserService {
     }
 
     const existingByFirebaseUid = await userDao.findByFirebaseUid(firebase_uid);
-    if (existingByFirebaseUid) {
-      return {
-        created: false,
-        user: existingByFirebaseUid,
-      };
-    }
+      if (existingByFirebaseUid) {
+        return {
+          created: false,
+          user: existingByFirebaseUid,
+        };
+      }
 
     const existingByEmail = await userDao.findUserByEmail(email);
-    if (existingByEmail) {
-      throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
-    }
+      if (existingByEmail) {
+        throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
+      }
 
     const createdUser = await userDao.signup({
       email,
       firebase_uid,
+      tenant_id,
     });
 
     return {
@@ -114,17 +124,13 @@ class UserService {
     };
   }
 
-  async login(body, user) {
-    const validated = this.validate("loginSchema", { body });
-    const { email } = validated.body;
-
-    if (!user?.uid) {
-      throw new AppError("User not authenticated", 401, "UNAUTHORIZED");
-    }
+  async login(email, user = {}) {
+    // validate email format via existing schema
+    this.validate("loginSchema", { body: { email } });
 
     const userRow = await userDao.login({
       email,
-      firebase_uid: user.uid,
+      firebase_uid: user?.uid,
     });
 
     return userRow;

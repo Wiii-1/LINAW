@@ -1,4 +1,4 @@
 module.exports = {
-  userSchema: require("./userSchema"),
-  addMemberSchema: require("./addMemberSchema"),
-};
+    userSchema: require('./userSchema'),
+    addMemberSchema: require('./addMemberSchema'),
+}

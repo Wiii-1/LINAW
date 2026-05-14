@@ -122,15 +122,13 @@ async function runInContainer(containerName, command) {
   } catch (error) {
     const statusCode = error?.code === 125 ? 400 : 500;
     throw new AppError(
-      error?.stderr?.trim() ||
-        error?.message ||
-        "Unable to run container command",
+      error?.stderr?.trim() || error?.message || "Unable to run container command",
       statusCode,
       "CONTAINER_COMMAND_FAILED",
       {
         stdout: error?.stdout ?? "",
         stderr: error?.stderr ?? "",
-        exitCode: error?.code,
+        exitCode: error?.code,  
         dockerCmd,
       },
     );
