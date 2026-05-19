@@ -13,12 +13,62 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Field, FieldGroup } from "@/components/ui/field"
+import { Field, FieldDescription, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import OrganizationsDataTable, {
   type TenantRow,
 } from "@/components/ui/organizations-data-table"
+
+const INVALID_CHARACTER_RULES = [
+  { character: ":", label: "colon" },
+  { character: "@", label: "at sign" },
+  { character: "/", label: "forward slash" },
+  { character: ";", label: "semicolon" },
+  { character: "&", label: "ampersand" },
+  { character: "|", label: "pipe" },
+  { character: "`", label: "backtick" },
+  { character: "$", label: "dollar sign" },
+  { character: "(", label: "left parenthesis" },
+  { character: ")", label: "right parenthesis" },
+  { character: "\\", label: "backslash" },
+  { character: '"', label: "double quote" },
+  { character: "'", label: "single quote" },
+  { character: " ", label: "space" },
+] as const
+
+function getInvalidCharacters(value: string): string[] {
+  const invalidCharacters = new Set<string>()
+
+  for (const rule of INVALID_CHARACTER_RULES) {
+    if (value.includes(rule.character)) {
+      invalidCharacters.add(rule.label)
+    }
+  }
+
+  if (/\t/.test(value)) {
+    invalidCharacters.add("tab")
+  }
+
+  if (/\n|\r/.test(value)) {
+    invalidCharacters.add("newline")
+  }
+
+  return [...invalidCharacters]
+}
+
+function getInputValidationMessage(value: string): string | null {
+  if (!value || value.length === 0) return "required"
+  if (value.startsWith("-")) return "must not start with '-'"
+
+  const invalidCharacters = getInvalidCharacters(value)
+  if (invalidCharacters.length > 0) {
+    return `Contains invalid characters: ${invalidCharacters.join(", ")}`
+  }
+
+  return null
+}
 
 interface Tenant extends TenantRow {
   errorMessage?: string
@@ -75,14 +125,7 @@ export default function Organizations() {
   }, [backendUrl])
 
   function isInvalidInput(value: string): string | null {
-    if (!value || value.length === 0) return "required"
-    if (value.startsWith("-")) return "must not start with '-'"
-    if (value.includes(":")) return "must not include ':'"
-    if (value.includes("@")) return "must not include '@'"
-    if (value.includes("/")) return "must not include '/'"
-    const dangerousChars = /[;&|`$()\\"'\s]/
-    if (dangerousChars.test(value)) return "contains invalid characters"
-    return null
+    return getInputValidationMessage(value)
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -197,6 +240,17 @@ export default function Organizations() {
     }
   }
 
+  const tenantNameError =
+    tenantName.length > 0 ? isInvalidInput(tenantName) : null
+  const tlsAdminUserError =
+    tlsAdminUser.length > 0 ? isInvalidInput(tlsAdminUser) : null
+  const tlsAdminPasswordError =
+    tlsAdminPassword.length > 0 ? isInvalidInput(tlsAdminPassword) : null
+  const orgAdminUserError =
+    orgAdminUser.length > 0 ? isInvalidInput(orgAdminUser) : null
+  const orgAdminPasswordError =
+    orgAdminPassword.length > 0 ? isInvalidInput(orgAdminPassword) : null
+
   return (
     <SidebarProvider
       style={
@@ -215,18 +269,18 @@ export default function Organizations() {
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button type="button" variant="outline">
-                    Create Tenant Organization
+                    Create Certificate Authority
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <form onSubmit={handleSubmit} noValidate>
                     <DialogHeader>
                       <DialogTitle className="text-center">
-                        Create Tenant Organization
+                        Create Certificate Authority
                       </DialogTitle>
                       <DialogDescription className="text-center">
-                        Provision your organization's root TLS and Signing
-                        certificate authority
+                        Provision your root TLS and Signing certificate
+                        authority
                       </DialogDescription>
                     </DialogHeader>
 
@@ -244,8 +298,14 @@ export default function Organizations() {
                           name="tenantName"
                           value={tenantName}
                           onChange={(e) => setTenantName(e.target.value)}
+                          aria-invalid={Boolean(tenantNameError)}
                           required
                         />
+                        {tenantNameError ? (
+                          <FieldDescription className="text-destructive">
+                            {tenantNameError}
+                          </FieldDescription>
+                        ) : null}
                       </Field>
 
                       <div className="border-t pt-4">
@@ -258,23 +318,34 @@ export default function Organizations() {
                             name="tlsAdminUser"
                             value={tlsAdminUser}
                             onChange={(e) => setTlsAdminUser(e.target.value)}
+                            aria-invalid={Boolean(tlsAdminUserError)}
                             required
                           />
+                          {tlsAdminUserError ? (
+                            <FieldDescription className="text-destructive">
+                              {tlsAdminUserError}
+                            </FieldDescription>
+                          ) : null}
                         </Field>
                         <Field className="space-y-2">
                           <Label htmlFor="tlsAdminPassword">
                             TLS Admin Password
                           </Label>
-                          <Input
+                          <PasswordInput
                             id="tlsAdminPassword"
                             name="tlsAdminPassword"
-                            type="password"
                             value={tlsAdminPassword}
                             onChange={(e) =>
                               setTlsAdminPassword(e.target.value)
                             }
+                            aria-invalid={Boolean(tlsAdminPasswordError)}
                             required
                           />
+                          {tlsAdminPasswordError ? (
+                            <FieldDescription className="text-destructive">
+                              {tlsAdminPasswordError}
+                            </FieldDescription>
+                          ) : null}
                         </Field>
                       </div>
 
@@ -288,23 +359,34 @@ export default function Organizations() {
                             name="orgAdminUser"
                             value={orgAdminUser}
                             onChange={(e) => setOrgAdminUser(e.target.value)}
+                            aria-invalid={Boolean(orgAdminUserError)}
                             required
                           />
+                          {orgAdminUserError ? (
+                            <FieldDescription className="text-destructive">
+                              {orgAdminUserError}
+                            </FieldDescription>
+                          ) : null}
                         </Field>
                         <Field className="space-y-2">
                           <Label htmlFor="orgAdminPassword">
                             Org Admin Password
                           </Label>
-                          <Input
+                          <PasswordInput
                             id="orgAdminPassword"
                             name="orgAdminPassword"
-                            type="password"
                             value={orgAdminPassword}
                             onChange={(e) =>
                               setOrgAdminPassword(e.target.value)
                             }
+                            aria-invalid={Boolean(orgAdminPasswordError)}
                             required
                           />
+                          {orgAdminPasswordError ? (
+                            <FieldDescription className="text-destructive">
+                              {orgAdminPasswordError}
+                            </FieldDescription>
+                          ) : null}
                         </Field>
                       </div>
                     </FieldGroup>
