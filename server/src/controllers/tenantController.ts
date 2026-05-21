@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { validateTenantProvisionRequest } from "../model/tenantModel.js";
 import { encryptValue } from "../service/encryptionService.js";
 import { TenantCaOrchestrator } from "../service/tenantCaOrchestratorService.js";
+import { allocateTenantPorts } from "../service/tenantPortAllocator.js";
 import { join } from "path";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
@@ -38,6 +39,17 @@ type TenantRecord = {
 };
 
 const tenantStore = new Map<string, TenantRecord>();
+
+function collectReservedPorts(): number[] {
+  const ports: number[] = [];
+  for (const tenant of tenantStore.values()) {
+    if (tenant.tlsCaPort !== undefined) ports.push(tenant.tlsCaPort);
+    if (tenant.orgCaPort !== undefined) ports.push(tenant.orgCaPort);
+    if (tenant.tlsCaOpsPort !== undefined) ports.push(tenant.tlsCaOpsPort);
+    if (tenant.orgCaOpsPort !== undefined) ports.push(tenant.orgCaOpsPort);
+  }
+  return ports;
+}
 
 function getTenantIdParam(req: Request): string {
   const tenantId = req.params["tenantId"];
@@ -225,14 +237,14 @@ async function provisionTenantAsync(
 ): Promise<void> {
   orchestrator.init();
 
+  const activeTenantIds = new Set(tenantStore.keys());
+  orchestrator.cleanupStaleCaContainers(activeTenantIds);
+
   try {
-    // Allocate ports
-    const ports = {
-      tlsCaPort: 7054 + Math.floor(Math.random() * 100),
-      orgCaPort: 8054 + Math.floor(Math.random() * 100),
-      tlsCaOpsPort: 17054 + Math.floor(Math.random() * 100),
-      orgCaOpsPort: 18054 + Math.floor(Math.random() * 100),
-    };
+    const ports = await allocateTenantPorts(collectReservedPorts());
+    console.log(
+      `[${tenantId}] Allocated ports: tls=${ports.tlsCaPort}, org=${ports.orgCaPort}, tlsOps=${ports.tlsCaOpsPort}, orgOps=${ports.orgCaOpsPort}`,
+    );
 
     const config = {
       tenantId,
