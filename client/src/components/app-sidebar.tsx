@@ -15,6 +15,9 @@ import {
   ChartBarIcon,
   UsersIcon,
   ScrollText,
+  PackageIcon,
+  ClipboardListIcon,
+  NetworkIcon,
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
@@ -39,6 +42,21 @@ const navMainData = [
     title: "Analytics",
     url: "/analytics",
     icon: <ChartBarIcon />,
+  },
+  {
+    title: "Asset Registry",
+    url: "/asset",
+    icon: <PackageIcon />,
+  },
+  {
+    title: "Submissions",
+    url: "/submissions",
+    icon: <ClipboardListIcon />,
+  },
+  {
+    title: "Blockchain Networks",
+    url: "/networks",
+    icon: <NetworkIcon />,
   },
 ]
 

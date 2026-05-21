@@ -81,13 +81,20 @@ class UserService {
       throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
     }
 
-    const tenant_id = await this.createDefaultTenant(email);
+    const tenantId = user?.tenantId || null;
 
-    return {
+    // If no tenantId provided in token, create a default tenant for this user
+    let assignedTenantId = tenantId;
+    if (!assignedTenantId) {
+      assignedTenantId = await this.createDefaultTenant(email);
+    }
+
+
+    return await this.syncAuthenticatedUser({
       email,
       tenant_id,
       message: "Signup request accepted",
-    };
+    })
   }
 
   async syncAuthenticatedUser({ email, firebase_uid, tenant_id = null }) {

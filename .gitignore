@@ -25,4 +25,6 @@ solution.md
 /*.yml
 .env
 /graphify-out
-/backend/vault/
+/tenants
+GUIDEREADME.md
+BACKEND_FRONTEND.md

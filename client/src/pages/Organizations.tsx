@@ -1,7 +1,7 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { type CSSProperties, useState } from "react"
+import { type CSSProperties, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,70 +13,162 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Field, FieldGroup } from "@/components/ui/field"
+import { Field, FieldDescription, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
+import OrganizationsDataTable, {
+  type TenantRow,
+} from "@/components/ui/organizations-data-table"
+
+const INVALID_CHARACTER_RULES = [
+  { character: ":", label: "colon" },
+  { character: "@", label: "at sign" },
+  { character: "/", label: "forward slash" },
+  { character: ";", label: "semicolon" },
+  { character: "&", label: "ampersand" },
+  { character: "|", label: "pipe" },
+  { character: "`", label: "backtick" },
+  { character: "$", label: "dollar sign" },
+  { character: "(", label: "left parenthesis" },
+  { character: ")", label: "right parenthesis" },
+  { character: "\\", label: "backslash" },
+  { character: '"', label: "double quote" },
+  { character: "'", label: "single quote" },
+  { character: " ", label: "space" },
+] as const
+
+function getInvalidCharacters(value: string): string[] {
+  const invalidCharacters = new Set<string>()
+
+  for (const rule of INVALID_CHARACTER_RULES) {
+    if (value.includes(rule.character)) {
+      invalidCharacters.add(rule.label)
+    }
+  }
+
+  if (/\t/.test(value)) {
+    invalidCharacters.add("tab")
+  }
+
+  if (/\n|\r/.test(value)) {
+    invalidCharacters.add("newline")
+  }
+
+  return [...invalidCharacters]
+}
+
+function getInputValidationMessage(value: string): string | null {
+  if (!value || value.length === 0) return "required"
+  if (value.startsWith("-")) return "must not start with '-'"
+
+  const invalidCharacters = getInvalidCharacters(value)
+  if (invalidCharacters.length > 0) {
+    return `Contains invalid characters: ${invalidCharacters.join(", ")}`
+  }
+
+  return null
+}
+
+interface Tenant extends TenantRow {
+  errorMessage?: string
+}
 
 export default function Organizations() {
-  const [orgUser, setOrgUser] = useState("")
-  const [orgPassword, setOrgPassword] = useState("")
-  const [caname, setCaname] = useState("")
+  const [tenantName, setTenantName] = useState("")
+  const [tlsAdminUser, setTlsAdminUser] = useState("")
+  const [tlsAdminPassword, setTlsAdminPassword] = useState("")
+  const [orgAdminUser, setOrgAdminUser] = useState("")
+  const [orgAdminPassword, setOrgAdminPassword] = useState("")
+
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [tenants, setTenants] = useState<Tenant[]>([])
+  const [loadingTenants, setLoadingTenants] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  function isInvalidToken(value: string): string | null {
-    if (!value || value.length === 0) return "required"
-    if (value.startsWith("-")) return "must not start with '-'"
-    if (value.includes(":")) return "must not include ':'"
-    const dangerousChars = /[;&|`$()\\"'\s]/
-    if (dangerousChars.test(value)) return "contains invalid characters"
-    return null
+  const backendUrl = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3000"
+  const tenantsSignatureRef = useRef("")
+
+  useEffect(() => {
+    const loadTenants = async (options?: { silent?: boolean }) => {
+      const silent = options?.silent ?? false
+      try {
+        if (!silent) {
+          setLoadingTenants(true)
+        }
+
+        const response = await fetch(`${backendUrl}/api/tenants`)
+        if (response.ok) {
+          const data = (await response.json()) as { tenants: Tenant[] }
+          const nextSignature = JSON.stringify(data.tenants)
+          if (nextSignature !== tenantsSignatureRef.current) {
+            tenantsSignatureRef.current = nextSignature
+            setTenants(data.tenants)
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load tenants:", err)
+      } finally {
+        if (!silent) {
+          setLoadingTenants(false)
+        }
+      }
+    }
+
+    loadTenants()
+    const interval = setInterval(() => {
+      void loadTenants({ silent: true })
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [backendUrl])
+
+  function isInvalidInput(value: string): string | null {
+    return getInputValidationMessage(value)
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
+
     const fields = [
-      { v: orgUser, name: "Admin username" },
-      { v: orgPassword, name: "Admin password" },
+      { v: tenantName, name: "Tenant name" },
+      { v: tlsAdminUser, name: "TLS admin username" },
+      { v: tlsAdminPassword, name: "TLS admin password" },
+      { v: orgAdminUser, name: "Org admin username" },
+      { v: orgAdminPassword, name: "Org admin password" },
     ]
+
     for (const f of fields) {
-      const bad = isInvalidToken(f.v)
+      const bad = isInvalidInput(f.v)
       if (bad) {
         setError(`${f.name} ${bad}`)
         return
       }
     }
-    if (caname) {
-      const bad = isInvalidToken(caname)
-      if (bad) {
-        setError(`CA name ${bad}`)
-        return
-      }
-    }
-
-    const backendUrl =
-      import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3000"
 
     setLoading(true)
     try {
-      const response = await fetch(`${backendUrl}/api/fabric-ca-server/init`, {
+      const response = await fetch(`${backendUrl}/api/tenants`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          containerName: orgUser,
-          orgUser,
-          orgPassword,
-          caname,
+          tenantName,
+          tlsAdminUser,
+          tlsAdminPassword,
+          orgAdminUser,
+          orgAdminPassword,
         }),
       })
+
       if (!response.ok) {
         let backendMessage = ""
         try {
           const payload = (await response.json()) as { error?: string }
           backendMessage = payload.error ?? ""
         } catch {
-          // Ignore JSON parse errors and fall back to status text.
+          // Ignore parse errors
         }
 
         setError(
@@ -86,9 +178,19 @@ export default function Organizations() {
         return
       }
 
-      setOrgUser("")
-      setOrgPassword("")
-      setCaname("")
+      setTenantName("")
+      setTlsAdminUser("")
+      setTlsAdminPassword("")
+      setOrgAdminUser("")
+      setOrgAdminPassword("")
+      setIsDialogOpen(false)
+
+      const listResponse = await fetch(`${backendUrl}/api/tenants`)
+      if (listResponse.ok) {
+        const data = (await listResponse.json()) as { tenants: Tenant[] }
+        tenantsSignatureRef.current = JSON.stringify(data.tenants)
+        setTenants(data.tenants)
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Network error"
       setError(`Request failed: ${message}`)
@@ -96,6 +198,58 @@ export default function Organizations() {
       setLoading(false)
     }
   }
+
+  async function handleDeleteTenant(tenantId: string) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this tenant? This action cannot be undone."
+      )
+    ) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${backendUrl}/api/tenants/${tenantId}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        let backendMessage = ""
+        try {
+          const payload = (await response.json()) as { error?: string }
+          backendMessage = payload.error ?? ""
+        } catch {
+          // Ignore parse errors
+        }
+        alert(
+          backendMessage ||
+            `Delete failed (${response.status} ${response.statusText})`
+        )
+        return
+      }
+
+      const listResponse = await fetch(`${backendUrl}/api/tenants`)
+      if (listResponse.ok) {
+        const data = (await listResponse.json()) as { tenants: Tenant[] }
+        tenantsSignatureRef.current = JSON.stringify(data.tenants)
+        setTenants(data.tenants)
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Network error"
+      alert(`Delete failed: ${message}`)
+    }
+  }
+
+  const tenantNameError =
+    tenantName.length > 0 ? isInvalidInput(tenantName) : null
+  const tlsAdminUserError =
+    tlsAdminUser.length > 0 ? isInvalidInput(tlsAdminUser) : null
+  const tlsAdminPasswordError =
+    tlsAdminPassword.length > 0 ? isInvalidInput(tlsAdminPassword) : null
+  const orgAdminUserError =
+    orgAdminUser.length > 0 ? isInvalidInput(orgAdminUser) : null
+  const orgAdminPasswordError =
+    orgAdminPassword.length > 0 ? isInvalidInput(orgAdminPassword) : null
 
   return (
     <SidebarProvider
@@ -111,63 +265,132 @@ export default function Organizations() {
         <SiteHeader title="Organizations" />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 md:px-6">
-              <Dialog>
+            <div className="flex flex-col gap-4 px-4 py-4 md:gap-6 md:px-6 md:py-6">
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button type="button" variant="outline">
-                    Create Organization
+                    Create Certificate Authority
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-sm">
+                <DialogContent className="sm:max-w-md">
                   <form onSubmit={handleSubmit} noValidate>
                     <DialogHeader>
-                      <DialogTitle>Create Organization</DialogTitle>
-                      <DialogDescription>
-                        Make changes to your organization credentials here.
-                        Click save when you&apos;re done.
+                      <DialogTitle className="text-center">
+                        Create Certificate Authority
+                      </DialogTitle>
+                      <DialogDescription className="text-center">
+                        Provision your root TLS and Signing certificate
+                        authority
                       </DialogDescription>
                     </DialogHeader>
+
                     {error ? (
                       <div className="max-h-28 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm wrap-break-word whitespace-pre-wrap text-red-700">
                         {error}
                       </div>
                     ) : null}
+
                     <FieldGroup className="gap-4 py-4">
                       <Field className="space-y-2">
-                        <Label htmlFor="orgUser">Admin Username</Label>
+                        <Label htmlFor="tenantName">Tenant Name</Label>
                         <Input
-                          id="orgUser"
-                          name="orgUser"
-                          value={orgUser}
-                          onChange={(e) => {
-                            setOrgUser(e.target.value)
-                          }}
+                          id="tenantName"
+                          name="tenantName"
+                          value={tenantName}
+                          onChange={(e) => setTenantName(e.target.value)}
+                          aria-invalid={Boolean(tenantNameError)}
                           required
                         />
+                        {tenantNameError ? (
+                          <FieldDescription className="text-destructive">
+                            {tenantNameError}
+                          </FieldDescription>
+                        ) : null}
                       </Field>
-                      <Field className="space-y-2">
-                        <Label htmlFor="orgPassword">Admin Password</Label>
-                        <Input
-                          id="orgPassword"
-                          name="orgPassword"
-                          type="password"
-                          value={orgPassword}
-                          onChange={(e) => setOrgPassword(e.target.value)}
-                          required
-                        />
-                      </Field>
-                      <Field className="space-y-2">
-                        <Label htmlFor="caname">
-                          Certificate Authority Name (optional)
-                        </Label>
-                        <Input
-                          id="caname"
-                          name="caname"
-                          value={caname}
-                          onChange={(e) => setCaname(e.target.value)}
-                        />
-                      </Field>
+
+                      <div className="border-t pt-4">
+                        <Field className="mb-3 space-y-2">
+                          <Label htmlFor="tlsAdminUser">
+                            TLS Admin Username
+                          </Label>
+                          <Input
+                            id="tlsAdminUser"
+                            name="tlsAdminUser"
+                            value={tlsAdminUser}
+                            onChange={(e) => setTlsAdminUser(e.target.value)}
+                            aria-invalid={Boolean(tlsAdminUserError)}
+                            required
+                          />
+                          {tlsAdminUserError ? (
+                            <FieldDescription className="text-destructive">
+                              {tlsAdminUserError}
+                            </FieldDescription>
+                          ) : null}
+                        </Field>
+                        <Field className="space-y-2">
+                          <Label htmlFor="tlsAdminPassword">
+                            TLS Admin Password
+                          </Label>
+                          <PasswordInput
+                            id="tlsAdminPassword"
+                            name="tlsAdminPassword"
+                            value={tlsAdminPassword}
+                            onChange={(e) =>
+                              setTlsAdminPassword(e.target.value)
+                            }
+                            aria-invalid={Boolean(tlsAdminPasswordError)}
+                            required
+                          />
+                          {tlsAdminPasswordError ? (
+                            <FieldDescription className="text-destructive">
+                              {tlsAdminPasswordError}
+                            </FieldDescription>
+                          ) : null}
+                        </Field>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <Field className="mb-3 space-y-2">
+                          <Label htmlFor="orgAdminUser">
+                            Org Admin Username
+                          </Label>
+                          <Input
+                            id="orgAdminUser"
+                            name="orgAdminUser"
+                            value={orgAdminUser}
+                            onChange={(e) => setOrgAdminUser(e.target.value)}
+                            aria-invalid={Boolean(orgAdminUserError)}
+                            required
+                          />
+                          {orgAdminUserError ? (
+                            <FieldDescription className="text-destructive">
+                              {orgAdminUserError}
+                            </FieldDescription>
+                          ) : null}
+                        </Field>
+                        <Field className="space-y-2">
+                          <Label htmlFor="orgAdminPassword">
+                            Org Admin Password
+                          </Label>
+                          <PasswordInput
+                            id="orgAdminPassword"
+                            name="orgAdminPassword"
+                            value={orgAdminPassword}
+                            onChange={(e) =>
+                              setOrgAdminPassword(e.target.value)
+                            }
+                            aria-invalid={Boolean(orgAdminPasswordError)}
+                            required
+                          />
+                          {orgAdminPasswordError ? (
+                            <FieldDescription className="text-destructive">
+                              {orgAdminPasswordError}
+                            </FieldDescription>
+                          ) : null}
+                        </Field>
+                      </div>
                     </FieldGroup>
+
                     <DialogFooter>
                       <DialogClose asChild>
                         <Button variant="destructive" className="sm:mr-auto">
@@ -175,12 +398,24 @@ export default function Organizations() {
                         </Button>
                       </DialogClose>
                       <Button type="submit" disabled={loading}>
-                        {loading ? "Submitting..." : "Save changes"}
+                        {loading ? "Provisioning..." : "Create Tenant"}
                       </Button>
                     </DialogFooter>
                   </form>
                 </DialogContent>
               </Dialog>
+
+              <OrganizationsDataTable
+                tenants={tenants}
+                loadingTenants={loadingTenants}
+                onDeleteTenant={handleDeleteTenant}
+              />
+
+              {tenants.length > 0 && (
+                <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
+                  Total Certificate Authorities: {tenants.length}
+                </div>
+              )}
             </div>
           </div>
         </div>

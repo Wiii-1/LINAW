@@ -3,6 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { lazy, Suspense } from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 
+
 const AuthenticationRoute = lazy(() => import("./pages/AuthenticationRoute"))
 const AuthenticationRouteReversed = lazy(
   () => import("./pages/AuthenticationRouteReversed")
@@ -16,6 +17,9 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"))
 const Organizations = lazy(() => import("./pages/Organizations"))
 const SmartContracts = lazy(() => import("./pages/SmartContracts"))
 const Analytics = lazy(() => import("./pages/Analytics"))
+const Asset = lazy(() => import("./pages/AssetRegistry"))
+const Submissions = lazy(() => import("./pages/ApprovalWorkflow"))
+const Blockchain = lazy(() => import("./pages/BlockchainNetworks"))
 const Account = lazy(() => import("./pages/Account"))
 const Settings = lazy(() => import("./pages/Settings"))
 
@@ -79,6 +83,30 @@ export function App() {
               element={
                 <AuthenticationRoute>
                   <Analytics />
+                </AuthenticationRoute>
+              }
+            />
+            <Route
+              path="/asset"
+              element={
+                <AuthenticationRoute>
+                  <Asset />
+                </AuthenticationRoute>
+              }
+            />
+            <Route
+              path="/submissions"
+              element={
+                <AuthenticationRoute>
+                  <Submissions />
+                </AuthenticationRoute>
+              }
+            />
+            <Route
+              path="/networks"
+              element={
+                <AuthenticationRoute>
+                  <Blockchain />
                 </AuthenticationRoute>
               }
             />
