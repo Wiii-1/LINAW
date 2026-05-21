@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
-import { join } from "path";
+import { basename, join } from "path";
 import { fileURLToPath } from "url";
 import { FabricCaApiClient } from "./fabricCaApiClient.js";
 import forge from "node-forge";
@@ -83,6 +83,10 @@ export class TenantCaOrchestrator {
       /{ORG_ADMIN_PASSWORD}/g,
       config.orgAdminPassword,
     );
+    const hostUid = process.getuid?.() ?? 0;
+    const hostGid = process.getgid?.() ?? 0;
+    template = template.replace(/{HOST_UID}/g, hostUid.toString());
+    template = template.replace(/{HOST_GID}/g, hostGid.toString());
 
     const composePath = join(TENANTS_DIR, `compose-${config.tenantId}.yml`);
     writeFileSync(composePath, template);
@@ -125,6 +129,14 @@ export class TenantCaOrchestrator {
 
       console.log(`[${config.tenantId}] Containers started and healthy`);
     } catch (error) {
+      try {
+        await this.stopTenantCA(config.tenantId);
+      } catch (cleanupError) {
+        console.error(
+          `[${config.tenantId}] Rollback after failed start:`,
+          cleanupError,
+        );
+      }
       throw new Error(
         `Failed to start tenant CA: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -238,15 +250,123 @@ export class TenantCaOrchestrator {
         rmSync(composePath);
       }
 
-      const tenantDir = join(TENANTS_DIR, tenantId);
-      if (existsSync(tenantDir)) {
-        rmSync(tenantDir, { recursive: true, force: true });
-      }
+      this.forceStopTenantContainers(tenantId);
+      this.removeTenantDirectory(tenantId);
 
       console.log(`[${tenantId}] Containers stopped and cleaned up`);
     } catch (error) {
       throw new Error(
         `Failed to stop tenant CA: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  /**
+   * Stop CA containers by name when compose metadata is missing or incomplete.
+   */
+  private forceStopTenantContainers(tenantId: string): void {
+    const safeTenantId = basename(tenantId);
+    if (safeTenantId !== tenantId || tenantId.includes("..")) {
+      return;
+    }
+
+    for (const containerName of [
+      `tls-ca-${safeTenantId}`,
+      `org-ca-${safeTenantId}`,
+    ]) {
+      try {
+        execSync(`docker rm -f ${containerName}`, { stdio: "ignore" });
+      } catch {
+        // Container may not exist
+      }
+    }
+  }
+
+  /**
+   * Remove CA containers for tenants that are no longer tracked (e.g. after server restart).
+   */
+  cleanupStaleCaContainers(activeTenantIds: Set<string>): void {
+    try {
+      const output = execSync(
+        'docker ps -aq --filter "label=service=hyperledger-fabric"',
+        { encoding: "utf-8" },
+      );
+      const containerIds = output
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+      for (const containerId of containerIds) {
+        let tenantLabel = "";
+        try {
+          tenantLabel = execSync(
+            `docker inspect -f '{{index .Config.Labels "tenant"}}' ${containerId}`,
+            { encoding: "utf-8" },
+          ).trim();
+        } catch {
+          continue;
+        }
+
+        if (!tenantLabel || activeTenantIds.has(tenantLabel)) {
+          continue;
+        }
+
+        console.log(
+          `[cleanup] Removing stale CA container ${containerId} (tenant=${tenantLabel})`,
+        );
+        try {
+          execSync(`docker rm -f ${containerId}`, { stdio: "inherit" });
+        } catch (error) {
+          console.error(
+            `[cleanup] Failed to remove container ${containerId}:`,
+            error,
+          );
+        }
+      }
+    } catch (error) {
+      console.error("[cleanup] Failed to list stale CA containers:", error);
+    }
+  }
+
+  /**
+   * Remove tenant data directory. Docker bind mounts may leave root-owned files.
+   */
+  private removeTenantDirectory(tenantId: string): void {
+    const safeTenantId = basename(tenantId);
+    if (safeTenantId !== tenantId || tenantId.includes("..")) {
+      throw new Error(`Invalid tenant id: ${tenantId}`);
+    }
+
+    const tenantDir = join(TENANTS_DIR, safeTenantId);
+    if (!existsSync(tenantDir)) {
+      return;
+    }
+
+    try {
+      rmSync(tenantDir, { recursive: true, force: true });
+      return;
+    } catch (error) {
+      const err = error as NodeJS.ErrnoException;
+      if (err.code !== "EACCES" && err.code !== "EPERM") {
+        throw error;
+      }
+    }
+
+    console.log(
+      `[${tenantId}] Removing root-owned tenant directory via Docker...`,
+    );
+    const cmd = `docker run --rm -v "${TENANTS_DIR}:/tenants:rw" alpine rm -rf "/tenants/${safeTenantId}"`;
+    try {
+      execSync(cmd, { stdio: "inherit" });
+    } catch (error) {
+      throw new Error(
+        `Could not remove tenant data; root-owned files may remain at ${tenantDir}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+
+    if (existsSync(tenantDir)) {
+      throw new Error(
+        `Could not remove tenant data; root-owned files remain at ${tenantDir}`,
       );
     }
   }
