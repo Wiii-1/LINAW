@@ -4,6 +4,7 @@ const AppError = require("../../utils/AppError")
 const organizationDao = require("../../dao/organizations/organizationDao");
 const organizationUserDao = require("../../dao/organizations/organziationUserDao");
 const organizationInviteDao = require("../../dao/organizations/organizationInviteDao");
+const db = require("../../db/db")
 const userDao = require("../../dao/userDao");
 
 function buildInviteLink(rawToken) {
@@ -87,15 +88,24 @@ class organizationInviteService {
 
     async listOrganizations({ tenant_id, firebaseUid }) {
         if (!firebaseUid) {
-            throw new AppError('Authentication required', 401, 'UNAUTHORIZED')
+            throw new AppError('Authentication required', 401, 'UNAUTHORIZED');
         }
 
-        const dbUser = await userDao.findByFirebaseUid(firebaseUid)
+        const dbUser = await userDao.findByFirebaseUid(firebaseUid);
         if (!dbUser) {
-            throw new AppError('Authenticated user not found in database', 404, 'USER_NOT_FOUND')
+            throw new AppError('Authenticated user not found in database', 404, 'USER_NOT_FOUND');
         }
 
-        const organizations = await organizationDao.getOrganizationsByTenant(tenant_id)
+        let organizations = [];
+
+        if (tenant_id) {
+            organizations = await organizationDao.getOrganizationsByTenant(tenant_id);
+        } else {
+            // Fallback: resolve organizations using organization_users table
+            const memberships = await organizationUserDao.findMembersByUser({ user_id: dbUser.user_id });
+            const organizationIds = memberships.map((membership) => membership.organization_id);
+            organizations = await db('organizations').whereIn('organization_id', organizationIds);
+        }
 
         return {
             success: true,
@@ -107,7 +117,7 @@ class organizationInviteService {
                 created_at: organization.created_at,
                 updated_at: organization.updated_at,
             })),
-        }
+        };
     }
 
     async createInvite ({ organization_id, invitedEmail, role, invitedByUserId, tenant_id}){

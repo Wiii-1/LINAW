@@ -35,26 +35,17 @@ class UserDao {
     }
   }
 
-  async login(data) {
-    try {
-      const { email } = data;
-
-      const user = await db("users")
-        .where("user_email", email)
-        .select("user_id", "user_email", "tenant_id", "created_at", "updated_at")
-        .first();
-
-      return user || null;
-    } catch (err) {
-      console.error("DAO login error:", err);
-      throw err;
-    }
-  }
-
   async findByFirebaseUid(firebase_uid) {
     const user = await db("users")
       .where({ firebase_uid })
-      .select("user_id", "user_email", "firebase_uid", "tenant_id", "created_at", "updated_at")
+      .select(
+        "user_id",
+        "user_email",
+        "firebase_uid",
+        "tenant_id",
+        "created_at",
+        "updated_at"
+      )
       .first();
 
     return user || null;
@@ -63,7 +54,14 @@ class UserDao {
   async findUserByEmail(email) {
     const user = await db("users")
       .where("user_email", email)
-      .select("user_id", "user_email", "firebase_uid", "tenant_id", "created_at", "updated_at")
+      .select(
+        "user_id",
+        "user_email",
+        "firebase_uid",
+        "tenant_id",
+        "created_at",
+        "updated_at"
+      )
       .first();
 
     return user || null;
@@ -72,10 +70,25 @@ class UserDao {
   async findById(user_id) {
     const user = await db("users")
       .where({ user_id })
-      .select("user_id", "user_email", "firebase_uid", "tenant_id", "created_at", "updated_at")
+      .select(
+        "user_id",
+        "user_email",
+        "firebase_uid",
+        "tenant_id",
+        "created_at",
+        "updated_at"
+      )
       .first();
 
     return user || null;
+  }
+
+  async updateLastLogin(user_id) {
+    await db("users")
+      .where({ user_id })
+      .update({ 
+        updated_at: db.fn.now()
+      });
   }
 }
 

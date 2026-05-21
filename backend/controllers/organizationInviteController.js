@@ -22,16 +22,28 @@ class organizationInviteController {
     }
     async listOrganizations(req, res, next) {
         try {
+            console.log("=== LIST ORGANIZATIONS START ===")
+            console.log("req.user:", req.user)
+        
             const tenant_id = req.user?.tenantId
             const firebaseUid = req.user?.uid
+        
+            console.log("tenant_id:", tenant_id)
+            console.log("firebaseUid:", firebaseUid)
 
+            console.log("Calling service...")
             const organizations = await organizationInviteService.listOrganizations({
                 tenant_id,
                 firebaseUid,
             })
-
+        
+            console.log("Organizations:", organizations)
             return res.status(200).json(organizations)
         } catch (error) {
+            console.error("=== LIST ORGANIZATIONS ERROR ===")
+            console.error("Error type:", error.constructor.name)
+            console.error("Error message:", error.message)
+            console.error("Full error:", error)
             next(error)
         }
     }
