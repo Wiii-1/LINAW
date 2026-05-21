@@ -49,7 +49,7 @@ const navMainData = [
     icon: <ChartBarIcon />,
   },
   {
-    title: "Asset Registry",
+    title: "Assets",
     url: "/asset",
     icon: <PackageIcon />,
   },

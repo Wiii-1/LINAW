@@ -1,5 +1,5 @@
 import { getAuth } from "firebase/auth"
-import type { Invite, InviteLinkResponse, Member } from "@/types/member.types"
+import type { Invite, InviteLinkResponse, Member } from "@/types/memberTypes"
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3000"
 
@@ -8,7 +8,12 @@ export class MemberServiceError extends Error {
   code?: string
   details?: unknown
 
-  constructor(message: string, status: number, code?: string, details?: unknown) {
+  constructor(
+    message: string,
+    status: number,
+    code?: string,
+    details?: unknown
+  ) {
     super(message)
     this.name = "MemberServiceError"
     this.status = status
@@ -159,7 +164,8 @@ async function getOrganizationId(): Promise<string> {
 
 function normalizeInvite(invite: RawInvite): Invite {
   const id = invite.id ?? invite.inviteId ?? invite.invite_id ?? ""
-  const email = invite.email ?? invite.invitedEmail ?? invite.invited_email ?? ""
+  const email =
+    invite.email ?? invite.invitedEmail ?? invite.invited_email ?? ""
 
   return {
     id,
@@ -188,14 +194,18 @@ function normalizeMember(member: RawMember): Member {
     name: member.name ?? (email ? email.split("@")[0] : "Member"),
     email,
     role: member.role ?? "member",
-    joinedAt: member.joinedAt ?? member.joined_at ?? member.user_created_at ?? null,
+    joinedAt:
+      member.joinedAt ?? member.joined_at ?? member.user_created_at ?? null,
     status: member.status ?? "active",
     organizationId: member.organizationId ?? member.organization_id ?? null,
     tenantId: member.tenantId ?? member.tenant_id ?? null,
   }
 }
 
-async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function requestJson<T>(
+  path: string,
+  init: RequestInit = {}
+): Promise<T> {
   const token = await getAuthToken()
 
   const response = await fetch(`${BACKEND_URL}/api/v1${path}`, {
@@ -212,7 +222,10 @@ async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> 
     .catch(() => null as Record<string, unknown> | null)
 
   if (!response.ok) {
-    const errorPayload = payload as { error?: { message?: string; code?: string; details?: unknown }; message?: string }
+    const errorPayload = payload as {
+      error?: { message?: string; code?: string; details?: unknown }
+      message?: string
+    }
     const message =
       errorPayload?.error?.message ??
       errorPayload?.message ??
@@ -239,7 +252,10 @@ function readInviteCache(organizationId: string): Invite[] {
 }
 
 function writeInviteCache(organizationId: string, invites: Invite[]) {
-  localStorage.setItem(`linaw:member-invites:${organizationId}`, JSON.stringify(invites))
+  localStorage.setItem(
+    `linaw:member-invites:${organizationId}`,
+    JSON.stringify(invites)
+  )
 }
 
 function readMemberCache(organizationId: string): Member[] {
@@ -252,21 +268,28 @@ function readMemberCache(organizationId: string): Member[] {
 }
 
 function writeMemberCache(organizationId: string, members: Member[]) {
-  localStorage.setItem(`linaw:members:${organizationId}`, JSON.stringify(members))
+  localStorage.setItem(
+    `linaw:members:${organizationId}`,
+    JSON.stringify(members)
+  )
 }
 
 export async function getPendingInvites(): Promise<Invite[]> {
   const organizationId = await getOrganizationId()
 
   try {
-    const response = await requestJson<{ success?: boolean; data?: RawInvite[] }>(
-      `/organizations/${organizationId}/invitations`
-    )
+    const response = await requestJson<{
+      success?: boolean
+      data?: RawInvite[]
+    }>(`/organizations/${organizationId}/invitations`)
 
     const invites = (response.data ?? []).map(normalizeInvite)
     const cache = readInviteCache(organizationId)
     const cachedById = new Map(cache.map((invite) => [invite.id, invite]))
-    const hydrated = invites.map((invite) => ({ ...invite, inviteLink: cachedById.get(invite.id)?.inviteLink ?? invite.inviteLink }))
+    const hydrated = invites.map((invite) => ({
+      ...invite,
+      inviteLink: cachedById.get(invite.id)?.inviteLink ?? invite.inviteLink,
+    }))
 
     writeInviteCache(organizationId, hydrated)
     return hydrated
@@ -279,9 +302,10 @@ export async function getAcceptedMembers(): Promise<Member[]> {
   const organizationId = await getOrganizationId()
 
   try {
-    const response = await requestJson<{ success?: boolean; data?: RawMember[] }>(
-      `/organizations/${organizationId}/members`
-    )
+    const response = await requestJson<{
+      success?: boolean
+      data?: RawMember[]
+    }>(`/organizations/${organizationId}/members`)
 
     const members = (response.data ?? []).map(normalizeMember)
     writeMemberCache(organizationId, members)
@@ -341,7 +365,9 @@ export async function generateInviteLink(params: {
   }
 }
 
-export async function resendInvite(inviteId: string): Promise<InviteLinkResponse & { invite: Invite }> {
+export async function resendInvite(
+  inviteId: string
+): Promise<InviteLinkResponse & { invite: Invite }> {
   const organizationId = await getOrganizationId()
   const response = await requestJson<{
     success?: boolean
@@ -383,22 +409,34 @@ export async function resendInvite(inviteId: string): Promise<InviteLinkResponse
 
 export async function cancelInvite(inviteId: string): Promise<void> {
   const organizationId = await getOrganizationId()
-  await requestJson<{ success?: boolean }>(`/organizations/${organizationId}/invitations/${inviteId}`, {
-    method: "DELETE",
-  })
+  await requestJson<{ success?: boolean }>(
+    `/organizations/${organizationId}/invitations/${inviteId}`,
+    {
+      method: "DELETE",
+    }
+  )
 
   const cache = readInviteCache(organizationId)
-  writeInviteCache(organizationId, cache.filter((invite) => invite.id !== inviteId))
+  writeInviteCache(
+    organizationId,
+    cache.filter((invite) => invite.id !== inviteId)
+  )
 }
 
 export async function removeMember(userId: string): Promise<void> {
   const organizationId = await getOrganizationId()
-  await requestJson<{ success?: boolean }>(`/organizations/${organizationId}/members/${userId}`, {
-    method: "DELETE",
-  })
+  await requestJson<{ success?: boolean }>(
+    `/organizations/${organizationId}/members/${userId}`,
+    {
+      method: "DELETE",
+    }
+  )
 
   const cache = readMemberCache(organizationId)
-  writeMemberCache(organizationId, cache.filter((member) => member.userId !== userId && member.id !== userId))
+  writeMemberCache(
+    organizationId,
+    cache.filter((member) => member.userId !== userId && member.id !== userId)
+  )
 }
 
 export async function resolveOrganizationId(): Promise<string> {

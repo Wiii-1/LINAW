@@ -24,7 +24,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Trash2, Edit2, Plus } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Plus } from "lucide-react"
 
 interface Asset {
   id: string
@@ -112,13 +119,16 @@ export default function AssetRegistry() {
 
       if (editingAsset) {
         // Update existing asset
-        const response = await fetch(`${backendUrl}/api/v1/assets/${editingAsset.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        })
+        const response = await fetch(
+          `${backendUrl}/api/v1/assets/${editingAsset.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        )
 
         if (!response.ok) {
           throw new Error("Failed to update asset")
@@ -209,12 +219,12 @@ export default function AssetRegistry() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader title="Asset Registry" />
+        <SiteHeader title="Assets" />
         <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Asset Registry</h1>
-              <p className="text-muted-foreground mt-1">
+              <h1 className="text-3xl font-bold">Assets</h1>
+              <p className="mt-1 text-muted-foreground">
                 Manage and track your blockchain assets
               </p>
             </div>
@@ -225,7 +235,13 @@ export default function AssetRegistry() {
                   variant="outline"
                   onClick={() => {
                     setEditingAsset(null)
-                    setFormData({ id: "", color: "", size: 0, owner: "", appraisedValue: 0 })
+                    setFormData({
+                      id: "",
+                      color: "",
+                      size: 0,
+                      owner: "",
+                      appraisedValue: 0,
+                    })
                   }}
                 >
                   <Plus className="mr-2 h-4 w-4" />
@@ -234,11 +250,21 @@ export default function AssetRegistry() {
               </DialogTrigger>
 
               <DialogContent className="sm:max-w-md">
-                <form onSubmit={(e) => { e.preventDefault(); void handleCreateOrUpdate(); }} noValidate>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    void handleCreateOrUpdate()
+                  }}
+                  noValidate
+                >
                   <DialogHeader>
-                    <DialogTitle>{editingAsset ? "Edit Asset" : "Create New Asset"}</DialogTitle>
+                    <DialogTitle>
+                      {editingAsset ? "Edit Asset" : "Create New Asset"}
+                    </DialogTitle>
                     <DialogDescription>
-                      {editingAsset ? "Update the asset details below" : "Fill in the details to create a new asset"}
+                      {editingAsset
+                        ? "Update the asset details below"
+                        : "Fill in the details to create a new asset"}
                     </DialogDescription>
                   </DialogHeader>
 
@@ -249,34 +275,78 @@ export default function AssetRegistry() {
                         id="asset-id"
                         placeholder="e.g., ASSET-001"
                         value={formData.id}
-                        onChange={(e) => setFormData({ ...formData, id: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, id: e.target.value })
+                        }
                         disabled={!!editingAsset}
                       />
-                      <FieldDescription>Auto-generated if left empty</FieldDescription>
+                      <FieldDescription>
+                        Auto-generated if left empty
+                      </FieldDescription>
                     </Field>
 
                     <Field>
                       <Label htmlFor="color">Color *</Label>
-                      <Input id="color" placeholder="e.g., Blue" value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} required />
+                      <Input
+                        id="color"
+                        placeholder="e.g., Blue"
+                        value={formData.color}
+                        onChange={(e) =>
+                          setFormData({ ...formData, color: e.target.value })
+                        }
+                        required
+                      />
                     </Field>
 
                     <Field>
                       <Label htmlFor="size">Size *</Label>
-                      <Input id="size" type="number" placeholder="e.g., 150" value={formData.size} onChange={(e) => setFormData({ ...formData, size: parseInt(e.target.value) || 0 })} required />
+                      <Input
+                        id="size"
+                        type="number"
+                        placeholder="e.g., 150"
+                        value={formData.size}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            size: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        required
+                      />
                     </Field>
 
                     <Field>
                       <Label htmlFor="owner">Owner *</Label>
-                      <Input id="owner" placeholder="e.g., John Doe" value={formData.owner} onChange={(e) => setFormData({ ...formData, owner: e.target.value })} required />
+                      <Input
+                        id="owner"
+                        placeholder="e.g., John Doe"
+                        value={formData.owner}
+                        onChange={(e) =>
+                          setFormData({ ...formData, owner: e.target.value })
+                        }
+                        required
+                      />
                     </Field>
 
                     <Field>
                       <Label htmlFor="value">Appraised Value (USD) *</Label>
-                      <Input id="value" type="number" placeholder="e.g., 50000" value={formData.appraisedValue} onChange={(e) => setFormData({ ...formData, appraisedValue: parseInt(e.target.value) || 0 })} required />
+                      <Input
+                        id="value"
+                        type="number"
+                        placeholder="e.g., 50000"
+                        value={formData.appraisedValue}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            appraisedValue: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        required
+                      />
                     </Field>
 
                     {error ? (
-                      <div className="max-h-28 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm whitespace-pre-wrap text-red-700">
+                      <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                         {error}
                       </div>
                     ) : null}
@@ -284,11 +354,17 @@ export default function AssetRegistry() {
 
                   <DialogFooter>
                     <DialogClose asChild>
-                      <Button variant="outline" type="button" onClick={handleDialogClose}>
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={handleDialogClose}
+                      >
                         Cancel
                       </Button>
                     </DialogClose>
-                    <Button type="submit">{editingAsset ? "Update Asset" : "Create Asset"}</Button>
+                    <Button type="submit">
+                      {editingAsset ? "Update Asset" : "Create Asset"}
+                    </Button>
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -296,7 +372,7 @@ export default function AssetRegistry() {
           </div>
 
           {error && !isDialogOpen && (
-            <div className="rounded-lg bg-red-50 p-4 text-red-700 text-sm">
+            <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -312,14 +388,16 @@ export default function AssetRegistry() {
               </div>
             ) : (
               <Table>
-                <TableHeader>
+                <TableHeader className="sticky top-0 z-10 bg-muted">
                   <TableRow>
                     <TableHead>Asset ID</TableHead>
                     <TableHead>Color</TableHead>
                     <TableHead>Size</TableHead>
                     <TableHead>Owner</TableHead>
                     <TableHead>Appraised Value</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-10">
+                      <span className="sr-only">Row actions</span>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -329,22 +407,34 @@ export default function AssetRegistry() {
                       <TableCell>{asset.color}</TableCell>
                       <TableCell>{asset.size}</TableCell>
                       <TableCell>{asset.owner}</TableCell>
-                      <TableCell>${asset.appraisedValue.toLocaleString()}</TableCell>
+                      <TableCell>
+                        ${asset.appraisedValue.toLocaleString()}
+                      </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(asset)}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(asset.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                            >
+                              <span className="sr-only">Open actions menu</span>
+                              ⋯
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEdit(asset)}>
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => handleDelete(asset.id)}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}

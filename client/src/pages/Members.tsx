@@ -13,12 +13,33 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { cancelInvite, generateInviteLink, getAcceptedMembers, getPendingInvites, removeMember, resendInvite, resolveOrganizationId } from "@/services/memberService"
-import type { Invite, Member } from "@/types/member.types"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  cancelInvite,
+  generateInviteLink,
+  getAcceptedMembers,
+  getPendingInvites,
+  removeMember,
+  resendInvite,
+  resolveOrganizationId,
+} from "@/services/memberService"
+import type { Invite, Member } from "@/types/memberTypes"
 import {
   Copy,
   Eye,
@@ -28,7 +49,6 @@ import {
   Search,
   Trash2,
   UserRound,
-  Users,
   RefreshCw,
 } from "lucide-react"
 import { useEffect, useMemo, useState, type CSSProperties } from "react"
@@ -87,7 +107,7 @@ function TableSkeletonRows({ columns = 5 }: { columns?: number }) {
         <TableRow key={rowIndex}>
           {Array.from({ length: columns }).map((__, columnIndex) => (
             <TableCell key={columnIndex}>
-              <Skeleton className="h-4 w-full max-w-[180px]" />
+              <Skeleton className="h-4 w-full max-w-45" />
             </TableCell>
           ))}
         </TableRow>
@@ -129,7 +149,8 @@ export default function AddUser() {
       try {
         await resolveOrganizationId()
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Organization context is missing"
+        const message =
+          err instanceof Error ? err.message : "Organization context is missing"
         if (!cancelled) {
           setError(message)
           toast.error(message)
@@ -149,10 +170,16 @@ export default function AddUser() {
       if (pendingResult.status === "fulfilled") {
         setPendingInvites(pendingResult.value)
       } else {
-        const message = pendingResult.reason instanceof Error ? pendingResult.reason.message : "Failed to load pending invites"
+        const message =
+          pendingResult.reason instanceof Error
+            ? pendingResult.reason.message
+            : "Failed to load pending invites"
         setError(message)
         toast.error(message)
-        if ((pendingResult.reason as { status?: number } | undefined)?.status === 401) {
+        if (
+          (pendingResult.reason as { status?: number } | undefined)?.status ===
+          401
+        ) {
           navigate("/login", { replace: true })
         }
       }
@@ -160,10 +187,16 @@ export default function AddUser() {
       if (memberResult.status === "fulfilled") {
         setAcceptedMembers(memberResult.value)
       } else {
-        const message = memberResult.reason instanceof Error ? memberResult.reason.message : "Failed to load members"
+        const message =
+          memberResult.reason instanceof Error
+            ? memberResult.reason.message
+            : "Failed to load members"
         setError((current) => current ?? message)
         toast.error(message)
-        if ((memberResult.reason as { status?: number } | undefined)?.status === 401) {
+        if (
+          (memberResult.reason as { status?: number } | undefined)?.status ===
+          401
+        ) {
           navigate("/login", { replace: true })
         }
       }
@@ -189,25 +222,45 @@ export default function AddUser() {
         member.email.toLowerCase().includes(query) ||
         member.role.toLowerCase().includes(query)
 
-      const matchesRole = memberRoleFilter === "all" || member.role.toLowerCase() === memberRoleFilter
+      const matchesRole =
+        memberRoleFilter === "all" ||
+        member.role.toLowerCase() === memberRoleFilter
 
       return matchesQuery && matchesRole
     })
   }, [acceptedMembers, memberRoleFilter, memberSearch])
 
-  const pendingPageCount = Math.max(1, Math.ceil(pendingInvites.length / PAGE_SIZE))
-  const memberPageCount = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE))
+  const pendingPageCount = Math.max(
+    1,
+    Math.ceil(pendingInvites.length / PAGE_SIZE)
+  )
+  const memberPageCount = Math.max(
+    1,
+    Math.ceil(filteredMembers.length / PAGE_SIZE)
+  )
   const safePendingPage = Math.min(pendingPage, pendingPageCount)
   const safeMemberPage = Math.min(memberPage, memberPageCount)
-  const pendingPageItems = pendingInvites.slice((safePendingPage - 1) * PAGE_SIZE, safePendingPage * PAGE_SIZE)
-  const memberPageItems = filteredMembers.slice((safeMemberPage - 1) * PAGE_SIZE, safeMemberPage * PAGE_SIZE)
+  const pendingPageItems = pendingInvites.slice(
+    (safePendingPage - 1) * PAGE_SIZE,
+    safePendingPage * PAGE_SIZE
+  )
+  const memberPageItems = filteredMembers.slice(
+    (safeMemberPage - 1) * PAGE_SIZE,
+    safeMemberPage * PAGE_SIZE
+  )
 
   async function copyText(value: string, inviteId?: string) {
     try {
       await navigator.clipboard.writeText(value)
       if (inviteId) {
         setCopiedInviteId(inviteId)
-        window.setTimeout(() => setCopiedInviteId((current) => (current === inviteId ? null : current)), 1500)
+        window.setTimeout(
+          () =>
+            setCopiedInviteId((current) =>
+              current === inviteId ? null : current
+            ),
+          1500
+        )
       }
       toast.success("Invite link copied")
     } catch {
@@ -216,7 +269,10 @@ export default function AddUser() {
   }
 
   async function refreshTables() {
-    const [pendingResult, memberResult] = await Promise.allSettled([getPendingInvites(), getAcceptedMembers()])
+    const [pendingResult, memberResult] = await Promise.allSettled([
+      getPendingInvites(),
+      getAcceptedMembers(),
+    ])
 
     if (pendingResult.status === "fulfilled") {
       setPendingInvites(pendingResult.value)
@@ -238,7 +294,10 @@ export default function AddUser() {
         role: inviteRole,
       })
 
-      setPendingInvites((current) => [response.invite, ...current.filter((invite) => invite.id !== response.invite.id)])
+      setPendingInvites((current) => [
+        response.invite,
+        ...current.filter((invite) => invite.id !== response.invite.id),
+      ])
       setInviteLink(response.inviteLink)
       setIsGenerateDialogOpen(false)
       setIsInviteLinkDialogOpen(true)
@@ -252,7 +311,8 @@ export default function AddUser() {
       setInviteRole("member")
       void refreshTables()
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to generate invite link"
+      const message =
+        err instanceof Error ? err.message : "Failed to generate invite link"
       setError(message)
       toast.error(message)
 
@@ -268,7 +328,9 @@ export default function AddUser() {
     setError(null)
     try {
       const response = await resendInvite(invite.id)
-      setPendingInvites((current) => current.map((item) => (item.id === invite.id ? response.invite : item)))
+      setPendingInvites((current) =>
+        current.map((item) => (item.id === invite.id ? response.invite : item))
+      )
       setInviteLink(response.inviteLink)
       setIsInviteLinkDialogOpen(true)
       toast.success("Invite link generated!")
@@ -277,7 +339,8 @@ export default function AddUser() {
         await copyText(response.inviteLink, response.inviteId)
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to resend invite"
+      const message =
+        err instanceof Error ? err.message : "Failed to resend invite"
       setError(message)
       toast.error(message)
       if ((err as { status?: number } | undefined)?.status === 401) {
@@ -293,10 +356,13 @@ export default function AddUser() {
 
     try {
       await cancelInvite(inviteId)
-      setPendingInvites((current) => current.filter((invite) => invite.id !== inviteId))
+      setPendingInvites((current) =>
+        current.filter((invite) => invite.id !== inviteId)
+      )
       toast.success("Invite cancelled")
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to cancel invite"
+      const message =
+        err instanceof Error ? err.message : "Failed to cancel invite"
       setError(message)
       toast.error(message)
       if ((err as { status?: number } | undefined)?.status === 401) {
@@ -312,10 +378,13 @@ export default function AddUser() {
 
     try {
       await removeMember(member.userId)
-      setAcceptedMembers((current) => current.filter((item) => item.userId !== member.userId))
+      setAcceptedMembers((current) =>
+        current.filter((item) => item.userId !== member.userId)
+      )
       toast.success("Member removed")
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to remove member"
+      const message =
+        err instanceof Error ? err.message : "Failed to remove member"
       setError(message)
       toast.error(message)
       if ((err as { status?: number } | undefined)?.status === 401) {
@@ -326,26 +395,26 @@ export default function AddUser() {
 
   return (
     <SidebarProvider
-      style={{
-        "--sidebar-width": "calc(var(--spacing) * 72)",
-        "--header-height": "calc(var(--spacing) * 12)",
-      } as CSSProperties}
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as CSSProperties
+      }
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader title="Members" />
         <main className="flex flex-1 flex-col gap-6 px-4 py-4 md:px-6 md:py-6">
-          <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white shadow-sm">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.12),_transparent_35%),radial-gradient(circle_at_bottom_left,_rgba(34,197,94,0.16),_transparent_30%)]" />
+          <div className="relative overflow-hidden rounded-2xl border bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 text-white shadow-sm">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(34,197,94,0.16),transparent_30%)]" />
             <div className="relative flex flex-col gap-4 p-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl space-y-2">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/80 backdrop-blur">
-                  <Users className="h-3.5 w-3.5" />
-                  Organization member management
-                </div>
-                <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Add and manage invitees</h1>
+                <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                  Membership Management
+                </h1>
                 <p className="max-w-xl text-sm text-white/72 sm:text-base">
-                  Create invite links, monitor pending invitations, and review accepted members from one place.
+                  Create invites, monitor invitations, and review members
                 </p>
               </div>
 
@@ -373,20 +442,26 @@ export default function AddUser() {
             <div className="rounded-2xl border bg-card p-4 shadow-sm">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold">Pending User Invites</h2>
-                  <p className="text-sm text-muted-foreground">Invites that have been sent but not yet accepted.</p>
+                  <h2 className="text-lg font-semibold">
+                    Pending User Invites
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Sent invitations that are not accepted yet
+                  </p>
                 </div>
                 <Badge variant="outline">{pendingInvites.length} total</Badge>
               </div>
 
               <div className="overflow-hidden rounded-xl border">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 z-10 bg-muted">
                     <TableRow>
-                      <TableHead>Email/Username</TableHead>
-                      <TableHead>Invite sent</TableHead>
-                      <TableHead>Link status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Invite</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-10">
+                        <span className="sr-only">Row actions</span>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -394,7 +469,10 @@ export default function AddUser() {
                       <TableSkeletonRows columns={4} />
                     ) : pendingPageItems.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                        <TableCell
+                          colSpan={4}
+                          className="py-10 text-center text-muted-foreground"
+                        >
                           No pending invites
                         </TableCell>
                       </TableRow>
@@ -404,7 +482,9 @@ export default function AddUser() {
                           <TableCell>
                             <div className="space-y-1">
                               <div className="font-medium">{invite.email}</div>
-                              <div className="text-xs text-muted-foreground">Role: {invite.role}</div>
+                              <div className="text-xs text-muted-foreground">
+                                Role: {invite.role}
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>{formatDateTime(invite.sentAt)}</TableCell>
@@ -415,7 +495,12 @@ export default function AddUser() {
                           </TableCell>
                           <TableCell>
                             <div className="flex justify-end gap-2">
-                              <Button type="button" size="sm" variant="outline" onClick={() => void handleResendInvite(invite)}>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => void handleResendInvite(invite)}
+                              >
                                 <RefreshCw className="mr-2 h-4 w-4" />
                                 Resend invite
                               </Button>
@@ -423,13 +508,27 @@ export default function AddUser() {
                                 type="button"
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => void copyText(invite.inviteLink ?? "", invite.id)}
+                                onClick={() =>
+                                  void copyText(
+                                    invite.inviteLink ?? "",
+                                    invite.id
+                                  )
+                                }
                                 disabled={!invite.inviteLink}
                               >
                                 <Copy className="mr-2 h-4 w-4" />
-                                {copiedInviteId === invite.id ? "Copied" : "Copy link"}
+                                {copiedInviteId === invite.id
+                                  ? "Copied"
+                                  : "Copy link"}
                               </Button>
-                              <Button type="button" size="sm" variant="destructive" onClick={() => void handleCancelInvite(invite.id)}>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="destructive"
+                                onClick={() =>
+                                  void handleCancelInvite(invite.id)
+                                }
+                              >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Cancel invite
                               </Button>
@@ -444,14 +543,38 @@ export default function AddUser() {
 
               <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
                 <span>
-                  Showing {pendingInvites.length === 0 ? 0 : (safePendingPage - 1) * PAGE_SIZE + 1} to {Math.min(safePendingPage * PAGE_SIZE, pendingInvites.length)} of {pendingInvites.length}
+                  Showing{" "}
+                  {pendingInvites.length === 0
+                    ? 0
+                    : (safePendingPage - 1) * PAGE_SIZE + 1}{" "}
+                  to{" "}
+                  {Math.min(safePendingPage * PAGE_SIZE, pendingInvites.length)}{" "}
+                  of {pendingInvites.length}
                 </span>
                 {pendingPageCount > 1 ? (
                   <div className="flex items-center gap-2">
-                    <Button type="button" size="sm" variant="outline" onClick={() => setPendingPage((value) => Math.max(1, value - 1))} disabled={pendingPage <= 1}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setPendingPage((value) => Math.max(1, value - 1))
+                      }
+                      disabled={pendingPage <= 1}
+                    >
                       Previous
                     </Button>
-                    <Button type="button" size="sm" variant="outline" onClick={() => setPendingPage((value) => Math.min(pendingPageCount, value + 1))} disabled={pendingPage >= pendingPageCount}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setPendingPage((value) =>
+                          Math.min(pendingPageCount, value + 1)
+                        )
+                      }
+                      disabled={pendingPage >= pendingPageCount}
+                    >
                       Next
                     </Button>
                   </div>
@@ -463,7 +586,10 @@ export default function AddUser() {
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold">Accepted Invites</h2>
-                  <p className="text-sm text-muted-foreground">Members who accepted an invitation and can now access the organization.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Members who accepted an invitation and can now access the
+                    organization.
+                  </p>
                 </div>
                 <Badge variant="outline">{acceptedMembers.length} total</Badge>
               </div>
@@ -480,8 +606,14 @@ export default function AddUser() {
                   />
                 </div>
                 <div>
-                  <Select value={memberRoleFilter} onValueChange={setMemberRoleFilter}>
-                    <SelectTrigger className="w-full" aria-label="Filter members by role">
+                  <Select
+                    value={memberRoleFilter}
+                    onValueChange={setMemberRoleFilter}
+                  >
+                    <SelectTrigger
+                      className="w-full"
+                      aria-label="Filter members by role"
+                    >
                       <SelectValue placeholder="Filter by role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -496,13 +628,15 @@ export default function AddUser() {
 
               <div className="overflow-hidden rounded-xl border">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 z-10 bg-muted">
                     <TableRow>
-                      <TableHead>Name/Email</TableHead>
+                      <TableHead>Email</TableHead>
                       <TableHead>Role</TableHead>
-                      <TableHead>Joined date</TableHead>
+                      <TableHead>Admitted</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="w-10">
+                        <span className="sr-only">Row actions</span>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -510,7 +644,10 @@ export default function AddUser() {
                       <TableSkeletonRows columns={5} />
                     ) : memberPageItems.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                        <TableCell
+                          colSpan={5}
+                          className="py-10 text-center text-muted-foreground"
+                        >
                           No members yet
                         </TableCell>
                       </TableRow>
@@ -520,23 +657,41 @@ export default function AddUser() {
                           <TableCell>
                             <div className="space-y-1">
                               <div className="font-medium">{member.name}</div>
-                              <div className="text-xs text-muted-foreground">{member.email}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {member.email}
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline">{member.role}</Badge>
                           </TableCell>
-                          <TableCell>{formatDateTime(member.joinedAt)}</TableCell>
                           <TableCell>
-                            <Badge variant={badgeTone(member.status)}>{member.status === "active" ? "Active" : "Inactive"}</Badge>
+                            {formatDateTime(member.joinedAt)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={badgeTone(member.status)}>
+                              {member.status === "active"
+                                ? "Active"
+                                : "Inactive"}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex justify-end gap-2">
-                              <Button type="button" size="sm" variant="outline" onClick={() => setSelectedMember(member)}>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setSelectedMember(member)}
+                              >
                                 <Eye className="mr-2 h-4 w-4" />
                                 View profile
                               </Button>
-                              <Button type="button" size="sm" variant="destructive" onClick={() => void handleRemoveMember(member)}>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => void handleRemoveMember(member)}
+                              >
                                 <UserRound className="mr-2 h-4 w-4" />
                                 Remove member
                               </Button>
@@ -551,14 +706,38 @@ export default function AddUser() {
 
               <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
                 <span>
-                  Showing {filteredMembers.length === 0 ? 0 : (safeMemberPage - 1) * PAGE_SIZE + 1} to {Math.min(safeMemberPage * PAGE_SIZE, filteredMembers.length)} of {filteredMembers.length}
+                  Showing{" "}
+                  {filteredMembers.length === 0
+                    ? 0
+                    : (safeMemberPage - 1) * PAGE_SIZE + 1}{" "}
+                  to{" "}
+                  {Math.min(safeMemberPage * PAGE_SIZE, filteredMembers.length)}{" "}
+                  of {filteredMembers.length}
                 </span>
                 {memberPageCount > 1 ? (
                   <div className="flex items-center gap-2">
-                    <Button type="button" size="sm" variant="outline" onClick={() => setMemberPage((value) => Math.max(1, value - 1))} disabled={memberPage <= 1}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setMemberPage((value) => Math.max(1, value - 1))
+                      }
+                      disabled={memberPage <= 1}
+                    >
                       Previous
                     </Button>
-                    <Button type="button" size="sm" variant="outline" onClick={() => setMemberPage((value) => Math.min(memberPageCount, value + 1))} disabled={memberPage >= memberPageCount}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setMemberPage((value) =>
+                          Math.min(memberPageCount, value + 1)
+                        )
+                      }
+                      disabled={memberPage >= memberPageCount}
+                    >
                       Next
                     </Button>
                   </div>
@@ -568,24 +747,28 @@ export default function AddUser() {
           </section>
         </main>
 
-        <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
+        <Dialog
+          open={isGenerateDialogOpen}
+          onOpenChange={setIsGenerateDialogOpen}
+        >
           <DialogContent className="sm:max-w-md">
             <form onSubmit={handleGenerateInvite} noValidate>
               <DialogHeader>
                 <DialogTitle>Generate Invite Link</DialogTitle>
-                <DialogDescription>Create a new member invite and copy the generated link.</DialogDescription>
+                <DialogDescription>
+                  Create invitations for new members
+                </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="invite-email">Email address</Label>
+                  <Label htmlFor="invite-email">Email</Label>
                   <Input
                     id="invite-email"
                     type="email"
                     required
                     value={inviteEmail}
                     onChange={(event) => setInviteEmail(event.target.value)}
-                    placeholder="member@company.com"
                   />
                 </div>
 
@@ -604,34 +787,49 @@ export default function AddUser() {
                 </div>
 
                 <div className="rounded-lg border border-dashed px-3 py-2 text-xs text-muted-foreground">
-                  The invite will be attached to the currently selected organization context for this session.
+                  The invite will be attached to the currently selected
+                  organization context for this session.
                 </div>
               </div>
 
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button type="button" variant="outline">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="sm:mr-auto"
+                  >
                     Cancel
                   </Button>
                 </DialogClose>
                 <Button type="submit" disabled={isGeneratingLink}>
-                  {isGeneratingLink ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Link2 className="mr-2 h-4 w-4" />}
-                  {isGeneratingLink ? "Generating..." : "Generate Invite Link"}
+                  {isGeneratingLink ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Link2 className="mr-2 h-4 w-4" />
+                  )}
+                  {isGeneratingLink ? "Generating..." : "Invite"}
                 </Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
 
-        <Dialog open={isInviteLinkDialogOpen} onOpenChange={(open) => setIsInviteLinkDialogOpen(open)}>
+        <Dialog
+          open={isInviteLinkDialogOpen}
+          onOpenChange={(open) => setIsInviteLinkDialogOpen(open)}
+        >
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>New Invite Link Generated</DialogTitle>
-              <DialogDescription>Share this link with the person you want to add to the organization.</DialogDescription>
+              <DialogDescription>
+                Share this link with the person you want to add to the
+                organization.
+              </DialogDescription>
             </DialogHeader>
 
             <div className="rounded-xl border bg-muted/40 p-4">
-              <div className="break-all rounded-lg border bg-background px-3 py-2 font-mono text-xs text-foreground">
+              <div className="rounded-lg border bg-background px-3 py-2 font-mono text-xs break-all text-foreground">
                 {inviteLink ?? "Invite link unavailable"}
               </div>
             </div>
@@ -669,11 +867,16 @@ export default function AddUser() {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={Boolean(selectedMember)} onOpenChange={(open) => !open && setSelectedMember(null)}>
+        <Dialog
+          open={Boolean(selectedMember)}
+          onOpenChange={(open) => !open && setSelectedMember(null)}
+        >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Member Profile</DialogTitle>
-              <DialogDescription>Quick summary of the selected member.</DialogDescription>
+              <DialogDescription>
+                Quick summary of the selected member.
+              </DialogDescription>
             </DialogHeader>
 
             {selectedMember ? (
@@ -692,7 +895,9 @@ export default function AddUser() {
                 </div>
                 <div>
                   <div className="text-muted-foreground">Joined</div>
-                  <div className="font-medium">{formatDateTime(selectedMember.joinedAt)}</div>
+                  <div className="font-medium">
+                    {formatDateTime(selectedMember.joinedAt)}
+                  </div>
                 </div>
                 <div>
                   <div className="text-muted-foreground">Status</div>

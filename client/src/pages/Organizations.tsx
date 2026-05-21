@@ -263,162 +263,164 @@ export default function Organizations() {
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader title="Organizations" />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 px-4 py-4 md:gap-6 md:px-6 md:py-6">
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button type="button" variant="outline">
-                    Create Certificate Authority
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <form onSubmit={handleSubmit} noValidate>
-                    <DialogHeader>
-                      <DialogTitle className="text-center">
-                        Create Certificate Authority
-                      </DialogTitle>
-                      <DialogDescription className="text-center">
-                        Provision your root TLS and Signing certificate
-                        authority
-                      </DialogDescription>
-                    </DialogHeader>
+        <main>
+          <div className="flex flex-1 flex-col">
+            <div className="@container/main flex flex-1 flex-col gap-2">
+              <div className="flex flex-col gap-4 px-4 py-4 md:gap-6 md:px-6 md:py-6">
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="outline">
+                      Create Certificate Authority
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <form onSubmit={handleSubmit} noValidate>
+                      <DialogHeader>
+                        <DialogTitle className="text-center">
+                          Create Certificate Authority
+                        </DialogTitle>
+                        <DialogDescription className="text-center">
+                          Provision your root TLS and Signing certificate
+                          authority
+                        </DialogDescription>
+                      </DialogHeader>
 
-                    {error ? (
-                      <div className="max-h-28 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm wrap-break-word whitespace-pre-wrap text-red-700">
-                        {error}
-                      </div>
-                    ) : null}
+                      {error ? (
+                        <div className="max-h-28 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm wrap-break-word whitespace-pre-wrap text-red-700">
+                          {error}
+                        </div>
+                      ) : null}
 
-                    <FieldGroup className="gap-4 py-4">
-                      <Field className="space-y-2">
-                        <Label htmlFor="tenantName">Tenant Name</Label>
-                        <Input
-                          id="tenantName"
-                          name="tenantName"
-                          value={tenantName}
-                          onChange={(e) => setTenantName(e.target.value)}
-                          aria-invalid={Boolean(tenantNameError)}
-                          required
-                        />
-                        {tenantNameError ? (
-                          <FieldDescription className="text-destructive">
-                            {tenantNameError}
-                          </FieldDescription>
-                        ) : null}
-                      </Field>
-
-                      <div className="border-t pt-4">
-                        <Field className="mb-3 space-y-2">
-                          <Label htmlFor="tlsAdminUser">
-                            TLS Admin Username
-                          </Label>
-                          <Input
-                            id="tlsAdminUser"
-                            name="tlsAdminUser"
-                            value={tlsAdminUser}
-                            onChange={(e) => setTlsAdminUser(e.target.value)}
-                            aria-invalid={Boolean(tlsAdminUserError)}
-                            required
-                          />
-                          {tlsAdminUserError ? (
-                            <FieldDescription className="text-destructive">
-                              {tlsAdminUserError}
-                            </FieldDescription>
-                          ) : null}
-                        </Field>
+                      <FieldGroup className="gap-4 py-4">
                         <Field className="space-y-2">
-                          <Label htmlFor="tlsAdminPassword">
-                            TLS Admin Password
-                          </Label>
-                          <PasswordInput
-                            id="tlsAdminPassword"
-                            name="tlsAdminPassword"
-                            value={tlsAdminPassword}
-                            onChange={(e) =>
-                              setTlsAdminPassword(e.target.value)
-                            }
-                            aria-invalid={Boolean(tlsAdminPasswordError)}
-                            required
-                          />
-                          {tlsAdminPasswordError ? (
-                            <FieldDescription className="text-destructive">
-                              {tlsAdminPasswordError}
-                            </FieldDescription>
-                          ) : null}
-                        </Field>
-                      </div>
-
-                      <div className="border-t pt-4">
-                        <Field className="mb-3 space-y-2">
-                          <Label htmlFor="orgAdminUser">
-                            Org Admin Username
-                          </Label>
+                          <Label htmlFor="tenantName">Tenant Name</Label>
                           <Input
-                            id="orgAdminUser"
-                            name="orgAdminUser"
-                            value={orgAdminUser}
-                            onChange={(e) => setOrgAdminUser(e.target.value)}
-                            aria-invalid={Boolean(orgAdminUserError)}
+                            id="tenantName"
+                            name="tenantName"
+                            value={tenantName}
+                            onChange={(e) => setTenantName(e.target.value)}
+                            aria-invalid={Boolean(tenantNameError)}
                             required
                           />
-                          {orgAdminUserError ? (
+                          {tenantNameError ? (
                             <FieldDescription className="text-destructive">
-                              {orgAdminUserError}
+                              {tenantNameError}
                             </FieldDescription>
                           ) : null}
                         </Field>
-                        <Field className="space-y-2">
-                          <Label htmlFor="orgAdminPassword">
-                            Org Admin Password
-                          </Label>
-                          <PasswordInput
-                            id="orgAdminPassword"
-                            name="orgAdminPassword"
-                            value={orgAdminPassword}
-                            onChange={(e) =>
-                              setOrgAdminPassword(e.target.value)
-                            }
-                            aria-invalid={Boolean(orgAdminPasswordError)}
-                            required
-                          />
-                          {orgAdminPasswordError ? (
-                            <FieldDescription className="text-destructive">
-                              {orgAdminPasswordError}
-                            </FieldDescription>
-                          ) : null}
-                        </Field>
-                      </div>
-                    </FieldGroup>
 
-                    <DialogFooter>
-                      <DialogClose asChild>
-                        <Button variant="destructive" className="sm:mr-auto">
-                          Cancel
+                        <div className="border-t pt-4">
+                          <Field className="mb-3 space-y-2">
+                            <Label htmlFor="tlsAdminUser">
+                              TLS Admin Username
+                            </Label>
+                            <Input
+                              id="tlsAdminUser"
+                              name="tlsAdminUser"
+                              value={tlsAdminUser}
+                              onChange={(e) => setTlsAdminUser(e.target.value)}
+                              aria-invalid={Boolean(tlsAdminUserError)}
+                              required
+                            />
+                            {tlsAdminUserError ? (
+                              <FieldDescription className="text-destructive">
+                                {tlsAdminUserError}
+                              </FieldDescription>
+                            ) : null}
+                          </Field>
+                          <Field className="space-y-2">
+                            <Label htmlFor="tlsAdminPassword">
+                              TLS Admin Password
+                            </Label>
+                            <PasswordInput
+                              id="tlsAdminPassword"
+                              name="tlsAdminPassword"
+                              value={tlsAdminPassword}
+                              onChange={(e) =>
+                                setTlsAdminPassword(e.target.value)
+                              }
+                              aria-invalid={Boolean(tlsAdminPasswordError)}
+                              required
+                            />
+                            {tlsAdminPasswordError ? (
+                              <FieldDescription className="text-destructive">
+                                {tlsAdminPasswordError}
+                              </FieldDescription>
+                            ) : null}
+                          </Field>
+                        </div>
+
+                        <div className="border-t pt-4">
+                          <Field className="mb-3 space-y-2">
+                            <Label htmlFor="orgAdminUser">
+                              Org Admin Username
+                            </Label>
+                            <Input
+                              id="orgAdminUser"
+                              name="orgAdminUser"
+                              value={orgAdminUser}
+                              onChange={(e) => setOrgAdminUser(e.target.value)}
+                              aria-invalid={Boolean(orgAdminUserError)}
+                              required
+                            />
+                            {orgAdminUserError ? (
+                              <FieldDescription className="text-destructive">
+                                {orgAdminUserError}
+                              </FieldDescription>
+                            ) : null}
+                          </Field>
+                          <Field className="space-y-2">
+                            <Label htmlFor="orgAdminPassword">
+                              Org Admin Password
+                            </Label>
+                            <PasswordInput
+                              id="orgAdminPassword"
+                              name="orgAdminPassword"
+                              value={orgAdminPassword}
+                              onChange={(e) =>
+                                setOrgAdminPassword(e.target.value)
+                              }
+                              aria-invalid={Boolean(orgAdminPasswordError)}
+                              required
+                            />
+                            {orgAdminPasswordError ? (
+                              <FieldDescription className="text-destructive">
+                                {orgAdminPasswordError}
+                              </FieldDescription>
+                            ) : null}
+                          </Field>
+                        </div>
+                      </FieldGroup>
+
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="destructive" className="sm:mr-auto">
+                            Cancel
+                          </Button>
+                        </DialogClose>
+                        <Button type="submit" disabled={loading}>
+                          {loading ? "Provisioning..." : "Create Tenant"}
                         </Button>
-                      </DialogClose>
-                      <Button type="submit" disabled={loading}>
-                        {loading ? "Provisioning..." : "Create Tenant"}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
 
-              <OrganizationsDataTable
-                tenants={tenants}
-                loadingTenants={loadingTenants}
-                onDeleteTenant={handleDeleteTenant}
-              />
+                <OrganizationsDataTable
+                  tenants={tenants}
+                  loadingTenants={loadingTenants}
+                  onDeleteTenant={handleDeleteTenant}
+                />
 
-              {tenants.length > 0 && (
-                <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
-                  Total Certificate Authorities: {tenants.length}
-                </div>
-              )}
+                {tenants.length > 0 && (
+                  <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
+                    Total Certificate Authorities: {tenants.length}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </main>
       </SidebarInset>
     </SidebarProvider>
   )

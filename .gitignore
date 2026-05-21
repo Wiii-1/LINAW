@@ -1,30 +1,17 @@
-chaindeploy 
-database/
-/.github/agents/
-
-# Hyperledger Fabric
 fabric-ca
 /fabric-ca-client
 /fabric-ca-server-tls
 /fabric-samples
-/.workspaces
-docker/compose/.workspaces/
 install-fabric.sh
-
-# Documentation
+progress.md
 TODO.md
 GRYPHEN_DOCS.md
 NOTES.md
 ChainCodeSecurity.md
-solution.md
-
-# Stray Files
+database
+tenants
 /*.pid
 /*.log
 /*.yaml
 /*.yml
 .env
-/graphify-out
-/tenants
-GUIDEREADME.md
-BACKEND_FRONTEND.md

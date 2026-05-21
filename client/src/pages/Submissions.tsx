@@ -32,7 +32,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { FileText, Plus, Eye, CheckCircle, XCircle, AlertCircle } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { FileText, Plus, CheckCircle, XCircle, AlertCircle } from "lucide-react"
 
 interface Submission {
   submission_id: number
@@ -47,7 +54,11 @@ interface Submission {
 }
 
 const STATUS_CONFIG = {
-  draft: { label: "Draft", color: "bg-gray-100 text-gray-800", icon: AlertCircle },
+  draft: {
+    label: "Draft",
+    color: "bg-gray-100 text-gray-800",
+    icon: AlertCircle,
+  },
   submitted: {
     label: "Submitted",
     color: "bg-blue-100 text-blue-800",
@@ -58,8 +69,16 @@ const STATUS_CONFIG = {
     color: "bg-yellow-100 text-yellow-800",
     icon: AlertCircle,
   },
-  approved: { label: "Approved", color: "bg-green-100 text-green-800", icon: CheckCircle },
-  rejected: { label: "Rejected", color: "bg-red-100 text-red-800", icon: XCircle },
+  approved: {
+    label: "Approved",
+    color: "bg-green-100 text-green-800",
+    icon: CheckCircle,
+  },
+  rejected: {
+    label: "Rejected",
+    color: "bg-red-100 text-red-800",
+    icon: XCircle,
+  },
 }
 
 export default function ApprovalWorkflow() {
@@ -67,7 +86,9 @@ export default function ApprovalWorkflow() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [viewingSubmission, setViewingSubmission] = useState<Submission | null>(null)
+  const [viewingSubmission, setViewingSubmission] = useState<Submission | null>(
+    null
+  )
   const [actionDialog, setActionDialog] = useState<{
     type: "approve" | "reject" | "request-changes" | null
     submission: Submission | null
@@ -80,7 +101,6 @@ export default function ApprovalWorkflow() {
   })
 
   const [actionRemarks, setActionRemarks] = useState("")
-
 
   // Load submissions on mount
   useEffect(() => {
@@ -97,7 +117,9 @@ export default function ApprovalWorkflow() {
             owner: "John Doe",
             fileName: "capex-2026.pdf",
             fileSize: 2048000,
-            created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date(
+              Date.now() - 2 * 24 * 60 * 60 * 1000
+            ).toISOString(),
           },
           {
             submission_id: 2,
@@ -107,7 +129,9 @@ export default function ApprovalWorkflow() {
             fileName: "budget-q2-2026.docx",
             fileSize: 1024000,
             remarks: "Approved. Please proceed with implementation.",
-            created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date(
+              Date.now() - 5 * 24 * 60 * 60 * 1000
+            ).toISOString(),
           },
           {
             submission_id: 3,
@@ -116,19 +140,26 @@ export default function ApprovalWorkflow() {
             owner: "Bob Johnson",
             fileName: "vendor-proposal.pdf",
             fileSize: 512000,
-            remarks: "Please clarify the pricing structure and provide references.",
-            created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+            remarks:
+              "Please clarify the pricing structure and provide references.",
+            created_at: new Date(
+              Date.now() - 10 * 24 * 60 * 60 * 1000
+            ).toISOString(),
           },
           {
             submission_id: 4,
             proposalType: "policy-update",
             status: "draft",
             owner: "Alice Wilson",
-            created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date(
+              Date.now() - 1 * 24 * 60 * 60 * 1000
+            ).toISOString(),
           },
         ])
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load submissions")
+        setError(
+          err instanceof Error ? err.message : "Failed to load submissions"
+        )
       } finally {
         setLoading(false)
       }
@@ -146,7 +177,8 @@ export default function ApprovalWorkflow() {
       }
 
       const newSubmission: Submission = {
-        submission_id: Math.max(...submissions.map((s) => s.submission_id), 0) + 1,
+        submission_id:
+          Math.max(...submissions.map((s) => s.submission_id), 0) + 1,
         proposalType: formData.proposalType,
         status: "draft",
         owner: "Current User",
@@ -158,14 +190,18 @@ export default function ApprovalWorkflow() {
       setFormData({ proposalType: "", fileName: "" })
       setIsDialogOpen(false)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create submission")
+      setError(
+        err instanceof Error ? err.message : "Failed to create submission"
+      )
     }
   }
 
   const handleSubmitForApproval = (submission: Submission) => {
     const updated = { ...submission, status: "submitted" as const }
     setSubmissions((prev) =>
-      prev.map((s) => (s.submission_id === submission.submission_id ? updated : s))
+      prev.map((s) =>
+        s.submission_id === submission.submission_id ? updated : s
+      )
     )
     setViewingSubmission(updated)
   }
@@ -200,10 +236,14 @@ export default function ApprovalWorkflow() {
     }
 
     setSubmissions((prev) =>
-      prev.map((s) => (s.submission_id === actionDialog.submission!.submission_id ? updated : s))
+      prev.map((s) =>
+        s.submission_id === actionDialog.submission!.submission_id ? updated : s
+      )
     )
 
-    if (viewingSubmission?.submission_id === actionDialog.submission.submission_id) {
+    if (
+      viewingSubmission?.submission_id === actionDialog.submission.submission_id
+    ) {
       setViewingSubmission(updated)
     }
 
@@ -213,7 +253,7 @@ export default function ApprovalWorkflow() {
 
   const getStatusIcon = (status: Submission["status"]) => {
     const Icon = STATUS_CONFIG[status].icon
-    return <Icon className="h-4 w-4 inline mr-1" />
+    return <Icon className="mr-1 inline h-4 w-4" />
   }
 
   return (
@@ -232,7 +272,7 @@ export default function ApprovalWorkflow() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Approval Workflow</h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="mt-1 text-muted-foreground">
                 Manage document submissions and approvals
               </p>
             </div>
@@ -246,25 +286,48 @@ export default function ApprovalWorkflow() {
               </DialogTrigger>
 
               <DialogContent className="sm:max-w-md">
-                <form onSubmit={(e) => { e.preventDefault(); void handleCreateSubmission(); }} noValidate>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    void handleCreateSubmission()
+                  }}
+                  noValidate
+                >
                   <DialogHeader>
                     <DialogTitle>Create New Submission</DialogTitle>
-                    <DialogDescription>Create a new proposal or document for approval</DialogDescription>
+                    <DialogDescription>
+                      Create a new proposal or document for approval
+                    </DialogDescription>
                   </DialogHeader>
 
                   <FieldGroup className="gap-4 py-4">
                     <Field>
                       <Label htmlFor="proposal-type">Proposal Type *</Label>
-                      <Select value={formData.proposalType} onValueChange={(value) => setFormData({ ...formData, proposalType: value })}>
+                      <Select
+                        value={formData.proposalType}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, proposalType: value })
+                        }
+                      >
                         <SelectTrigger id="proposal-type">
                           <SelectValue placeholder="Select a type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="capex-request">Capital Expenditure Request</SelectItem>
-                          <SelectItem value="budget-allocation">Budget Allocation</SelectItem>
-                          <SelectItem value="vendor-onboarding">Vendor Onboarding</SelectItem>
-                          <SelectItem value="policy-update">Policy Update</SelectItem>
-                          <SelectItem value="contract-review">Contract Review</SelectItem>
+                          <SelectItem value="capex-request">
+                            Capital Expenditure Request
+                          </SelectItem>
+                          <SelectItem value="budget-allocation">
+                            Budget Allocation
+                          </SelectItem>
+                          <SelectItem value="vendor-onboarding">
+                            Vendor Onboarding
+                          </SelectItem>
+                          <SelectItem value="policy-update">
+                            Policy Update
+                          </SelectItem>
+                          <SelectItem value="contract-review">
+                            Contract Review
+                          </SelectItem>
                           <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
@@ -272,17 +335,28 @@ export default function ApprovalWorkflow() {
 
                     <Field>
                       <Label htmlFor="file-name">File Name (Optional)</Label>
-                      <Input id="file-name" placeholder="proposal.pdf" value={formData.fileName} onChange={(e) => setFormData({ ...formData, fileName: e.target.value })} />
+                      <Input
+                        id="file-name"
+                        placeholder="proposal.pdf"
+                        value={formData.fileName}
+                        onChange={(e) =>
+                          setFormData({ ...formData, fileName: e.target.value })
+                        }
+                      />
                     </Field>
 
                     {error ? (
-                      <div className="max-h-28 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm whitespace-pre-wrap text-red-700">{error}</div>
+                      <div className="max-h-28 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm whitespace-pre-wrap text-red-700">
+                        {error}
+                      </div>
                     ) : null}
                   </FieldGroup>
 
                   <DialogFooter>
                     <DialogClose asChild>
-                      <Button variant="outline" type="button">Cancel</Button>
+                      <Button variant="outline" type="button">
+                        Cancel
+                      </Button>
                     </DialogClose>
                     <Button type="submit">Create Submission</Button>
                   </DialogFooter>
@@ -292,7 +366,9 @@ export default function ApprovalWorkflow() {
           </div>
 
           {error && !isDialogOpen && (
-            <div className="rounded-lg bg-red-50 p-4 text-red-700 text-sm">{error}</div>
+            <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700">
+              {error}
+            </div>
           )}
 
           <div className="rounded-lg border bg-card text-card-foreground">
@@ -306,24 +382,32 @@ export default function ApprovalWorkflow() {
               </div>
             ) : (
               <Table>
-                <TableHeader>
+                <TableHeader className="sticky top-0 z-10 bg-muted">
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Proposal Type</TableHead>
                     <TableHead>Owner</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-10">
+                      <span className="sr-only">Row actions</span>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {submissions.map((submission) => (
                     <TableRow key={submission.submission_id}>
-                      <TableCell className="font-medium">#{submission.submission_id}</TableCell>
-                      <TableCell>{submission.proposalType.replace(/-/g, " ")}</TableCell>
+                      <TableCell className="font-medium">
+                        #{submission.submission_id}
+                      </TableCell>
+                      <TableCell>
+                        {submission.proposalType.replace(/-/g, " ")}
+                      </TableCell>
                       <TableCell>{submission.owner}</TableCell>
                       <TableCell>
-                        <Badge className={STATUS_CONFIG[submission.status].color}>
+                        <Badge
+                          className={STATUS_CONFIG[submission.status].color}
+                        >
                           {getStatusIcon(submission.status)}
                           {STATUS_CONFIG[submission.status].label}
                         </Badge>
@@ -332,13 +416,29 @@ export default function ApprovalWorkflow() {
                         {new Date(submission.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setViewingSubmission(submission)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                            >
+                              <span className="sr-only">Open actions menu</span>
+                              ⋯
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => setViewingSubmission(submission)}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem variant="destructive">
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -348,47 +448,70 @@ export default function ApprovalWorkflow() {
           </div>
 
           {/* Submission Detail Dialog */}
-          <Dialog open={!!viewingSubmission} onOpenChange={() => setViewingSubmission(null)}>
+          <Dialog
+            open={!!viewingSubmission}
+            onOpenChange={() => setViewingSubmission(null)}
+          >
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Submission #{viewingSubmission?.submission_id}</DialogTitle>
+                <DialogTitle>
+                  Submission #{viewingSubmission?.submission_id}
+                </DialogTitle>
               </DialogHeader>
 
               {viewingSubmission && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Proposal Type</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Proposal Type
+                      </p>
                       <p className="font-medium">
                         {viewingSubmission.proposalType.replace(/-/g, " ")}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Status</p>
-                      <Badge className={STATUS_CONFIG[viewingSubmission.status].color}>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Status
+                      </p>
+                      <Badge
+                        className={
+                          STATUS_CONFIG[viewingSubmission.status].color
+                        }
+                      >
                         {getStatusIcon(viewingSubmission.status)}
                         {STATUS_CONFIG[viewingSubmission.status].label}
                       </Badge>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Owner</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Owner
+                      </p>
                       <p className="font-medium">{viewingSubmission.owner}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Created</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Created
+                      </p>
                       <p className="font-medium">
-                        {new Date(viewingSubmission.created_at).toLocaleDateString()}
+                        {new Date(
+                          viewingSubmission.created_at
+                        ).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
 
                   {viewingSubmission.fileName && (
                     <div className="border-t pt-4">
-                      <p className="text-sm font-medium text-muted-foreground mb-2">Attachment</p>
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                      <p className="mb-2 text-sm font-medium text-muted-foreground">
+                        Attachment
+                      </p>
+                      <div className="flex items-center gap-2 rounded bg-gray-50 p-2">
                         <FileText className="h-4 w-4 text-muted-foreground" />
                         <div className="flex-1">
-                          <p className="text-sm font-medium">{viewingSubmission.fileName}</p>
+                          <p className="text-sm font-medium">
+                            {viewingSubmission.fileName}
+                          </p>
                           <p className="text-xs text-muted-foreground">
                             {(viewingSubmission.fileSize || 0) / 1024 / 1024} MB
                           </p>
@@ -399,8 +522,12 @@ export default function ApprovalWorkflow() {
 
                   {viewingSubmission.remarks && (
                     <div className="border-t pt-4">
-                      <p className="text-sm font-medium text-muted-foreground mb-2">Remarks</p>
-                      <p className="text-sm p-2 bg-gray-50 rounded">{viewingSubmission.remarks}</p>
+                      <p className="mb-2 text-sm font-medium text-muted-foreground">
+                        Remarks
+                      </p>
+                      <p className="rounded bg-gray-50 p-2 text-sm">
+                        {viewingSubmission.remarks}
+                      </p>
                     </div>
                   )}
 
@@ -408,7 +535,9 @@ export default function ApprovalWorkflow() {
                     <div className="border-t pt-4">
                       <Button
                         className="w-full"
-                        onClick={() => handleSubmitForApproval(viewingSubmission)}
+                        onClick={() =>
+                          handleSubmitForApproval(viewingSubmission)
+                        }
                       >
                         Submit for Approval
                       </Button>
@@ -416,11 +545,13 @@ export default function ApprovalWorkflow() {
                   )}
 
                   {viewingSubmission.status === "submitted" && (
-                    <div className="border-t pt-4 space-y-2">
+                    <div className="space-y-2 border-t pt-4">
                       <Button
                         className="w-full"
                         variant="default"
-                        onClick={() => handleApprovalAction("approve", viewingSubmission)}
+                        onClick={() =>
+                          handleApprovalAction("approve", viewingSubmission)
+                        }
                       >
                         <CheckCircle className="mr-2 h-4 w-4" />
                         Approve
@@ -428,7 +559,12 @@ export default function ApprovalWorkflow() {
                       <Button
                         className="w-full"
                         variant="outline"
-                        onClick={() => handleApprovalAction("request-changes", viewingSubmission)}
+                        onClick={() =>
+                          handleApprovalAction(
+                            "request-changes",
+                            viewingSubmission
+                          )
+                        }
                       >
                         <AlertCircle className="mr-2 h-4 w-4" />
                         Request Changes
@@ -436,7 +572,9 @@ export default function ApprovalWorkflow() {
                       <Button
                         className="w-full"
                         variant="destructive"
-                        onClick={() => handleApprovalAction("reject", viewingSubmission)}
+                        onClick={() =>
+                          handleApprovalAction("reject", viewingSubmission)
+                        }
                       >
                         <XCircle className="mr-2 h-4 w-4" />
                         Reject
@@ -480,8 +618,10 @@ export default function ApprovalWorkflow() {
                     id="remarks"
                     placeholder="Enter your remarks..."
                     value={actionRemarks}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setActionRemarks(e.target.value)}
-                    className="min-h-[100px] w-full px-3 py-2 border rounded-md border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setActionRemarks(e.target.value)
+                    }
+                    className="min-h-25 w-full rounded-md border border-input bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     rows={4}
                   />
                 </Field>
@@ -493,7 +633,9 @@ export default function ApprovalWorkflow() {
                 </DialogClose>
                 <Button
                   onClick={confirmAction}
-                  variant={actionDialog.type === "reject" ? "destructive" : "default"}
+                  variant={
+                    actionDialog.type === "reject" ? "destructive" : "default"
+                  }
                 >
                   {actionDialog.type === "approve" && "Approve"}
                   {actionDialog.type === "reject" && "Reject"}
