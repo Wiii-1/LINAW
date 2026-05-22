@@ -22,6 +22,21 @@ import OrganizationsDataTable, {
   type TenantRow,
 } from "@/components/ui/organizations-data-table"
 import { Plus } from "lucide-react"
+import { authHeaders, mapTenantApiError } from "@/lib/authToken"
+
+function parseApiErrorMessage(payload: unknown, status: number): string {
+  if (payload && typeof payload === "object") {
+    const record = payload as Record<string, unknown>
+    if (record.error && typeof record.error === "object") {
+      const err = record.error as { message?: string }
+      if (err.message) return mapTenantApiError(status, err.message)
+    }
+    if (typeof record.error === "string") {
+      return mapTenantApiError(status, record.error)
+    }
+  }
+  return mapTenantApiError(status, "")
+}
 
 const INVALID_CHARACTER_RULES = [
   { character: ":", label: "colon" },
@@ -100,7 +115,12 @@ export default function Organizations() {
           setLoadingTenants(true)
         }
 
-        const response = await fetch(`${backendUrl}/api/tenants`)
+        const headers = await authHeaders()
+        const response = await fetch(`${backendUrl}/api/tenants`, { headers })
+        if (response.status === 401 || response.status === 403) {
+          if (!silent) setTenants([])
+          return
+        }
         if (response.ok) {
           const data = (await response.json()) as { tenants: Tenant[] }
           const nextSignature = JSON.stringify(data.tenants)
@@ -152,9 +172,10 @@ export default function Organizations() {
 
     setLoading(true)
     try {
+      const headers = await authHeaders({ "Content-Type": "application/json" })
       const response = await fetch(`${backendUrl}/api/tenants`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           tenantName,
           tlsAdminUser,
@@ -165,18 +186,15 @@ export default function Organizations() {
       })
 
       if (!response.ok) {
-        let backendMessage = ""
+        let message = ""
         try {
-          const payload = (await response.json()) as { error?: string }
-          backendMessage = payload.error ?? ""
+          const payload = await response.json()
+          message = parseApiErrorMessage(payload, response.status)
         } catch {
-          // Ignore parse errors
+          message = mapTenantApiError(response.status, response.statusText)
         }
 
-        setError(
-          backendMessage ||
-            `Request failed (${response.status} ${response.statusText})`
-        )
+        setError(message)
         return
       }
 
@@ -187,7 +205,10 @@ export default function Organizations() {
       setOrgAdminPassword("")
       setIsDialogOpen(false)
 
-      const listResponse = await fetch(`${backendUrl}/api/tenants`)
+      const listHeaders = await authHeaders()
+      const listResponse = await fetch(`${backendUrl}/api/tenants`, {
+        headers: listHeaders,
+      })
       if (listResponse.ok) {
         const data = (await listResponse.json()) as { tenants: Tenant[] }
         tenantsSignatureRef.current = JSON.stringify(data.tenants)
@@ -211,26 +232,28 @@ export default function Organizations() {
     }
 
     try {
+      const deleteHeaders = await authHeaders()
       const response = await fetch(`${backendUrl}/api/tenants/${tenantId}`, {
         method: "DELETE",
+        headers: deleteHeaders,
       })
 
       if (!response.ok) {
-        let backendMessage = ""
+        let message = ""
         try {
-          const payload = (await response.json()) as { error?: string }
-          backendMessage = payload.error ?? ""
+          const payload = await response.json()
+          message = parseApiErrorMessage(payload, response.status)
         } catch {
-          // Ignore parse errors
+          message = mapTenantApiError(response.status, response.statusText)
         }
-        alert(
-          backendMessage ||
-            `Delete failed (${response.status} ${response.statusText})`
-        )
+        alert(message || `Delete failed (${response.status})`)
         return
       }
 
-      const listResponse = await fetch(`${backendUrl}/api/tenants`)
+      const listHeaders = await authHeaders()
+      const listResponse = await fetch(`${backendUrl}/api/tenants`, {
+        headers: listHeaders,
+      })
       if (listResponse.ok) {
         const data = (await listResponse.json()) as { tenants: Tenant[] }
         tenantsSignatureRef.current = JSON.stringify(data.tenants)
@@ -268,7 +291,7 @@ export default function Organizations() {
         <main className="flex flex-1 flex-col gap-6 px-4 py-4 md:px-6 md:py-6">
           <PageHero
             title="Organizations"
-            description="Manage certificate authorities and tenant provisioning"
+            description="Provision and manage your tenant certificate authorities (Firebase auth required)"
             actions={
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
@@ -424,7 +447,7 @@ export default function Organizations() {
 
           {tenants.length > 0 && (
             <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
-              Total Certificate Authorities: {tenants.length}
+              Your tenant CA{tenants.length === 1 ? "" : "s"}: {tenants.length}
             </div>
           )}
         </main>

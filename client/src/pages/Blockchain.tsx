@@ -205,11 +205,11 @@ export default function BlockchainNetworks() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader title="Blockchain Networks" />
+        <SiteHeader title="Blockchain" />
         <main className="flex flex-1 flex-col gap-6 px-4 py-4 md:px-6 md:py-6">
           <PageHero
-            title="Blockchain Networks"
-            description="Manage Hyperledger Fabric networks and infrastructure"
+            title="Blockchain"
+            description="Manage your Hyperledger Fabric network and infrastructure"
             actions={
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>

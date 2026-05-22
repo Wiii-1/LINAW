@@ -12,6 +12,7 @@ const { router: usersRouter } = require("./routes/usersRoute");
 const { router: fabricRouter } = require("./routes/fabricRoute");
 const { router: peerRouter } = require("./routes/peerRoute");
 const { router: disposableRouter } = require("./routes/disposableEmailRoute");
+const { router: tenantRouter } = require("./routes/tenantRoute");
 
 app.get("/api/v1/", (_req, res) => {
   res.json({ ok: true, service: "linaw-backend" });
@@ -28,6 +29,7 @@ app.use(express.json());
 app.use("/api/v1", usersRouter);
 // register disposable-email before fabric router so it isn't intercepted by fabric's auth middleware
 app.use("/api/v1/disposable-email", disposableRouter);
+app.use("/api/tenants", tenantRouter);
 app.use("/api/v1", fabricRouter);
 app.use("/api/v2/fabric", peerRouter);
 

@@ -268,10 +268,10 @@ export default function ApprovalWorkflow() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader title="Approval Workflow" />
+        <SiteHeader title="Submissions" />
         <main className="flex flex-1 flex-col gap-6 px-4 py-4 md:px-6 md:py-6">
           <PageHero
-            title="Approval Workflow"
+            title="Submissions Approval"
             description="Manage document submissions and approvals"
             actions={
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

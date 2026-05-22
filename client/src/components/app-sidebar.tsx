@@ -59,8 +59,8 @@ const navMainData = [
     icon: <ClipboardListIcon />,
   },
   {
-    title: "Blockchain Networks",
-    url: "/networks",
+    title: "Blockchain",
+    url: "/blockchain",
     icon: <NetworkIcon />,
   },
 ]

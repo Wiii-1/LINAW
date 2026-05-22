@@ -15,6 +15,9 @@ TODO.md
 *.config.js
 
 
+# Tenant CA runtime data
+tenants/
+
 # Node.js
 node_modules/
 package-lock.json/
@@ -22,7 +25,7 @@ package-lock.json/
 config/serviceAccount.json
 db/knexfile.js
 .npm/
-.env
+.env*
 logs/
 .cache/
 .next/
