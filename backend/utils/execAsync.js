@@ -1,4 +1,4 @@
-const { execFile } = require('child_process')
+const { exec } = require('child_process')
 const { promisify } = require('util')
 const logger = require('../utils/logger')
 const fabricBinPath = require(`../config/fabric/fabricConfig`)
@@ -10,23 +10,17 @@ const fabricEnv = {
 };
 
 // allow async cmd execution 
-async function execAsync(file, options = {}) {
+async function execAsync(cmd, options = {}) {
     const opts = { env: fabricEnv, ...options }
-    logger.debug('[DEBUG] execAsync running file', {
-         file,
-         hasOptions: Object.keys(options).length > 0,
-         hasEnv: Boolean(opts.env),
-         cwd: opts.cwd,
-         timeout: opts.timeout
-     })
+    logger.debug('[DEBUG] execAsync running cmd: ', { cmd, opts })
     try {
-        const { stdout, stderr } = await promisifiedExec(file, opts)
+        const { stdout, stderr } = await promisifiedExec(cmd, opts)
         if (stderr) {
             logger.debug(`[DEBUG] stderr: ${stderr}`)
         }
         return { stdout, stderr }
     } catch (error) {
-        logger.error(`[ERROR] execAsync: ${file}\n${error.message}`)
+        logger.error(`[ERROR] execAsync: ${cmd}\n${error.message}`)
         throw error
     }
 }

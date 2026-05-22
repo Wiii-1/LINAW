@@ -20,6 +20,7 @@ import {
 } from "firebase/auth"
 import { useNavigate } from "react-router-dom"
 
+
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>
 
 export function LoginForm({ className, ...props }: ComponentProps<"div">) {
@@ -32,89 +33,180 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-  const postLogin = async (email: string, firebase_uid: string) => {
-    try {
-      await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, firebase_uid }),
-      })
-    } catch (error) {
-      console.error("Error posting login:", error)
-    }
-  }
 
+  // Helper: Call backend login endpoint with Firebase ID token
+    const loginWithBackend = async (firebaseUser: any) => {
+      try {
+        console.log("=== LOGIN START ===")
+        const idToken = await firebaseUser.getIdToken()
+        console.log("Token obtained")
+    
+        const response = await fetch("/api/v1/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`
+          },
+        })  
+
+        console.log("Status:", response.status)
+    
+        const text = await response.text()
+        console.log("Response body:", text)
+    
+        let data = null
+        if (text) {
+          data = JSON.parse(text)
+          console.log("Parsed data:", data)
+        }
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError("No account found. Please sign up first.")
+            navigate("/register")
+            return false
+          }
+      
+          // IMPROVED: Extract the actual error message
+          const errorMsg = data?.error?.message || data?.error || data?.message || `Login failed: ${response.status}`
+          console.error("Error from server:", errorMsg)
+          throw new Error(errorMsg)
+        }
+
+        console.log("=== LOGIN SUCCESS ===")
+        return true
+
+      } catch (error: any) {
+        console.error("=== LOGIN ERROR ===")
+        console.error("Error type:", error.constructor?.name)
+        console.error("Error message:", error.message)
+        console.error("Full error:", error)
+    
+        // IMPROVED: Better error display
+        const displayError = error?.message || JSON.stringify(error) || "Failed to login"
+        setError(displayError)
+        return false
+      }
+    }
+    
+  // Email/Password Login
   const signInEmail: FormSubmitHandler = async (e) => {
     e.preventDefault()
     setAuthorizing(true)
     setError("")
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then((response) => {
-        if (auth.currentUser?.emailVerified === false) {
-          setAuthorizing(false)
-          console.log("email not verified")
-          setError(
-            "Email not verified. Please check your inbox for a verification email"
-          )
-          return
-        }
-        console.log("Signed in with email and password:", response.user.uid)
-        postLogin(email, auth.currentUser?.uid ?? "")
-        navigate("/dashboard")
-      })
-      .catch((error) => {
-        switch (error.code) {
-          case "auth/user-not-found":
-            setError("No account found with this email.")
-            break
-          case "auth/invalid-credential":
-            setError("Invalid email or password.")
-            break
-          case "auth/invalid-email":
-            setError("Invalid email.")
-            break
-          case "auth/invalid-password":
-            setError("Invalid password.")
-            break
-          case "auth/too-many-requests":
-            setError("Too many attempts. Please try again later.")
-            break
-          default:
-            console.log("default")
-            setError(error.message || "Failed to log in")
-        }
-        console.error("Error logging in with email and password:", error)
+    try {
+      const response = await signInWithEmailAndPassword(auth, email, password)
+
+      // Check email verification
+      if (!auth.currentUser?.emailVerified) {
         setAuthorizing(false)
-      })
+        setError(
+          "Email not verified. Please check your inbox for a verification email"
+        )
+        return
+      }
+
+      console.log("Firebase sign-in successful:", response.user.uid)
+
+      // Authenticate with backend
+      const backendSuccess = await loginWithBackend(response.user)
+
+      if (backendSuccess) {
+        navigate("/dashboard")
+      } else {
+        setAuthorizing(false)
+      }
+
+    } catch (error: any) {
+      switch (error.code) {
+        case "auth/user-not-found":
+          setError("No account found with this email.")
+          break
+        case "auth/invalid-credential":
+          setError("Invalid email or password.")
+          break
+        case "auth/invalid-email":
+          setError("Invalid email.")
+          break
+        case "auth/wrong-password":
+          setError("Invalid password.")
+          break
+        case "auth/too-many-requests":
+          setError("Too many attempts. Please try again later.")
+          break
+        default:
+          setError(error.message || "Failed to log in")
+      }
+      console.error("Firebase login error:", error)
+      setAuthorizing(false)
+    }
   }
 
+  // Google OAuth Login
   const googleLogin = async () => {
-    signInWithPopup(auth, providerGoogle)
-      .then((result) => {
-        const user = result.user
-        console.log("Logged in with Google:", user)
-        postLogin(user.email ?? "", user.uid)
+    setAuthorizing(true)
+    setError("")
+
+    try {
+      const result = await signInWithPopup(auth, providerGoogle)
+      const user = result.user
+      console.log("Google sign-in successful:", user.uid)
+
+      // Authenticate with backend
+      const backendSuccess = await loginWithBackend(user)
+
+      if (backendSuccess) {
         navigate("/dashboard")
-      })
-      .catch((error) => {
-        console.error("Error logging in with Google:", error)
-        setError("Failed to login in with Google")
-      })
+      } else {
+        setAuthorizing(false)
+      }
+
+    } catch (error: any) {
+      console.error("Google login error:", error)
+      
+      // User cancelled popup
+      if (error.code === "auth/popup-closed-by-user") {
+        setError("")
+      } else {
+        setError(error.message || "Failed to login with Google")
+      }
+      
+      setAuthorizing(false)
+    }
   }
 
+  // Microsoft OAuth Login
   const microsoftLogin = async () => {
-    signInWithPopup(auth, providerMicrosoft)
-      .then((result) => {
-        const user = result.user
-        console.log("Logged in with Microsoft:", user)
-        postLogin(user.email ?? "", user.uid)
+    setAuthorizing(true)
+    setError("")
+
+    try {
+      const result = await signInWithPopup(auth, providerMicrosoft)
+      const user = result.user
+      console.log("Microsoft sign-in successful:", user.uid)
+
+      // Authenticate with backend
+      const backendSuccess = await loginWithBackend(user)
+
+      if (backendSuccess) {
         navigate("/dashboard")
-      })
-      .catch((error) => {
-        console.error("Error logging in with Microsoft:", error)
-        setError("Failed to login in with Microsoft")
-      })
+      } else {
+        setAuthorizing(false)
+      }
+
+    } catch (error: any) {
+      console.error("Microsoft login error:", error)
+      
+      // User cancelled popup
+      if (error.code === "auth/popup-closed-by-user") {
+        setError("")
+      } else {
+        setError(error.message || "Failed to login with Microsoft")
+      }
+      
+      setAuthorizing(false)
+    }
   }
 
   return (
@@ -125,26 +217,32 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
         </CardHeader>
         <CardContent>
           {error && (
-            <div>
-              <p className="p-2 text-center text-sm text-red-600">{error}</p>
+            <div className="mb-4 rounded-md bg-red-50 p-3 border border-red-200">
+              <p className="text-sm text-red-600 text-center">{error}</p>
             </div>
           )}
           <form onSubmit={signInEmail}>
             <FieldGroup>
               <Field>
-                <Button variant="outline" type="button" onClick={googleLogin}>
+                <Button 
+                  variant="outline" 
+                  type="button" 
+                  onClick={googleLogin}
+                  disabled={authorizing}
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path
                       d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
                       fill="currentColor"
                     />
                   </svg>
-                  Login with Google
+                  {authorizing ? "Signing in..." : "Login with Google"}
                 </Button>
                 <Button
                   variant="outline"
                   type="button"
                   onClick={microsoftLogin}
+                  disabled={authorizing}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path
@@ -152,7 +250,7 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
                       fill="currentColor"
                     />
                   </svg>
-                  Login with Microsoft
+                  {authorizing ? "Signing in..." : "Login with Microsoft"}
                 </Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">

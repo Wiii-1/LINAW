@@ -1,3 +1,5 @@
+const { v4: uuidv4 } = require('uuid');
+
 class ValidationError extends Error {
   constructor(message, details = []) {
     super(message);
@@ -46,9 +48,13 @@ class assetRegistryService {
 
     const validated = this.validate("createAssetSchema", { body });
 
-    // allow id to come from either body or params (backwards compatibility)
-    const id = validated.body.id || (validated.params && validated.params.id)
+      // FIRST: Extract all fields from validated body
     const { color, size, owner, appraisedValue } = validated.body;
+
+    const id = (validated.body.id && validated.body.id.trim()) 
+    ? validated.body.id 
+    : uuidv4(); 
+
 
     await assetRegistryDao.createAsset({
       id,

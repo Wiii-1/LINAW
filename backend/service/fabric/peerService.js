@@ -1,6 +1,6 @@
 const { existsSync } = require("node:fs");
 const path = require("node:path");
-const { exec, execFile } = require("node:child_process");
+const { exec } = require("node:child_process");
 const { promisify } = require("node:util");
 const { randomUUID } = require("node:crypto");
 
@@ -12,7 +12,6 @@ const {
 } = require("../../validators/peer/provisionSchema");
 
 const execAsync = promisify(exec);
-const execFileAsync = promisify(execFile);
 const provisionedOrganizations = new Map();
 
 function buildPeerConfig(organization = "org1") {
@@ -105,11 +104,10 @@ async function runInContainer(containerName, command) {
     peerConfig.allowedContainerNames,
   );
 
-  const dockerArgs = ["exec", validated.containerName, "sh", "-lc", validated.command];
-  const dockerCmdDisplay = `docker ${dockerArgs.map((arg) => JSON.stringify(arg)).join(" ")}`;
+  const dockerCmd = `docker exec ${validated.containerName} sh -lc ${JSON.stringify(validated.command)}`;
 
   try {
-    const { stdout, stderr } = await execFileAsync("docker", dockerArgs, {
+    const { stdout, stderr } = await execAsync(dockerCmd, {
       env: process.env,
       maxBuffer: 10 * 1024 * 1024,
     });
@@ -117,7 +115,7 @@ async function runInContainer(containerName, command) {
     return {
       containerName: validated.containerName,
       command: validated.command,
-      dockerCmd: dockerCmdDisplay,
+      dockerCmd,
       stdout,
       stderr,
     };
@@ -130,8 +128,8 @@ async function runInContainer(containerName, command) {
       {
         stdout: error?.stdout ?? "",
         stderr: error?.stderr ?? "",
-        exitCode: error?.code,
-        dockerCmd: dockerCmdDisplay,
+        exitCode: error?.code,  
+        dockerCmd,
       },
     );
   }
