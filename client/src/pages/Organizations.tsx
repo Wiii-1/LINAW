@@ -222,6 +222,20 @@ export default function Organizations() {
     }
   }
 
+  async function refreshTenantsList(): Promise<Tenant[] | null> {
+    try {
+      const headers = await authHeaders()
+      const response = await fetch(`${backendUrl}/api/tenants`, { headers })
+      if (!response.ok) return null
+      const data = (await response.json()) as { tenants: Tenant[] }
+      tenantsSignatureRef.current = JSON.stringify(data.tenants)
+      setTenants(data.tenants)
+      return data.tenants
+    } catch {
+      return null
+    }
+  }
+
   async function handleDeleteTenant(tenantId: string) {
     if (
       !window.confirm(
@@ -250,16 +264,14 @@ export default function Organizations() {
         return
       }
 
-      const listHeaders = await authHeaders()
-      const listResponse = await fetch(`${backendUrl}/api/tenants`, {
-        headers: listHeaders,
-      })
-      if (listResponse.ok) {
-        const data = (await listResponse.json()) as { tenants: Tenant[] }
-        tenantsSignatureRef.current = JSON.stringify(data.tenants)
-        setTenants(data.tenants)
-      }
+      await refreshTenantsList()
     } catch (err) {
+      // Delete can succeed on the server while the client sees a dropped connection
+      // (e.g. nodemon restart while removing tenant files).
+      const tenants = await refreshTenantsList()
+      if (tenants && !tenants.some((t) => t.tenantId === tenantId)) {
+        return
+      }
       const message = err instanceof Error ? err.message : "Network error"
       alert(`Delete failed: ${message}`)
     }
@@ -291,7 +303,7 @@ export default function Organizations() {
         <main className="flex flex-1 flex-col gap-6 px-4 py-4 md:px-6 md:py-6">
           <PageHero
             title="Organizations"
-            description="Provision and manage your tenant certificate authorities (Firebase auth required)"
+            description="Provision and manage your tenant certificate authorities"
             actions={
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>

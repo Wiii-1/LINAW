@@ -6,12 +6,13 @@ const {
   rmSync,
   writeFileSync,
 } = require('fs');
-const { basename, join } = require('path');
+const { basename, join, resolve } = require('path');
 const forge = require('node-forge');
 const { FabricCaApiClient } = require('./fabricCaApiClient');
 
 const BACKEND_ROOT = join(__dirname, '..', '..');
-const TENANTS_DIR = process.env.TENANTS_DIR || join(BACKEND_ROOT, 'tenants');
+// Resolve so TENANTS_DIR=./tenants does not double up paths when cwd is also tenants/
+const TENANTS_DIR = resolve(process.env.TENANTS_DIR || join(BACKEND_ROOT, 'tenants'));
 const COMPOSE_CMD = process.env.COMPOSE_CMD || 'docker compose';
 
 class TenantCaOrchestrator {
@@ -59,7 +60,8 @@ class TenantCaOrchestrator {
       if (!existsSync(orgDir)) mkdirSync(orgDir, { recursive: true });
       if (!existsSync(orgClientDir)) mkdirSync(orgClientDir, { recursive: true });
 
-      const cmd = `${COMPOSE_CMD} -f ${composePath} up -d`;
+      const composeFile = basename(composePath);
+      const cmd = `${COMPOSE_CMD} -f ${composeFile} up -d`;
       console.log(`[${config.tenantId}] Starting containers: ${cmd}`);
       execSync(cmd, { cwd: TENANTS_DIR, stdio: 'inherit' });
 
@@ -135,18 +137,33 @@ class TenantCaOrchestrator {
     };
   }
 
-  async stopTenantCA(tenantId) {
+  async stopTenantContainers(tenantId) {
     const composePath = join(TENANTS_DIR, `compose-${tenantId}.yml`);
 
     if (existsSync(composePath)) {
-      const cmd = `${COMPOSE_CMD} -f ${composePath} down -v`;
+      const composeFile = basename(composePath);
+      const cmd = `${COMPOSE_CMD} -f ${composeFile} down -v`;
       console.log(`[${tenantId}] Stopping containers: ${cmd}`);
-      execSync(cmd, { cwd: TENANTS_DIR, stdio: 'inherit' });
+      try {
+        execSync(cmd, { cwd: TENANTS_DIR, stdio: 'inherit' });
+      } catch (error) {
+        console.error(`[${tenantId}] docker compose down failed (continuing cleanup):`, error);
+      }
       rmSync(composePath);
     }
 
     this.forceStopTenantContainers(tenantId);
+    console.log(`[${tenantId}] Containers stopped`);
+  }
+
+  async removeTenantData(tenantId) {
     this.removeTenantDirectory(tenantId);
+    console.log(`[${tenantId}] Tenant data removed`);
+  }
+
+  async stopTenantCA(tenantId) {
+    await this.stopTenantContainers(tenantId);
+    await this.removeTenantData(tenantId);
     console.log(`[${tenantId}] Containers stopped and cleaned up`);
   }
 

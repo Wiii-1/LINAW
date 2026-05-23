@@ -216,8 +216,17 @@ class TenantCaService {
       throw new AppError('Tenant CA deployment not found', 404, 'TENANT_CA_NOT_FOUND');
     }
 
-    await orchestrator.stopTenantCA(tenantId);
+    // Stop containers and remove DB row before deleting tenant files on disk.
+    // File removal can restart nodemon in dev and drop the HTTP connection.
+    await orchestrator.stopTenantContainers(tenantId);
     await tenantCaDao.deleteByTenantId(tenantId);
+
+    setImmediate(() => {
+      orchestrator.removeTenantData(tenantId).catch((err) => {
+        console.error(`[${tenantId}] Failed to remove tenant data after delete:`, err);
+      });
+    });
+
     return { message: 'Tenant deleted successfully' };
   }
 }
