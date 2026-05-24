@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - main
-      - jed
-
+      
 permissions:
   contents: read
   packages: write

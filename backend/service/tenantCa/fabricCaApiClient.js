@@ -24,6 +24,48 @@ class FabricCaApiClient {
     return this.get(path);
   }
 
+  async getCAChainPem(caname) {
+    const info = await this.getCAInfo(caname);
+    if (!info.success || !info.result?.CAChain) {
+      throw new Error(
+        `Failed to read CA chain${caname ? ` for ${caname}` : ''}: ${JSON.stringify(info.errors)}`,
+      );
+    }
+    return Buffer.from(info.result.CAChain, 'base64').toString('utf-8');
+  }
+
+  async addAffiliation(adminId, adminSecret, name, caname) {
+    const body = { name };
+    let path = '/api/v1/affiliations';
+    if (caname) path += `?ca=${encodeURIComponent(caname)}`;
+
+    const basicAuth = Buffer.from(`${adminId}:${adminSecret}`).toString('base64');
+    return this.post(path, JSON.stringify(body), {
+      Authorization: `Basic ${basicAuth}`,
+      'Content-Type': 'application/json',
+    });
+  }
+
+  async register(adminId, adminSecret, id, secret, options = {}) {
+    const body = {
+      id,
+      secret,
+      type: options.type || 'client',
+    };
+    if (options.affiliation) body.affiliation = options.affiliation;
+    if (options.attrs) body.attrs = options.attrs;
+    if (options.max_enrollments != null) body.max_enrollments = options.max_enrollments;
+
+    let path = '/api/v1/register';
+    if (options.caname) path += `?ca=${encodeURIComponent(options.caname)}`;
+
+    const basicAuth = Buffer.from(`${adminId}:${adminSecret}`).toString('base64');
+    return this.post(path, JSON.stringify(body), {
+      Authorization: `Basic ${basicAuth}`,
+      'Content-Type': 'application/json',
+    });
+  }
+
   post(path, body, headers) {
     return new Promise((resolve, reject) => {
       const options = {
