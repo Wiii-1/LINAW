@@ -1,5 +1,5 @@
 const organizationInviteService = require('../service/application/organizationInviteService')
-const userDao = require('../dao/userDao')
+const userDao = require('../dao/user/userDao')
 const AppError = require('../utils/AppError')
 
 class organizationInviteController {

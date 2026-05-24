@@ -3,10 +3,7 @@ import { PageHero } from "@/components/page-hero"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useEffect, useState, type CSSProperties } from "react"
-<<<<<<< HEAD
 import { getAuth } from "firebase/auth"
-=======
->>>>>>> jed
 import { Button } from "@/components/ui/button"
 import {
   Dialog,

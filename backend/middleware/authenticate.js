@@ -1,6 +1,6 @@
 const { auth } = require('../config/firebase-config')
 const AppError = require('../utils/AppError')
-const userDao = require('../dao/userDao') // ADD THIS
+const userDao = require('../dao/user/userDao') // ADD THIS
 
 class authenticate {
     async decodeToken (req, res, next) {
@@ -36,12 +36,7 @@ class authenticate {
                 email: decodedToken.email || null,
                 email_verified: decodedToken.email_verified || false,
                 role: decodedToken.role || 'user',
-<<<<<<< HEAD
                 tenantId: dbUser?.tenant_id || null, // CHANGED: Get from DB
-=======
-                userId: dbUser?.user_id ?? null,
-                tenantId: dbUser?.tenant_id || null,
->>>>>>> jed
                 claims: decodedToken
             }
 

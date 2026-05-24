@@ -1,4 +1,4 @@
-const userDao = require("../../dao/userDao");
+const userDao = require("../../dao/user/userDao");
 const { userSchema } = require("../../validators/user");
 const AppError = require("../../utils/AppError");
 const disposableService = require("./disposableEmailService");

@@ -551,15 +551,27 @@ export default function ApprovalWorkflow() {
                     </Field>
 
                     <Field>
-                      <Label htmlFor="file-name">File Name (Optional)</Label>
+                      <Label htmlFor="file">PDF File *</Label>
                       <Input
-                        id="file-name"
-                        placeholder="proposal.pdf"
-                        value={formData.fileName}
-                        onChange={(e) =>
-                          setFormData({ ...formData, fileName: e.target.value })
-                        }
+                        id="file"
+                        type="file"
+                        required
+                        accept="application/pdf,.pdf"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null
+
+                          setFormData({
+                            ...formData,
+                            file,
+                            fileName: file?.name ?? "",
+                          })
+                        }}
                       />
+                      {formData.fileName ? (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Selected file: {formData.fileName}
+                        </p>
+                      ) : null}
                     </Field>
 
                     {error ? (

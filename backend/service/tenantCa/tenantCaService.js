@@ -6,7 +6,7 @@ const {
   writeFileSync,
 } = require('fs');
 const db = require('../../db/db');
-const tenantCaDao = require('../../dao/tenantCaDao');
+const tenantCaDao = require('../../dao/blockchain/tenantCaDao');
 const AppError = require('../../utils/AppError');
 const { validateTenantProvisionRequest } = require('../../validators/tenant/tenantSchema');
 const { encryptValue, getEncryptionKey } = require('./encryptionService');

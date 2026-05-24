@@ -1,5 +1,5 @@
-const db = require("../db/db");
-const AppError = require("../utils/AppError");
+const db = require("../../db/db");
+const AppError = require("../../utils/AppError");
 
 class UserDao {
   async signup(data) {

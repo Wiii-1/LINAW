@@ -5,7 +5,7 @@ const organizationDao = require("../../dao/organizations/organizationDao");
 const organizationUserDao = require("../../dao/organizations/organziationUserDao");
 const organizationInviteDao = require("../../dao/organizations/organizationInviteDao");
 const db = require("../../db/db")
-const userDao = require("../../dao/userDao");
+const userDao = require("../../dao/user/userDao");
 
 function buildInviteLink(rawToken) {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
