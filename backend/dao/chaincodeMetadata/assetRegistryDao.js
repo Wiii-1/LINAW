@@ -3,11 +3,12 @@ const db = require("../../db/db");
 class AssetRegistryDao {
   async createAsset(data) {
     try {
-      const { asset_id, color, size, owner, appraisedValue, requestedBy } = data;
+      const { id, tenantId, color, size, owner, appraisedValue, requestedBy } = data;
 
       const [asset] = await db("asset_registry")
         .insert({
-          asset_id,
+          asset_id: id,
+          tenant_id: tenantId,
           color,
           size,
           owner,

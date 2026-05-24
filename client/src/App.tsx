@@ -19,8 +19,8 @@ const SmartContracts = lazy(() => import("./pages/SmartContracts"))
 const Analytics = lazy(() => import("./pages/Analytics"))
 const Assets = lazy(() => import("./pages/Assets"))
 const Submissions = lazy(() => import("./pages/Submissions"))
-const Blockchain = lazy(() => import("./pages/Blockchain"))
-const Channels = lazy(() => import("./pages/Channels"))
+// const Blockchain = lazy(() => import("./pages/Blockchain"))
+// const Channels = lazy(() => import("./pages/Channels"))
 const Account = lazy(() => import("./pages/Account"))
 const Settings = lazy(() => import("./pages/Settings"))
 const Members = lazy(() => import("./pages/Members"))
@@ -105,22 +105,22 @@ export function App() {
                 </AuthenticationRoute>
               }
             />
-            <Route
+            {/* <Route
               path="/blockchain"
               element={
                 <AuthenticationRoute>
                   <Blockchain />
                 </AuthenticationRoute>
               }
-            />
-            <Route
+            /> */}
+            {/* <Route
               path="/channels"
               element={
                 <AuthenticationRoute>
                   <Channels />
                 </AuthenticationRoute>
               }
-            />
+            /> */}
             <Route
               path="/account"
               element={

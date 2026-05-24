@@ -17,8 +17,7 @@ import {
   ScrollText,
   PackageIcon,
   ClipboardListIcon,
-  NetworkIcon,
-  Link2Icon,
+  
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
@@ -59,16 +58,7 @@ const navMainData = [
     url: "/submissions",
     icon: <ClipboardListIcon />,
   },
-  {
-    title: "Blockchain",
-    url: "/blockchain",
-    icon: <NetworkIcon />,
-  },
-  {
-    title: "Channels",
-    url: "/blockchain/channels",
-    icon: <Link2Icon />,
-  },
+  // Blockchain menu temporarily hidden
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

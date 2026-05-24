@@ -1,5 +1,5 @@
-const tenantCaDao = require('../../dao/tenantCaDao');
-const tenantFabricOrgDao = require('../../dao/tenantFabricOrgDao');
+const tenantCaDao = require('../../dao/blockchain/tenantCaDao');
+const tenantFabricOrgDao = require('../../dao/blockchain/tenantFabricOrgDao');
 const organizationDao = require('../../dao/organizations/organizationDao');
 const AppError = require('../../utils/AppError');
 const { validateFabricOrgRequest, validateOrgTypeParam } = require('../../validators/tenant/fabricOrgSchema');
