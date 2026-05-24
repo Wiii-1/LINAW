@@ -104,16 +104,17 @@ class ApprovalWorkflowService {
             throw new AppError('Submission not found', 404, 'SUBMISSION_NOT_FOUND');
         }
 
+        if (metadata?.objectKey && metadata?.bucketName) {
+            await fileService.deleteSubmissionFile({
+                bucketName: metadata.bucketName,
+                objectKey: metadata.objectKey
+            });
+        }
+
         // await approvalWorkflow.deleteSubmission({
         //     submissionId,
         //     owner: user?.uid
         // });
-
-        if (metadata?.objectKey) {
-            await fileService.deleteSubmissionFile({
-                objectKey: metadata.objectKey
-            })
-        }
 
         // Copilot note: Use metadata.owner (which is user_id from database) for DAO deletion
         await submissionDao.deleteSubmission({

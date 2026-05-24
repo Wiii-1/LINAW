@@ -1,5 +1,5 @@
-const db = require('../db/db');
-const AppError = require('../utils/appError');
+const db = require("../../db/db");
+const AppError = require('../../utils/AppError');
 
 class tenantStorageDao {
     async findByTenantId(tenant_id){

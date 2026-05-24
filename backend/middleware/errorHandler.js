@@ -27,7 +27,6 @@ function normalizeError(err) {
     );
   }
 
-  // Handle Multer file upload errors
   if (err && err.name === 'MulterError') {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return new AppError('File size exceeds 10MB limit', 400, 'FILE_TOO_LARGE');
@@ -66,18 +65,32 @@ function normalizeError(err) {
       ? err.details
       : undefined;
 
-  return new AppError(
-    statusCode >= 500 ? 'Internal server error' : (err?.message || 'Request failed'),
+  const normalized = new AppError(
+    err?.message || (statusCode >= 500 ? 'Internal server error' : 'Request failed'),
     statusCode,
     code,
     details
   );
+
+  normalized.cause = err;
+  return normalized;
 }
 
 function errorHandler(err, req, res, next) {
+  console.error('[RAW ERROR]', {
+    name: err?.name,
+    message: err?.message,
+    code: err?.code,
+    statusCode: err?.statusCode,
+    details: err?.details,
+    stack: err?.stack,
+    path: req.originalUrl,
+    method: req.method,
+  });
+
   const normalized = normalizeError(err);
 
-  console.error({
+  console.error('[NORMALIZED ERROR]', {
     name: normalized.name,
     message: normalized.message,
     code: normalized.code,

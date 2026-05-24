@@ -18,6 +18,7 @@ import {
   PackageIcon,
   ClipboardListIcon,
   NetworkIcon,
+  Link2Icon,
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
@@ -62,6 +63,11 @@ const navMainData = [
     title: "Blockchain",
     url: "/blockchain",
     icon: <NetworkIcon />,
+  },
+  {
+    title: "Channels",
+    url: "/blockchain/channels",
+    icon: <Link2Icon />,
   },
 ]
 
