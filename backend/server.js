@@ -10,7 +10,6 @@ const port = Number(process.env.PORT ?? 3000);
 
 const { router: usersRouter } = require("./routes/usersRoute");
 const { router: fabricRouter } = require("./routes/fabricRoute");
-const { router: peerRouter } = require("./routes/peerRoute");
 const { router: disposableRouter } = require("./routes/disposableEmailRoute");
 const { router: tenantRouter } = require("./routes/tenantRoute");
 
@@ -31,7 +30,6 @@ app.use("/api/v1", usersRouter);
 app.use("/api/v1/disposable-email", disposableRouter);
 app.use("/api/tenants", tenantRouter);
 app.use("/api/v1", fabricRouter);
-app.use("/api/v2/fabric", peerRouter);
 
 app.use(errorHandler);
 

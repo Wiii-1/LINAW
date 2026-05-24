@@ -98,42 +98,21 @@ class TenantCaOrchestrator {
   async initializeTenantCAs(config) {
     const tlsClient = new FabricCaApiClient(`localhost:${config.tlsCaPort}`);
     const orgClient = new FabricCaApiClient(`localhost:${config.orgCaPort}`);
-    const tlsIdentity = this.generateEnrollmentCSR(config.tlsAdminUser);
-    const orgIdentity = this.generateEnrollmentCSR(config.orgAdminUser);
 
-    console.log(`[${config.tenantId}] Enrolling TLS CA admin...`);
-    const tlsEnrollRes = await tlsClient.enroll(
-      config.tlsAdminUser,
-      config.tlsAdminPassword,
-      tlsIdentity.csrPem,
-      config.tlsCaName,
-    );
+    // Fetch CA root chains only. Do NOT enroll bootstrap admins here: enrolling
+    // consumes their enrollment quota and disables password auth for /register,
+    // which peer/orderer provisioning relies on.
+    console.log(`[${config.tenantId}] Fetching TLS CA certificate chain...`);
+    const tlsCertPem = await tlsClient.getCAChainPem(config.tlsCaName);
 
-    if (!tlsEnrollRes.success || !tlsEnrollRes.result?.Cert) {
-      throw new Error(`TLS CA enroll failed: ${JSON.stringify(tlsEnrollRes.errors)}`);
-    }
-
-    const tlsCertPem = Buffer.from(tlsEnrollRes.result.Cert, 'base64').toString('utf-8');
-
-    console.log(`[${config.tenantId}] Enrolling Org CA admin...`);
-    const orgEnrollRes = await orgClient.enroll(
-      config.orgAdminUser,
-      config.orgAdminPassword,
-      orgIdentity.csrPem,
-      config.orgCaName,
-    );
-
-    if (!orgEnrollRes.success || !orgEnrollRes.result?.Cert) {
-      throw new Error(`Org CA enroll failed: ${JSON.stringify(orgEnrollRes.errors)}`);
-    }
-
-    const orgCertPem = Buffer.from(orgEnrollRes.result.Cert, 'base64').toString('utf-8');
+    console.log(`[${config.tenantId}] Fetching Org CA certificate chain...`);
+    const orgCertPem = await orgClient.getCAChainPem(config.orgCaName);
 
     return {
       tlsCertPem,
       orgCertPem,
-      tlsPrivateKey: tlsIdentity.privateKeyPem,
-      orgPrivateKey: orgIdentity.privateKeyPem,
+      tlsPrivateKey: null,
+      orgPrivateKey: null,
     };
   }
 

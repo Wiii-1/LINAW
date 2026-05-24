@@ -12,6 +12,7 @@ const { validateTenantProvisionRequest } = require('../../validators/tenant/tena
 const { encryptValue, getEncryptionKey } = require('./encryptionService');
 const { allocateTenantPorts } = require('./tenantPortAllocator');
 const { TenantCaOrchestrator, TENANTS_DIR } = require('./tenantCaOrchestratorService');
+const tenantFabricOrgService = require('../tenantFabric/tenantFabricOrgService');
 
 const orchestrator = new TenantCaOrchestrator();
 const COMPOSE_TEMPLATE_PATH = path.join(
@@ -53,9 +54,13 @@ function persistCertFiles(tenantId, input, certs, ports) {
   if (!existsSync(orgDir)) mkdirSync(orgDir, { recursive: true });
 
   writeFileSync(path.join(tlsDir, `tls-ca-${tenantId}.pem`), certs.tlsCertPem, 'utf8');
-  writeFileSync(path.join(tlsDir, `tls-ca-${tenantId}-key.pem`), certs.tlsPrivateKey, 'utf8');
   writeFileSync(path.join(orgDir, `org-ca-${tenantId}.pem`), certs.orgCertPem, 'utf8');
-  writeFileSync(path.join(orgDir, `org-ca-${tenantId}-key.pem`), certs.orgPrivateKey, 'utf8');
+  if (certs.tlsPrivateKey) {
+    writeFileSync(path.join(tlsDir, `tls-ca-${tenantId}-key.pem`), certs.tlsPrivateKey, 'utf8');
+  }
+  if (certs.orgPrivateKey) {
+    writeFileSync(path.join(orgDir, `org-ca-${tenantId}-key.pem`), certs.orgPrivateKey, 'utf8');
+  }
   writeFileSync(
     path.join(tenantDir, 'tenant-metadata.json'),
     JSON.stringify(
@@ -215,6 +220,9 @@ class TenantCaService {
     if (!row) {
       throw new AppError('Tenant CA deployment not found', 404, 'TENANT_CA_NOT_FOUND');
     }
+
+    // Stop fabric org containers and remove fabric org rows before CA teardown.
+    await tenantFabricOrgService.cleanupAllForTenant(tenantId);
 
     // Stop containers and remove DB row before deleting tenant files on disk.
     // File removal can restart nodemon in dev and drop the HTTP connection.

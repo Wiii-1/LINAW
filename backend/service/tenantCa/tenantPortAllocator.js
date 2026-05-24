@@ -4,6 +4,12 @@ const TLS_CA_BASE = 7054;
 const ORG_CA_BASE = 8054;
 const TLS_OPS_BASE = 17054;
 const ORG_OPS_BASE = 18054;
+const PEER_BASE = 9051;
+const CHAINCODE_BASE = 10051;
+const COUCHDB_BASE = 5984;
+const ORDERER_BASE = 11050;
+const ORDERER_ADMIN_BASE = 12050;
+const OPERATIONS_BASE = 9443;
 const PORT_RANGE_SIZE = 200;
 
 function buildPortRange(base) {
@@ -52,7 +58,47 @@ async function allocateTenantPorts(reservedPorts = []) {
   return { tlsCaPort, orgCaPort, tlsCaOpsPort, orgCaOpsPort };
 }
 
+async function allocatePeerPorts(reservedPorts = []) {
+  const reserved = new Set(reservedPorts);
+
+  const peerPort = await pickAvailablePort(buildPortRange(PEER_BASE), reserved);
+  if (peerPort === null) throw new Error('No available peer port in range');
+  reserved.add(peerPort);
+
+  const chaincodePort = await pickAvailablePort(buildPortRange(CHAINCODE_BASE), reserved);
+  if (chaincodePort === null) throw new Error('No available chaincode port in range');
+  reserved.add(chaincodePort);
+
+  const couchdbPort = await pickAvailablePort(buildPortRange(COUCHDB_BASE), reserved);
+  if (couchdbPort === null) throw new Error('No available CouchDB port in range');
+  reserved.add(couchdbPort);
+
+  const operationsPort = await pickAvailablePort(buildPortRange(OPERATIONS_BASE), reserved);
+  if (operationsPort === null) throw new Error('No available operations port in range');
+
+  return { peerPort, chaincodePort, couchdbPort, operationsPort };
+}
+
+async function allocateOrdererPorts(reservedPorts = []) {
+  const reserved = new Set(reservedPorts);
+
+  const ordererPort = await pickAvailablePort(buildPortRange(ORDERER_BASE), reserved);
+  if (ordererPort === null) throw new Error('No available orderer port in range');
+  reserved.add(ordererPort);
+
+  const ordererAdminPort = await pickAvailablePort(buildPortRange(ORDERER_ADMIN_BASE), reserved);
+  if (ordererAdminPort === null) throw new Error('No available orderer admin port in range');
+  reserved.add(ordererAdminPort);
+
+  const operationsPort = await pickAvailablePort(buildPortRange(OPERATIONS_BASE), reserved);
+  if (operationsPort === null) throw new Error('No available orderer operations port in range');
+
+  return { ordererPort, ordererAdminPort, operationsPort };
+}
+
 module.exports = {
   allocateTenantPorts,
+  allocatePeerPorts,
+  allocateOrdererPorts,
   isPortAvailable,
 };
