@@ -10,6 +10,8 @@ NOTES.md
 ChainCodeSecurity.md
 database
 tenants
+graphify-out
+.workspaces
 /*.pid
 /*.log
 /*.yaml

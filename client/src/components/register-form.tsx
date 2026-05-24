@@ -60,8 +60,24 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
     }
 
     try {
+      // If a user is already signed in, include their ID token.
+      const currentUser = auth.currentUser
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      }
+
+      if (currentUser) {
+        try {
+          const token = await currentUser.getIdToken()
+          if (token) headers["Authorization"] = `Bearer ${token}`
+        } catch (e) {
+          console.warn("Could not obtain ID token for disposable-email check", e)
+        }
+      }
+
       const resp = await fetch(
-        `/api/v1/disposable-email/${encodeURIComponent(email)}`
+        `/api/v1/disposable-email/${encodeURIComponent(email)}`,
+        { headers }
       )
       if (!resp.ok) {
         console.error("Disposable email check failed with status:", resp.status)

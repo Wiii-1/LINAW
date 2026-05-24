@@ -3,6 +3,7 @@ import { PageHero } from "@/components/page-hero"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useEffect, useState, type CSSProperties } from "react"
+import { getAuth } from "firebase/auth"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -99,9 +100,105 @@ export default function ApprovalWorkflow() {
   const [formData, setFormData] = useState({
     proposalType: "",
     fileName: "",
+    file: null as File | null,
   })
 
   const [actionRemarks, setActionRemarks] = useState("")
+  const backendUrl = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3000"
+
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    const auth = getAuth()
+    const token = await auth.currentUser?.getIdToken()
+
+    if (!token) {
+      throw new Error("Authentication required")
+    }
+
+    return {
+      Authorization: `Bearer ${token}`,
+    }
+  }
+
+  const getJsonAuthHeaders = async (): Promise<Record<string, string>> => {
+    const headers = await getAuthHeaders()
+
+    return {
+      ...headers,
+      "Content-Type": "application/json",
+    }
+  }
+
+  const parseJsonResponse = async (response: Response) => {
+    const text = await response.text()
+    if (!text) return null
+
+    try {
+      return JSON.parse(text)
+    } catch {
+      return null
+    }
+  }
+
+  const mapSubmission = (item: Record<string, unknown>, fallback: Submission): Submission => {
+    const rawStatus =
+      (typeof item.status === "string" && item.status.toLowerCase()) ||
+      fallback.status
+    const status =
+      rawStatus === "draft" ||
+      rawStatus === "submitted" ||
+      rawStatus === "approved" ||
+      rawStatus === "rejected" ||
+      rawStatus === "changes-requested"
+        ? rawStatus
+        : fallback.status
+
+    const rawId = item.submission_id ?? item.submissionId ?? fallback.submission_id
+    const parsedId = typeof rawId === "number" ? rawId : Number.parseInt(String(rawId), 10)
+
+    return {
+      submission_id: Number.isFinite(parsedId) ? parsedId : fallback.submission_id,
+      proposalType:
+        (typeof item.proposalType === "string" && item.proposalType) ||
+        (typeof item.proposal_type === "string" && item.proposal_type) ||
+        fallback.proposalType,
+      status,
+      owner:
+        (typeof item.ownerName === "string" && item.ownerName) ||
+        (typeof item.owner === "string" && item.owner) ||
+        fallback.owner,
+      fileName:
+        (typeof item.fileName === "string" && item.fileName) ||
+        (typeof item.originalFileName === "string" && item.originalFileName) ||
+        fallback.fileName,
+      fileSize:
+        typeof item.fileSize === "number"
+          ? item.fileSize
+          : typeof item.size === "number"
+            ? item.size
+            : fallback.fileSize,
+      remarks:
+        (typeof item.remarks === "string" && item.remarks) ||
+        fallback.remarks,
+      created_at:
+        (typeof item.created_at === "string" && item.created_at) ||
+        (typeof item.createdAt === "string" && item.createdAt) ||
+        fallback.created_at,
+      updated_at:
+        (typeof item.updated_at === "string" && item.updated_at) ||
+        (typeof item.updatedAt === "string" && item.updatedAt) ||
+        fallback.updated_at,
+    }
+  }
+
+  const setUpdatedSubmissionState = (updated: Submission) => {
+    setSubmissions((prev) =>
+      prev.map((s) => (s.submission_id === updated.submission_id ? updated : s))
+    )
+
+    if (viewingSubmission?.submission_id === updated.submission_id) {
+      setViewingSubmission(updated)
+    }
+  }
 
   // Load submissions on mount
   useEffect(() => {
@@ -109,6 +206,7 @@ export default function ApprovalWorkflow() {
       setLoading(true)
       setError(null)
       try {
+        // TODO: replace mock with backend GET + auth header when list endpoint is available
         // Mock data for demo (backendUrl can be used for real API calls)
         setSubmissions([
           {
@@ -177,9 +275,46 @@ export default function ApprovalWorkflow() {
         return
       }
 
-      const newSubmission: Submission = {
-        submission_id:
-          Math.max(...submissions.map((s) => s.submission_id), 0) + 1,
+      if (!formData.file) {
+        setError("Please upload a PDF file")
+        return
+      }
+
+      if (
+        formData.file.type !== "application/pdf" &&
+        !formData.file.name.endsWith(".pdf")
+      ) {
+        setError("Only PDF files are allowed")
+        return
+      }
+
+      const form = new FormData()
+      form.append("proposalType", formData.proposalType)
+      form.append("file", formData.file, formData.file.name)
+
+      const headers = await getAuthHeaders()
+      const response = await fetch(`${backendUrl}/api/v1/submissions`, {
+        method: "POST",
+        headers,
+        body: form,
+      })
+
+      const data = await parseJsonResponse(response)
+
+      if (!response.ok) {
+        const errorMessage =
+          data &&
+          typeof data === "object" &&
+          data.error &&
+          typeof data.error === "object" &&
+          typeof (data.error as { message?: unknown }).message === "string"
+            ? ((data.error as { message: string }).message)
+            : "Failed to create submission"
+        throw new Error(errorMessage)
+      }
+
+      const fallback: Submission = {
+        submission_id: Math.max(...submissions.map((s) => s.submission_id), 0) + 1,
         proposalType: formData.proposalType,
         status: "draft",
         owner: "Current User",
@@ -187,8 +322,18 @@ export default function ApprovalWorkflow() {
         created_at: new Date().toISOString(),
       }
 
-      setSubmissions((prev) => [newSubmission, ...prev])
-      setFormData({ proposalType: "", fileName: "" })
+      const createdSource =
+        data && typeof data === "object"
+          ? (data as { data?: unknown }).data ?? data
+          : null
+
+      const createdSubmission =
+        createdSource && typeof createdSource === "object"
+          ? mapSubmission(createdSource as Record<string, unknown>, fallback)
+          : fallback
+
+      setSubmissions((prev) => [createdSubmission, ...prev])
+      setFormData({ proposalType: "", fileName: "", file: null })
       setIsDialogOpen(false)
     } catch (err) {
       setError(
@@ -197,14 +342,54 @@ export default function ApprovalWorkflow() {
     }
   }
 
-  const handleSubmitForApproval = (submission: Submission) => {
-    const updated = { ...submission, status: "submitted" as const }
-    setSubmissions((prev) =>
-      prev.map((s) =>
-        s.submission_id === submission.submission_id ? updated : s
+  const handleSubmitForApproval = async (submission: Submission) => {
+    try {
+      setError(null)
+      const headers = await getJsonAuthHeaders()
+      const response = await fetch(
+        `${backendUrl}/api/v1/submissions/${submission.submission_id}/submit`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({}),
+        }
       )
-    )
-    setViewingSubmission(updated)
+
+      const data = await parseJsonResponse(response)
+
+      if (!response.ok) {
+        const errorMessage =
+          data &&
+          typeof data === "object" &&
+          data.error &&
+          typeof data.error === "object" &&
+          typeof (data.error as { message?: unknown }).message === "string"
+            ? ((data.error as { message: string }).message)
+            : "Failed to submit for approval"
+        throw new Error(errorMessage)
+      }
+
+      const updatedSource =
+        data && typeof data === "object"
+          ? (data as { data?: unknown }).data ?? data
+          : null
+      const fallbackUpdated: Submission = {
+        ...submission,
+        status: "submitted",
+        updated_at: new Date().toISOString(),
+      }
+
+      const updated =
+        updatedSource && typeof updatedSource === "object"
+          ? mapSubmission(updatedSource as Record<string, unknown>, fallbackUpdated)
+          : fallbackUpdated
+
+      setUpdatedSubmissionState(updated)
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to submit for approval"
+      )
+    }
   }
 
   const handleApprovalAction = (
@@ -214,42 +399,73 @@ export default function ApprovalWorkflow() {
     setActionDialog({ type, submission })
   }
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (!actionDialog.submission || !actionDialog.type) return
 
-    let newStatus: Submission["status"]
-    switch (actionDialog.type) {
-      case "approve":
-        newStatus = "approved"
-        break
-      case "reject":
-        newStatus = "rejected"
-        break
-      case "request-changes":
-        newStatus = "changes-requested"
-        break
-    }
+    try {
+      setError(null)
 
-    const updated = {
-      ...actionDialog.submission,
-      status: newStatus,
-      remarks: actionRemarks,
-    }
+      const endpointByType: Record<"approve" | "reject" | "request-changes", string> = {
+        approve: "approve",
+        reject: "reject",
+        "request-changes": "request-changes",
+      }
 
-    setSubmissions((prev) =>
-      prev.map((s) =>
-        s.submission_id === actionDialog.submission!.submission_id ? updated : s
+      const nextStatusByType: Record<"approve" | "reject" | "request-changes", Submission["status"]> = {
+        approve: "approved",
+        reject: "rejected",
+        "request-changes": "changes-requested",
+      }
+
+      const endpoint = endpointByType[actionDialog.type]
+      const headers = await getJsonAuthHeaders()
+      const response = await fetch(
+        `${backendUrl}/api/v1/submissions/${actionDialog.submission.submission_id}/${endpoint}`,
+        {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify({ remarks: actionRemarks }),
+        }
       )
-    )
 
-    if (
-      viewingSubmission?.submission_id === actionDialog.submission.submission_id
-    ) {
-      setViewingSubmission(updated)
+      const data = await parseJsonResponse(response)
+
+      if (!response.ok) {
+        const errorMessage =
+          data &&
+          typeof data === "object" &&
+          data.error &&
+          typeof data.error === "object" &&
+          typeof (data.error as { message?: unknown }).message === "string"
+            ? ((data.error as { message: string }).message)
+            : "Failed to update submission status"
+        throw new Error(errorMessage)
+      }
+
+      const updatedSource =
+        data && typeof data === "object"
+          ? (data as { data?: unknown }).data ?? data
+          : null
+      const fallbackUpdated: Submission = {
+        ...actionDialog.submission,
+        status: nextStatusByType[actionDialog.type],
+        remarks: actionRemarks,
+        updated_at: new Date().toISOString(),
+      }
+
+      const updated =
+        updatedSource && typeof updatedSource === "object"
+          ? mapSubmission(updatedSource as Record<string, unknown>, fallbackUpdated)
+          : fallbackUpdated
+
+      setUpdatedSubmissionState(updated)
+      setActionDialog({ type: null, submission: null })
+      setActionRemarks("")
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to update submission status"
+      )
     }
-
-    setActionDialog({ type: null, submission: null })
-    setActionRemarks("")
   }
 
   const getStatusIcon = (status: Submission["status"]) => {
@@ -335,15 +551,25 @@ export default function ApprovalWorkflow() {
                     </Field>
 
                     <Field>
-                      <Label htmlFor="file-name">File Name (Optional)</Label>
+                      <Label htmlFor="file">PDF File *</Label>
                       <Input
-                        id="file-name"
-                        placeholder="proposal.pdf"
-                        value={formData.fileName}
-                        onChange={(e) =>
-                          setFormData({ ...formData, fileName: e.target.value })
-                        }
+                        id="file"
+                        type="file"
+                        accept="application/pdf,.pdf"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null
+                          setFormData({
+                            ...formData,
+                            file,
+                            fileName: file?.name ?? "",
+                          })
+                        }}
                       />
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {formData.fileName
+                          ? `Selected file: ${formData.fileName}`
+                          : "Choose a PDF file to upload."}
+                      </p>
                     </Field>
 
                     {error ? (

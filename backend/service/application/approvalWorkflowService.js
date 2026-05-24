@@ -79,13 +79,13 @@ class ApprovalWorkflowService {
         });
 
         // Pass firebase_uid to fabric service (for chaincode)
-        await approvalWorkflow.createSubmission({
-            submissionId,
-            owner: user?.uid,
-            role: user?.role,
-            proposalType,
-            docHash: fileMeta.docHash
-        });
+        // await approvalWorkflow.createSubmission({
+        //     submissionId,
+        //     owner: user?.uid,
+        //     role: user?.role,
+        //     proposalType,
+        //     docHash: fileMeta.docHash
+        // });
 
         return {
             submissionId,
@@ -104,10 +104,10 @@ class ApprovalWorkflowService {
             throw new AppError('Submission not found', 404, 'SUBMISSION_NOT_FOUND');
         }
 
-        await approvalWorkflow.deleteSubmission({
-            submissionId,
-            owner: user?.uid
-        });
+        // await approvalWorkflow.deleteSubmission({
+        //     submissionId,
+        //     owner: user?.uid
+        // });
 
         if (metadata?.objectKey) {
             await fileService.deleteSubmissionFile({
@@ -130,10 +130,10 @@ class ApprovalWorkflowService {
         const validated = this.validate('submitForApproval', { params });
         const submissionId = validated.params.submissionId;
 
-        return await approvalWorkflow.submitForApproval({
-            submissionId,
-            owner: user?.uid
-        });
+        // return await approvalWorkflow.submitForApproval({
+        //     submissionId,
+        //     owner: user?.uid
+        // });
     }
 
     async approveSubmission({ params, body, user }) {
@@ -141,11 +141,11 @@ class ApprovalWorkflowService {
         const submissionId = validated.params.submissionId;
         const { remarks } = validated.body;
 
-        return await approvalWorkflow.approveSubmission({
-            submissionId,
-            approver: user?.uid,
-            remarks
-        });
+        // return await approvalWorkflow.approveSubmission({
+        //     submissionId,
+        //     approver: user?.uid,
+        //     remarks
+        // });
     }
 
     async requestChanges({ params, body, user }) {
@@ -153,11 +153,11 @@ class ApprovalWorkflowService {
         const submissionId = validated.params.submissionId;
         const { remarks } = validated.body;
 
-        return await approvalWorkflow.requestChanges({
-            submissionId,
-            approver: user?.uid,
-            remarks
-        });
+        // return await approvalWorkflow.requestChanges({
+        //     submissionId,
+        //     approver: user?.uid,
+        //     remarks
+        // });
     }
 
     async rejectSubmission({ params, body, user }) {
@@ -165,11 +165,11 @@ class ApprovalWorkflowService {
         const submissionId = validated.params.submissionId;
         const { remarks } = validated.body;
 
-        return await approvalWorkflow.rejectSubmission({
-            submissionId,
-            approver: user?.uid,
-            remarks
-        });
+        // return await approvalWorkflow.rejectSubmission({
+        //     submissionId,
+        //     approver: user?.uid,
+        //     remarks
+        // });
     }
 
     async resubmitSubmission({ params, body, user, file }) {
@@ -193,11 +193,11 @@ class ApprovalWorkflowService {
             size: fileMeta.size
         });
 
-        await approvalWorkflow.resubmitSubmission({
-            submissionId,
-            owner: user?.uid,
-            newDocHash: fileMeta.docHash
-        });
+        // await approvalWorkflow.resubmitSubmission({
+        //     submissionId,
+        //     owner: user?.uid,
+        //     newDocHash: fileMeta.docHash
+        // });
 
         return {
             submissionId,
@@ -218,9 +218,9 @@ class ApprovalWorkflowService {
         const validated = this.validate('getSubmissionHistory', { params });
         const submissionId = validated.params.submissionId;
 
-        return await approvalWorkflow.getSubmissionHistory({
-            submissionId
-        });
+        // return await approvalWorkflow.getSubmissionHistory({
+        //     submissionId
+        // });
     }
 }
 

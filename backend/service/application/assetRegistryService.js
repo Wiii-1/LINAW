@@ -66,15 +66,15 @@ class assetRegistryService {
       requestedBy: user.uid,
     });
 
-    return await assetService.createAsset({
-      id,
-      tenantId: user.tenantId,
-      color,
-      size,
-      owner,
-      appraisedValue,
-      requestedBy: user.uid,
-    });
+    // return await assetService.createAsset({
+    //   id,
+    //   tenantId: user.tenantId,
+    //   color,
+    //   size,
+    //   owner,
+    //   appraisedValue,
+    //   requestedBy: user.uid,
+    // });
   }
 
   async assetTransfer({ params, body, user }) {
@@ -94,12 +94,12 @@ class assetRegistryService {
       requestedBy: user.uid,
     });
 
-    return await assetService.assetTransfer({
-      id,
-      tenantId: user.tenantId,
-      owner,
-      requestedBy: user.uid,
-    });
+    // return await assetService.assetTransfer({
+    //   id,
+    //   tenantId: user.tenantId,
+    //   owner,
+    //   requestedBy: user.uid,
+    // });
   }
 
   async assetUpdate({ params, body, user }) {
@@ -122,15 +122,15 @@ class assetRegistryService {
       requestedBy: user.uid,
     });
 
-    return await assetService.assetUpdate({
-      id,
-      tenantId: user.tenantId,
-      color,
-      size,
-      owner,
-      appraisedValue,
-      requestedBy: user.uid,
-    });
+    // return await assetService.assetUpdate({
+    //   id,
+    //   tenantId: user.tenantId,
+    //   color,
+    //   size,
+    //   owner,
+    //   appraisedValue,
+    //   requestedBy: user.uid,
+    // });
   }
 
   async assetDelete({ params, user }) {
@@ -148,11 +148,11 @@ class assetRegistryService {
       requestedBy: user.uid,
     });
 
-    return await assetService.assetDelete({
-      id,
-      tenantId: user.tenantId,
-      requestedBy: user.uid,
-    });
+    // return await assetService.assetDelete({
+    //   id,
+    //   tenantId: user.tenantId,
+    //   requestedBy: user.uid,
+    // });
   }
 
   async assetRead({ params, user }) {
@@ -164,11 +164,11 @@ class assetRegistryService {
 
     const { id } = validated.params;
 
-    return await assetService.assetRead({
-      id,
-      tenantId: user.tenantId,
-      requestedBy: user.uid,
-    });
+    // return await assetService.assetRead({
+    //   id,
+    //   tenantId: user.tenantId,
+    //   requestedBy: user.uid,
+    // });
   }
 
   async assetReadAll({ user }) {
@@ -176,10 +176,10 @@ class assetRegistryService {
       throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
     }
 
-    return await assetService.assetReadAll({
-      tenantId: user.tenantId,
-      requestedBy: user.uid,
-    });
+    // return await assetService.assetReadAll({
+    //   tenantId: user.tenantId,
+    //   requestedBy: user.uid,
+    // });
   }
 }
 

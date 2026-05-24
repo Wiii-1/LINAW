@@ -3,6 +3,7 @@ import { PageHero } from "@/components/page-hero"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useEffect, useState, type CSSProperties } from "react"
+import { getAuth } from "firebase/auth"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -59,12 +60,110 @@ const STATUS_CONFIG = {
   stopped: { label: "Stopped", color: "bg-gray-100 text-gray-800" },
 }
 
+const normalizeStatus = (status: unknown): Network["status"] => {
+  if (status === "active" || status === "starting" || status === "stopped") {
+    return status
+  }
+  return "starting"
+}
+
+const normalizeConsensus = (consensus: unknown): Network["consensus"] => {
+  if (consensus === "solo" || consensus === "etcdraft") {
+    return consensus
+  }
+  return "etcdraft"
+}
+
+const mapOrganizations = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((org) => {
+      if (typeof org === "string") return org
+      if (org && typeof org === "object") {
+        const orgRecord = org as Record<string, unknown>
+        const name = orgRecord.name ?? orgRecord.orgName ?? orgRecord.organization_name
+        return typeof name === "string" ? name : ""
+      }
+      return ""
+    })
+    .filter((org) => org.trim().length > 0)
+}
+
+const toNetwork = (
+  value: unknown,
+  fallbackId: number,
+  fallback?: Partial<Network>
+): Network => {
+  const record = value && typeof value === "object" ? (value as Record<string, unknown>) : {}
+
+  const rawId = record.network_id ?? record.id ?? fallback?.network_id ?? fallbackId
+  const parsedId = typeof rawId === "number" ? rawId : Number.parseInt(String(rawId), 10)
+  const networkId = Number.isFinite(parsedId) ? parsedId : fallbackId
+
+  const networkName =
+    (typeof record.network_name === "string" && record.network_name) ||
+    (typeof record.name === "string" && record.name) ||
+    fallback?.network_name ||
+    `network-${networkId}`
+
+  const organizations = mapOrganizations(record.organizations ?? record.orgs)
+  const consensus = normalizeConsensus(
+    record.consensus ?? (record.config as Record<string, unknown> | undefined)?.consensus ?? fallback?.consensus
+  )
+  const channelId =
+    (typeof record.channelId === "string" && record.channelId) ||
+    (typeof record.channel_id === "string" && record.channel_id) ||
+    (typeof (record.config as Record<string, unknown> | undefined)?.channelId === "string" &&
+      ((record.config as Record<string, unknown>).channelId as string)) ||
+    fallback?.channelId ||
+    "mychannel"
+
+  const ordererCandidate =
+    record.ordererCount ??
+    record.orderer_count ??
+    (record.config as Record<string, unknown> | undefined)?.ordererCount ??
+    fallback?.ordererCount ??
+    1
+  const parsedOrdererCount =
+    typeof ordererCandidate === "number"
+      ? ordererCandidate
+      : Number.parseInt(String(ordererCandidate), 10)
+
+  return {
+    network_id: networkId,
+    network_name: networkName,
+    status: normalizeStatus(record.status ?? fallback?.status),
+    organizations: organizations.length > 0 ? organizations : fallback?.organizations ?? [],
+    consensus,
+    channelId,
+    ordererCount: Number.isFinite(parsedOrdererCount) ? parsedOrdererCount : 1,
+    created_at:
+      (typeof record.created_at === "string" && record.created_at) ||
+      (typeof record.createdAt === "string" && record.createdAt) ||
+      fallback?.created_at ||
+      new Date().toISOString(),
+  }
+}
+
+const sanitizeOrgName = (orgName: string, index: number): string => {
+  const cleaned = orgName.replace(/[^a-zA-Z0-9]/g, "").slice(0, 30)
+  return cleaned.length >= 2 ? cleaned : `Org${index + 1}`
+}
+
+const toMspId = (orgName: string, index: number): string => {
+  const base = sanitizeOrgName(orgName, index)
+  const withSuffix = base.toUpperCase().endsWith("MSP") ? base : `${base}MSP`
+  return withSuffix.slice(0, 30)
+}
+
 export default function BlockchainNetworks() {
   const [networks, setNetworks] = useState<Network[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [viewingNetwork, setViewingNetwork] = useState<Network | null>(null)
+  const backendUrl = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3000"
 
   // Form state
   const [formData, setFormData] = useState({
@@ -76,51 +175,46 @@ export default function BlockchainNetworks() {
     orgName: "",
   })
 
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    const auth = getAuth()
+    const token = await auth.currentUser?.getIdToken()
+
+    if (!token) {
+      throw new Error("Authentication required")
+    }
+
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }
+  }
+
   // Load networks on mount
   useEffect(() => {
     const loadNetworks = async () => {
       setLoading(true)
       setError(null)
       try {
-        // Mock data for demo
-        setNetworks([
-          {
-            network_id: 1,
-            network_name: "production-network",
-            status: "active",
-            organizations: ["Org1", "Org2", "Org3"],
-            consensus: "etcdraft",
-            channelId: "mainchannel",
-            ordererCount: 3,
-            created_at: new Date(
-              Date.now() - 30 * 24 * 60 * 60 * 1000
-            ).toISOString(),
-          },
-          {
-            network_id: 2,
-            network_name: "test-network",
-            status: "active",
-            organizations: ["TestOrg1"],
-            consensus: "solo",
-            channelId: "mychannel",
-            ordererCount: 1,
-            created_at: new Date(
-              Date.now() - 10 * 24 * 60 * 60 * 1000
-            ).toISOString(),
-          },
-          {
-            network_id: 3,
-            network_name: "staging-network",
-            status: "starting",
-            organizations: ["StagingOrg1", "StagingOrg2"],
-            consensus: "etcdraft",
-            channelId: "stagingchannel",
-            ordererCount: 3,
-            created_at: new Date(
-              Date.now() - 1 * 24 * 60 * 60 * 1000
-            ).toISOString(),
-          },
-        ])
+        const headers = await getAuthHeaders()
+        const response = await fetch(`${backendUrl}/api/v1/networks`, {
+          method: "GET",
+          headers,
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to load networks: ${response.statusText}`)
+        }
+
+        const payload = await response.json()
+        const rawNetworks = Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload?.networks)
+            ? payload.networks
+            : Array.isArray(payload)
+              ? payload
+              : []
+
+        setNetworks(rawNetworks.map((network: unknown, index: number) => toNetwork(network, index + 1)))
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load networks")
       } finally {
@@ -129,6 +223,7 @@ export default function BlockchainNetworks() {
     }
 
     loadNetworks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleAddOrganization = () => {
@@ -160,18 +255,44 @@ export default function BlockchainNetworks() {
         return
       }
 
-      const newNetwork: Network = {
-        network_id: Math.max(...networks.map((n) => n.network_id), 0) + 1,
+      const headers = await getAuthHeaders()
+      const payload = {
+        name: formData.networkName,
+        consensus: formData.consensus,
+        channelId: formData.channelId,
+        ordererCount: Number.parseInt(formData.ordererCount, 10),
+        orgs: formData.organizations.map((orgName, index) => ({
+          name: sanitizeOrgName(orgName, index),
+          msp_ID: toMspId(orgName, index),
+        })),
+      }
+
+      const response = await fetch(`${backendUrl}/api/v1/networks`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to create network: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+      const createdSource =
+        result?.data ?? result?.network ?? result?.orchestration?.network ?? result
+
+      const fallbackId = Math.max(...networks.map((n) => n.network_id), 0) + 1
+      const createdNetwork = toNetwork(createdSource, fallbackId, {
         network_name: formData.networkName,
         status: "starting",
         organizations: formData.organizations,
         consensus: formData.consensus as "etcdraft" | "solo",
         channelId: formData.channelId,
-        ordererCount: parseInt(formData.ordererCount),
+        ordererCount: Number.parseInt(formData.ordererCount, 10),
         created_at: new Date().toISOString(),
-      }
+      })
 
-      setNetworks((prev) => [newNetwork, ...prev])
+      setNetworks((prev) => [createdNetwork, ...prev])
       setFormData({
         networkName: "",
         consensus: "etcdraft",

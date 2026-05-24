@@ -29,8 +29,8 @@ app.use("/api/v1", usersRouter);
 // register disposable-email before fabric router so it isn't intercepted by fabric's auth middleware
 app.use("/api/v1/disposable-email", disposableRouter);
 app.use("/api/v1", fabricRouter);
+app.use("/api/v1", peerRouter);
 app.use("/api/v2/fabric", peerRouter);
-
 app.use(errorHandler);
 
 app.listen(port, () => {

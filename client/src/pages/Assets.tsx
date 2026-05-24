@@ -3,6 +3,7 @@ import { PageHero } from "@/components/page-hero"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useEffect, useState, type CSSProperties } from "react"
+import { getAuth } from "firebase/auth"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -67,11 +68,20 @@ export default function AssetRegistry() {
       setLoading(true)
       setError(null)
       try {
+        const auth = getAuth()
+        const headers: Record<string, string> = { "Content-Type": "application/json" }
+        if (auth.currentUser) {
+          try {
+            const token = await auth.currentUser.getIdToken()
+            if (token) headers["Authorization"] = `Bearer ${token}`
+          } catch (e) {
+            console.warn("Could not obtain ID token for assets load", e)
+          }
+        }
+
         const response = await fetch(`${backendUrl}/api/v1/assets`, {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers,
         })
 
         if (!response.ok) {
@@ -120,13 +130,22 @@ export default function AssetRegistry() {
 
       if (editingAsset) {
         // Update existing asset
+        const auth = getAuth()
+        const headers: Record<string, string> = { "Content-Type": "application/json" }
+        if (auth.currentUser) {
+          try {
+            const token = await auth.currentUser.getIdToken()
+            if (token) headers["Authorization"] = `Bearer ${token}`
+          } catch (e) {
+            console.warn("Could not obtain ID token for asset update", e)
+          }
+        }
+
         const response = await fetch(
           `${backendUrl}/api/v1/assets/${editingAsset.id}`,
           {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers,
             body: JSON.stringify(formData),
           }
         )
@@ -143,11 +162,20 @@ export default function AssetRegistry() {
         )
       } else {
         // Create new asset
+        const auth = getAuth()
+        const headers: Record<string, string> = { "Content-Type": "application/json" }
+        if (auth.currentUser) {
+          try {
+            const token = await auth.currentUser.getIdToken()
+            if (token) headers["Authorization"] = `Bearer ${token}`
+          } catch (e) {
+            console.warn("Could not obtain ID token for asset creation", e)
+          }
+        }
+
         const response = await fetch(`${backendUrl}/api/v1/assets`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers,
           body: JSON.stringify(formData),
         })
 
@@ -185,11 +213,20 @@ export default function AssetRegistry() {
 
     try {
       setError(null)
+      const auth = getAuth()
+      const headers: Record<string, string> = { "Content-Type": "application/json" }
+      if (auth.currentUser) {
+        try {
+          const token = await auth.currentUser.getIdToken()
+          if (token) headers["Authorization"] = `Bearer ${token}`
+        } catch (e) {
+          console.warn("Could not obtain ID token for asset delete", e)
+        }
+      }
+
       const response = await fetch(`${backendUrl}/api/v1/assets/${assetId}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
       })
 
       if (!response.ok) {
