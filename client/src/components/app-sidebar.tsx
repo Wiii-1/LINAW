@@ -17,6 +17,7 @@ import {
   ScrollText,
   PackageIcon,
   ClipboardListIcon,
+  Building2Icon,
   
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
@@ -31,23 +32,23 @@ const navMainData = [
   {
     title: "Organizations",
     url: "/organizations",
-    icon: <UsersIcon />,
+    icon: <Building2Icon />,
   },
   {
     title: "Members",
     url: "/members",
     icon: <UsersIcon />,
   },
-  {
-    title: "Smart Contracts",
-    url: "/smart-contracts",
-    icon: <ScrollText />,
-  },
-  {
-    title: "Analytics",
-    url: "/analytics",
-    icon: <ChartBarIcon />,
-  },
+  //{
+  //  title: "Smart Contracts",
+  //  url: "/smart-contracts",
+  //  icon: <ScrollText />,
+  //},
+  //{
+  //  title: "Analytics",
+  //  url: "/analytics",
+  //  icon: <ChartBarIcon />,
+  //},
   {
     title: "Assets",
     url: "/asset",
