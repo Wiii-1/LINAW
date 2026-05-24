@@ -3,8 +3,8 @@ name: Publish Backend to GHCR
 on:
   push:
     branches:
-      - jed
       - main
+      - jed
 
 permissions:
   contents: read
@@ -39,9 +39,7 @@ jobs:
         with:
           images: ${{ env.IMAGE_REPO }}
           tags: |
-            type=ref,event=branch
-            type=sha,prefix=
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            ghcr.io/${{ github.repository }}:v1.0.0
 
       - name: Build and push
         uses: docker/build-push-action@v6

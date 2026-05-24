@@ -13,3 +13,4 @@ nodemon.json
 vitest.config.js
 docs
 tenants
+config/serviceAccount.json
