@@ -105,7 +105,8 @@ async function runInContainer(containerName, command) {
     peerConfig.allowedContainerNames,
   );
 
-  const dockerCmd = `docker exec ${validated.containerName} sh -lc ${JSON.stringify(validated.command)}`;
+  const dockerArgs = ["exec", validated.containerName, "sh", "-lc", validated.command];
+  const dockerCmdDisplay = `docker ${dockerArgs.map((arg) => JSON.stringify(arg)).join(" ")}`;
 
   try {
     const { stdout, stderr } = await execFileAsync("docker", dockerArgs, {
@@ -116,7 +117,7 @@ async function runInContainer(containerName, command) {
     return {
       containerName: validated.containerName,
       command: validated.command,
-      dockerCmd,
+      dockerCmd: dockerCmdDisplay,
       stdout,
       stderr,
     };
@@ -129,8 +130,8 @@ async function runInContainer(containerName, command) {
       {
         stdout: error?.stdout ?? "",
         stderr: error?.stderr ?? "",
-        exitCode: error?.code,  
-        dockerCmd,
+        exitCode: error?.code,
+        dockerCmd: dockerCmdDisplay,
       },
     );
   }

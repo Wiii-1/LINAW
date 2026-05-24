@@ -5,7 +5,9 @@ const assetIdParam = joi.object({
 }).required()
 
 const createAssetSchema = joi.object({
+    params: assetIdParam.optional(),
     body: joi.object({
+        id: joi.string().trim().min(1).max(128).optional(),
         color: joi.string().trim().min(1).max(50).required(),
         size: joi.number().integer().positive().max(1000000).required(),
         owner: joi.string().trim().min(1).max(128).required(),

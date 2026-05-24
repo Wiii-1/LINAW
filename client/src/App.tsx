@@ -1,5 +1,4 @@
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { Toaster } from "@/components/ui/sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { lazy, Suspense } from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
@@ -17,17 +16,12 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"))
 const Organizations = lazy(() => import("./pages/Organizations"))
 const SmartContracts = lazy(() => import("./pages/SmartContracts"))
 const Analytics = lazy(() => import("./pages/Analytics"))
-const Assets = lazy(() => import("./pages/Assets"))
-const Submissions = lazy(() => import("./pages/Submissions"))
-const Blockchain = lazy(() => import("./pages/Blockchain"))
 const Account = lazy(() => import("./pages/Account"))
 const Settings = lazy(() => import("./pages/Settings"))
-const Members = lazy(() => import("./pages/Members"))
 
 export function App() {
   return (
     <TooltipProvider>
-      <Toaster />
       <Suspense fallback={<Skeleton />}>
         <BrowserRouter>
           <Routes>
@@ -89,30 +83,6 @@ export function App() {
               }
             />
             <Route
-              path="/asset"
-              element={
-                <AuthenticationRoute>
-                  <Assets />
-                </AuthenticationRoute>
-              }
-            />
-            <Route
-              path="/submissions"
-              element={
-                <AuthenticationRoute>
-                  <Submissions />
-                </AuthenticationRoute>
-              }
-            />
-            <Route
-              path="/networks"
-              element={
-                <AuthenticationRoute>
-                  <Blockchain />
-                </AuthenticationRoute>
-              }
-            />
-            <Route
               path="/account"
               element={
                 <AuthenticationRoute>
@@ -125,22 +95,6 @@ export function App() {
               element={
                 <AuthenticationRoute>
                   <Settings />
-                </AuthenticationRoute>
-              }
-            />
-            <Route
-              path="/members"
-              element={
-                <AuthenticationRoute>
-                  <Members />
-                </AuthenticationRoute>
-              }
-            />
-            <Route
-              path="/add-user"
-              element={
-                <AuthenticationRoute>
-                  <Members />
                 </AuthenticationRoute>
               }
             />

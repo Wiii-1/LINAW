@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { v4 as uuidv4 } from "uuid";
 import { validateTenantProvisionRequest } from "../model/tenantModel.js";
 import { encryptValue } from "../service/encryptionService.js";
 import { TenantCaOrchestrator } from "../service/tenantCaOrchestratorService.js";
@@ -75,7 +76,7 @@ export async function createTenant(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const tenantId = crypto.randomUUID();
+    const tenantId = uuidv4();
     const tenantRecord: TenantRecord = {
       tenantId,
       tenantName: input.tenantName,

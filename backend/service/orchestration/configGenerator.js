@@ -1,5 +1,8 @@
 const yaml = require("js-yaml");
+<<<<<<<< HEAD:backend/service/orchestration/configGenerator.js
 const logger = require("../../utils/logger");
+========
+>>>>>>>> f20ec437488b0fd3226afa88d50dbaa383544ddf:backend/service/configGenerator.js
 
 /*
 TODO:
@@ -177,8 +180,12 @@ function generateDockerCompose(userId, rawConfig) {
 
   const fabricVersion = process.env.FABRIC_VERSION || "2.5";
   const fabricCAVersion = process.env.FABRIC_CA_VERSION || "1.5";
+<<<<<<<< HEAD:backend/service/orchestration/configGenerator.js
   // Copilot note: fix operator precedence so `leveldb` correctly disables CouchDB.
   const useCouchDB = (config.stateDb || "couchdb") === "couchdb";
+========
+  const useCouchDB = config.stateDb || "couchdb" === "couchdb";
+>>>>>>>> f20ec437488b0fd3226afa88d50dbaa383544ddf:backend/service/configGenerator.js
   const res = config.resources;
 
   function netWithAliases(aliases = []) {

@@ -55,11 +55,18 @@ class UserService {
     return value;
   }
 
+<<<<<<< HEAD
   async signup({ email, firebase_uid, tenant_id = null }) {
     // Validate email
     this.validate("signupSchema", { body: { email } });
 
     // Check disposable email
+=======
+  async signup(body) {
+    const validated = this.validate("signupSchema", { body });
+    const { email } = validated.body;
+
+>>>>>>> f20ec437488b0fd3226afa88d50dbaa383544ddf
     let disposableCheck = null;
     try {
       disposableCheck = await disposableService.checkEmail(email);
@@ -77,6 +84,7 @@ class UserService {
       );
     }
 
+<<<<<<< HEAD
     // Check if user already exists
     const existingByFirebaseUid = await userDao.findByFirebaseUid(firebase_uid);
     if (existingByFirebaseUid) {
@@ -142,6 +150,66 @@ class UserService {
     });
 
     return user;
+=======
+    const existingByEmail = await userDao.findUserByEmail(email);
+    if (existingByEmail) {
+      throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
+    }
+
+    const tenant_id = await this.createDefaultTenant(email);
+
+    return {
+      email,
+      tenant_id,
+      message: "Signup request accepted",
+    };
+  }
+
+  async syncAuthenticatedUser({ email, firebase_uid, tenant_id = null }) {
+    if (!firebase_uid) {
+      throw new AppError("User not authenticated", 401, "UNAUTHORIZED");
+    }
+
+    if (!email) {
+      throw new AppError("Email is required", 400, "EMAIL_REQUIRED");
+    }
+
+    const existingByFirebaseUid = await userDao.findByFirebaseUid(firebase_uid);
+      if (existingByFirebaseUid) {
+        return {
+          created: false,
+          user: existingByFirebaseUid,
+        };
+      }
+
+    const existingByEmail = await userDao.findUserByEmail(email);
+      if (existingByEmail) {
+        throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
+      }
+
+    const createdUser = await userDao.signup({
+      email,
+      firebase_uid,
+      tenant_id,
+    });
+
+    return {
+      created: true,
+      user: createdUser,
+    };
+  }
+
+  async login(email, user = {}) {
+    // validate email format via existing schema
+    this.validate("loginSchema", { body: { email } });
+
+    const userRow = await userDao.login({
+      email,
+      firebase_uid: user?.uid,
+    });
+
+    return userRow;
+>>>>>>> f20ec437488b0fd3226afa88d50dbaa383544ddf
   }
 }
 
