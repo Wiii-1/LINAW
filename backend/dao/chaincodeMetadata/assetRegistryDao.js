@@ -3,11 +3,11 @@ const db = require("../../db/db");
 class AssetRegistryDao {
   async createAsset(data) {
     try {
-      const { id, color, size, owner, appraisedValue, requestedBy } = data;
+      const { asset_id, color, size, owner, appraisedValue, requestedBy } = data;
 
       const [asset] = await db("asset_registry")
         .insert({
-          id,
+          asset_id,
           color,
           size,
           owner,
@@ -28,10 +28,10 @@ class AssetRegistryDao {
 
   async assetTransfer(data) {
     try {
-      const { id, owner, requestedBy } = data;
+      const { asset_id, owner, requestedBy } = data;
 
       const [asset] = await db("asset_registry")
-        .where({ id })
+        .where({ asset_id })
         .update({
           owner,
           updated_by: requestedBy,
@@ -48,10 +48,10 @@ class AssetRegistryDao {
 
   async assetUpdate(data) {
     try {
-      const { id, color, size, owner, appraisedValue, requestedBy } = data;
+      const { asset_id, color, size, owner, appraisedValue, requestedBy } = data;
 
       const [asset] = await db("asset_registry")
-        .where({ id })
+        .where({ asset_id })
         .update({
           color,
           size,
@@ -71,9 +71,9 @@ class AssetRegistryDao {
 
   async assetDelete(data) {
     try {
-      const { id } = data;
+      const { asset_id } = data;
 
-      const deletedRows = await db("asset_registry").where({ id }).del();
+      const deletedRows = await db("asset_registry").where({ asset_id }).del();
 
       return deletedRows > 0;
     } catch (error) {
@@ -83,11 +83,11 @@ class AssetRegistryDao {
 
   async assetRead(data) {
     try {
-      const { id } = data;
+      const { asset_id } = data;
 
       const asset = await db("asset_registry")
         .select("*")
-        .where({ id })
+        .where({ asset_id })
         .first();
 
       return asset || null;

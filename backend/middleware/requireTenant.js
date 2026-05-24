@@ -1,16 +1,45 @@
 const AppError = require('../utils/AppError');
+const userDao = require("../dao/user/userDao")
 
-function requireDbUser(req, res, next) {
-  if (!req.user?.userId) {
-    return next(
-      new AppError(
-        'User not found in database. Complete signup before using tenant CA APIs.',
-        404,
-        'USER_NOT_FOUND',
-      ),
-    );
+async function requireDbUser(req, res, next) {
+  try {
+    if (req.user?.userId) {
+      return next();
+    }
+
+    const firebaseUid = req.user?.uid;
+    if (!firebaseUid) {
+      return next(
+        new AppError(
+          'User not found in database. Complete signup before using tenant CA APIs.',
+          404,
+          'USER_NOT_FOUND',
+        ),
+      );
+    }
+
+    const dbUser = await userDao.findByFirebaseUid(firebaseUid);
+
+    if (!dbUser) {
+      return next(
+        new AppError(
+          'User not found in database. Complete signup before using tenant CA APIs.',
+          404,
+          'USER_NOT_FOUND',
+        ),
+      );
+    }
+
+    req.user = {
+      ...req.user,
+      userId: dbUser.user_id,
+      tenantId: dbUser.tenant_id ?? req.user.tenantId ?? null,
+    };
+
+    return next();
+  } catch (error) {
+    return next(error instanceof AppError ? error : new AppError(error.message || 'Failed to resolve tenant user', 500, 'USER_LOOKUP_FAILED'));
   }
-  return next();
 }
 
 function requireTenantId(req, res, next) {
