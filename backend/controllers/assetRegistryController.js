@@ -2,30 +2,18 @@ const assetRegistryService = require('../service/application/assetRegistryServic
 
 class assetRegistryController {
     // Asset registry operations
-  async createAsset(req, res, next) {
-    try {
-      console.log("=== CREATE ASSET START ===")
-      console.log("User:", req.user)
-      console.log("Body:", req.body)
-      
-      const result = await assetRegistryService.createAsset({
-        body: req.body,
-        user: req.user
-      })
-      
-      console.log("=== CREATE ASSET SUCCESS ===")
-      console.log("Result:", result)
-      
-      res.status(201).json(result)
-    } catch (error) {
-      console.error("=== CREATE ASSET ERROR ===")
-      console.error("Error type:", error.constructor.name)
-      console.error("Error message:", error.message)
-      console.error("Full error:", error)
-      console.error("Stack:", error.stack)
-      next(error)
+    async createAsset(req, res, next) {
+        try {
+            const create = await assetRegistryService.createAsset({
+                body: req.body,
+                user: req.user
+            })
+
+            return res.status(201).json(create)
+        } catch (error) {
+            next(error)
+        }
     }
-  }
 
     async assetTransfer(req, res, next) {
         try {

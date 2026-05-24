@@ -1,6 +1,5 @@
 const { auth } = require('../config/firebase-config')
 const AppError = require('../utils/AppError')
-const userDao = require('../dao/userDao') // ADD THIS
 
 class authenticate {
     async decodeToken (req, res, next) {
@@ -28,9 +27,6 @@ class authenticate {
                 return next(new AppError('Missing email claim', 401, 'INVALID_TOKEN'))
             }
 
-            // ADDED: Get tenant_id from database
-            const dbUser = await userDao.findByFirebaseUid(decodedToken.uid)
-            
             req.user = {
                 uid: decodedToken.uid,
                 email: decodedToken.email || null,

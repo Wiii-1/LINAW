@@ -1,6 +1,6 @@
 const { existsSync } = require("node:fs");
 const path = require("node:path");
-const { exec } = require("node:child_process");
+const { exec, execFile } = require("node:child_process");
 const { promisify } = require("node:util");
 const { randomUUID } = require("node:crypto");
 
@@ -12,6 +12,7 @@ const {
 } = require("../../validators/peer/provisionSchema");
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 const provisionedOrganizations = new Map();
 
 function buildPeerConfig(organization = "org1") {
@@ -107,7 +108,7 @@ async function runInContainer(containerName, command) {
   const dockerCmd = `docker exec ${validated.containerName} sh -lc ${JSON.stringify(validated.command)}`;
 
   try {
-    const { stdout, stderr } = await execAsync(dockerCmd, {
+    const { stdout, stderr } = await execFileAsync("docker", dockerArgs, {
       env: process.env,
       maxBuffer: 10 * 1024 * 1024,
     });
