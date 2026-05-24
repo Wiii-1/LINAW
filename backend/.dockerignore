@@ -9,3 +9,8 @@ vault
 *.config.js
 .gitignore
 knexfile.js
+nodemon.json
+vitest.config.js
+docs
+tenants
+config/serviceAccount.json

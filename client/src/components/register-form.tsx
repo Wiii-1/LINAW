@@ -274,6 +274,11 @@ const postRegister = async (firebaseUser: any) => {
             {error}
           </FieldDescription>
         )}
+        {error ? (
+          <div className="max-h-28 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm whitespace-pre-wrap text-red-700">
+              {error}
+          </div>
+        ) : null}
         <Field>
           <FieldLabel htmlFor="name">Username</FieldLabel>
           <Input id="name" type="text" required className="bg-background" />

@@ -329,7 +329,7 @@ export default function Organizations() {
                       </DialogHeader>
 
                       {error ? (
-                        <div className="max-h-28 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm wrap-break-word whitespace-pre-wrap text-red-700">
+                        <div className="max-h-28 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm whitespace-pre-wrap text-red-700">
                           {error}
                         </div>
                       ) : null}
