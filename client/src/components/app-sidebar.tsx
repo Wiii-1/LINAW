@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/sidebar"
 import {
   LayoutDashboardIcon,
-  ChartBarIcon,
+  //ChartBarIcon,
   UsersIcon,
-  ScrollText,
+  //ScrollText,
   PackageIcon,
   ClipboardListIcon,
   Building2Icon,
