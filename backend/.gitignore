@@ -15,6 +15,9 @@ TODO.md
 *.config.js
 
 
+# Tenant CA runtime data
+tenants/
+
 # Node.js
 node_modules/
 package-lock.json/

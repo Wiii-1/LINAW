@@ -3,7 +3,10 @@ import { PageHero } from "@/components/page-hero"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useEffect, useState, type CSSProperties } from "react"
+<<<<<<< HEAD
 import { getAuth } from "firebase/auth"
+=======
+>>>>>>> jed
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -215,6 +218,45 @@ export default function BlockchainNetworks() {
               : []
 
         setNetworks(rawNetworks.map((network: unknown, index: number) => toNetwork(network, index + 1)))
+        // Mock data for demo
+        setNetworks([
+          {
+            network_id: 1,
+            network_name: "production-network",
+            status: "active",
+            organizations: ["Org1", "Org2", "Org3"],
+            consensus: "etcdraft",
+            channelId: "mainchannel",
+            ordererCount: 3,
+            created_at: new Date(
+              Date.now() - 30 * 24 * 60 * 60 * 1000
+            ).toISOString(),
+          },
+          {
+            network_id: 2,
+            network_name: "test-network",
+            status: "active",
+            organizations: ["TestOrg1"],
+            consensus: "solo",
+            channelId: "mychannel",
+            ordererCount: 1,
+            created_at: new Date(
+              Date.now() - 10 * 24 * 60 * 60 * 1000
+            ).toISOString(),
+          },
+          {
+            network_id: 3,
+            network_name: "staging-network",
+            status: "starting",
+            organizations: ["StagingOrg1", "StagingOrg2"],
+            consensus: "etcdraft",
+            channelId: "stagingchannel",
+            ordererCount: 3,
+            created_at: new Date(
+              Date.now() - 1 * 24 * 60 * 60 * 1000
+            ).toISOString(),
+          },
+        ])
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load networks")
       } finally {
@@ -223,7 +265,6 @@ export default function BlockchainNetworks() {
     }
 
     loadNetworks()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleAddOrganization = () => {
@@ -326,11 +367,11 @@ export default function BlockchainNetworks() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader title="Blockchain Networks" />
+        <SiteHeader title="Blockchain" />
         <main className="flex flex-1 flex-col gap-6 px-4 py-4 md:px-6 md:py-6">
           <PageHero
-            title="Blockchain Networks"
-            description="Manage Hyperledger Fabric networks and infrastructure"
+            title="Blockchain"
+            description="Manage your Hyperledger Fabric network and infrastructure"
             actions={
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>

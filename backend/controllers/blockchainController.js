@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 const networkService = require('../service/application/networkService')
+=======
+const networkAssetsService = require('../service/application/networkAssetsService')
+>>>>>>> jed
 const AppError = require('../utils/AppError')
 
 // blockchainController: Network and channel provisioning
@@ -16,7 +20,11 @@ class fabricController {
 
         const user = req.user
 
+<<<<<<< HEAD
         const network = await networkService.networkCreate({
+=======
+        const network = await networkAssetsService.networkCreate({
+>>>>>>> jed
             body: req.body,
             user: user
         }); 
@@ -28,7 +36,11 @@ class fabricController {
 
     async networkRead (req, res, next) {
         try {
+<<<<<<< HEAD
             const read = await networkService.networkRead({
+=======
+            const read = await networkAssetsService.networkRead({
+>>>>>>> jed
                 params: req.params,
                 user: req.user
             })
@@ -42,7 +54,11 @@ class fabricController {
 
     async channelCreate (req, res, next) {
         try {
+<<<<<<< HEAD
             const channel = await networkService.channelCreate({
+=======
+            const channel = await networkAssetsService.channelCreate({
+>>>>>>> jed
                 params: req.params,
                 body: req.body,
                 user: req.user
@@ -56,7 +72,11 @@ class fabricController {
 
     async channelRead (req, res, next) {
        try {
+<<<<<<< HEAD
             const read = await networkService.channelRead({
+=======
+            const read = await networkAssetsService.channelRead({
+>>>>>>> jed
             params: req.params,
             user: req.user
             })
@@ -69,7 +89,11 @@ class fabricController {
 
     async smartContract (req, res, next) {
         try {
+<<<<<<< HEAD
             const contract = await networkService.smartContract({
+=======
+            const contract = await networkAssetsService.smartContract({
+>>>>>>> jed
                 params: req.params,
                 body: req.body,
                 user: req.user
@@ -83,7 +107,11 @@ class fabricController {
 
     async contractReadAll (req, res, next) {
         try {
+<<<<<<< HEAD
             const contracts = await networkService.contractReadAll({
+=======
+            const contracts = await networkAssetsService.contractReadAll({
+>>>>>>> jed
                 params: req.params,
                 user: req.user
             })

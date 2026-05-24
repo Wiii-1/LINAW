@@ -105,7 +105,7 @@ export function App() {
               }
             />
             <Route
-              path="/networks"
+              path="/blockchain"
               element={
                 <AuthenticationRoute>
                   <Blockchain />

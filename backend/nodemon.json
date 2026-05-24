@@ -1,0 +1,5 @@
+{
+  "watch": ["."],
+  "ext": "js,json",
+  "ignore": ["tenants/**", "node_modules/**"]
+}

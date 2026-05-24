@@ -36,7 +36,12 @@ class authenticate {
                 email: decodedToken.email || null,
                 email_verified: decodedToken.email_verified || false,
                 role: decodedToken.role || 'user',
+<<<<<<< HEAD
                 tenantId: dbUser?.tenant_id || null, // CHANGED: Get from DB
+=======
+                userId: dbUser?.user_id ?? null,
+                tenantId: dbUser?.tenant_id || null,
+>>>>>>> jed
                 claims: decodedToken
             }
 

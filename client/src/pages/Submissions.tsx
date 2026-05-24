@@ -484,10 +484,10 @@ export default function ApprovalWorkflow() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader title="Approval Workflow" />
+        <SiteHeader title="Submissions" />
         <main className="flex flex-1 flex-col gap-6 px-4 py-4 md:px-6 md:py-6">
           <PageHero
-            title="Approval Workflow"
+            title="Submissions Approval"
             description="Manage document submissions and approvals"
             actions={
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -551,25 +551,15 @@ export default function ApprovalWorkflow() {
                     </Field>
 
                     <Field>
-                      <Label htmlFor="file">PDF File *</Label>
+                      <Label htmlFor="file-name">File Name (Optional)</Label>
                       <Input
-                        id="file"
-                        type="file"
-                        accept="application/pdf,.pdf"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] ?? null
-                          setFormData({
-                            ...formData,
-                            file,
-                            fileName: file?.name ?? "",
-                          })
-                        }}
+                        id="file-name"
+                        placeholder="proposal.pdf"
+                        value={formData.fileName}
+                        onChange={(e) =>
+                          setFormData({ ...formData, fileName: e.target.value })
+                        }
                       />
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {formData.fileName
-                          ? `Selected file: ${formData.fileName}`
-                          : "Choose a PDF file to upload."}
-                      </p>
                     </Field>
 
                     {error ? (

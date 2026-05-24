@@ -77,11 +77,11 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
 
       const resp = await fetch(
         `/api/v1/disposable-email/${encodeURIComponent(email)}`,
-        { headers }
-      )
-      if (!resp.ok) {
-        console.error("Disposable email check failed with status:", resp.status)
-      } else {
+        { headers })
+        
+        if (!resp.ok) {
+          console.error("Disposable email check failed with status:", resp.status)
+        } else {
         const data = await resp.json()
         if (data?.is_disposable) {
           setError("Disposable email addresses are not allowed")
