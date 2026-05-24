@@ -21,13 +21,16 @@ import {
 import { Input } from "@/components/ui/input"
 import { PasswordInput } from "./ui/password-input"
 
+
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>
+
 
 export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
   const providerGoogle = new GoogleAuthProvider()
   const providerMicrosoft = new OAuthProvider("microsoft.com")
   const auth = getAuth()
   const navigate = useNavigate()
+
   const [authorizing, setAuthorizing] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -57,12 +60,28 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
     }
 
     try {
+      // If a user is already signed in, include their ID token.
+      const currentUser = auth.currentUser
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      }
+
+      if (currentUser) {
+        try {
+          const token = await currentUser.getIdToken()
+          if (token) headers["Authorization"] = `Bearer ${token}`
+        } catch (e) {
+          console.warn("Could not obtain ID token for disposable-email check", e)
+        }
+      }
+
       const resp = await fetch(
-        `/api/v1/disposable-email/${encodeURIComponent(email)}`
-      )
-      if (!resp.ok) {
-        console.error("Disposable email check failed with status:", resp.status)
-      } else {
+        `/api/v1/disposable-email/${encodeURIComponent(email)}`,
+        { headers })
+        
+        if (!resp.ok) {
+          console.error("Disposable email check failed with status:", resp.status)
+        } else {
         const data = await resp.json()
         if (data?.is_disposable) {
           setError("Disposable email addresses are not allowed")
@@ -81,7 +100,14 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
         password
       )
       console.log("User registered:", response.user)
-      postRegister(email, response.user.uid)
+      
+      // CHANGED: Use new postRegister function
+      const backendSuccess = await postRegister(response.user)
+      
+      if (!backendSuccess) {
+        setAuthorizing(false)
+        return
+      }
 
       await sendEmailVerification(response.user)
       console.log("Verification email sent")
@@ -116,44 +142,123 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
   }
 
   const googleRegistration = async () => {
-    signInWithPopup(auth, providerGoogle)
-      .then((result) => {
-        const user = result.user
-        console.log("Registered with Google:", user)
-        postRegister(user.email ?? "", user.uid)
+    setAuthorizing(true)
+    setError("")
+    
+    // CHANGED: Use signInWithPopup with try/catch and new postRegister
+    try {
+      const result = await signInWithPopup(auth, providerGoogle)
+      const user = result.user
+      console.log("Registered with Google:", user)
+      
+      const backendSuccess = await postRegister(user)
+      
+      if (backendSuccess) {
         navigate("/dashboard")
-      })
-      .catch((error) => {
-        console.error("Error registering with Google:", error)
-        setError("Failed to register with Google")
-      })
+      } else {
+        setAuthorizing(false)
+      }
+    } catch (error: any) {
+      console.error("Error registering with Google:", error)
+      setError("Failed to register with Google")
+      setAuthorizing(false)
+    }
   }
 
   const microsoftRegistration = async () => {
-    signInWithPopup(auth, providerMicrosoft)
-      .then((result) => {
-        const user = result.user
-        console.log("Registered with Microsoft:", user)
-        postRegister(user.email ?? "", user.uid)
-        navigate("/dashboard")
-      })
-      .catch((error) => {
-        console.error("Error registering with Microsoft:", error)
-        setError("Failed to register with Microsoft")
-      })
-  }
-
-  const postRegister = async (email: string, firebase_uid: string) => {
+    setAuthorizing(true)
+    setError("")
+    
+    // CHANGED: Use signInWithPopup with try/catch and new postRegister
     try {
-      await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, firebase_uid }),
-      })
-    } catch (error) {
-      console.error("Error posting register:", error)
+      const result = await signInWithPopup(auth, providerMicrosoft)
+      const user = result.user
+      console.log("Registered with Microsoft:", user)
+      
+      const backendSuccess = await postRegister(user)
+      
+      if (backendSuccess) {
+        navigate("/dashboard")
+      } else {
+        setAuthorizing(false)
+      }
+    } catch (error: any) {
+      console.error("Error registering with Microsoft:", error)
+      setError("Failed to register with Microsoft")
+      setAuthorizing(false)
     }
   }
+
+    // NEW: Helper function to call backend with Firebase token
+const postRegister = async (firebaseUser: any) => {
+  console.log("=== START postRegister ===")
+  console.log("Firebase user:", firebaseUser)
+  
+  try {
+    console.log("Step 1: Getting ID token...")
+    const idToken = await firebaseUser.getIdToken()
+    console.log("Step 2: ID token obtained:", idToken.substring(0, 30) + "...")
+    
+    console.log("Step 3: Calling backend at /api/v1/auth/signup")
+    const response = await fetch("/api/v1/auth/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`
+      },
+    })
+
+    console.log("Step 4: Response received")
+    console.log("Status:", response.status)
+    console.log("Status text:", response.statusText)
+    
+    console.log("Step 5: Reading response body...")
+    const text = await response.text()
+    console.log("Response body (raw):", text)
+    console.log("Response body length:", text.length)
+    
+    let data = null
+    if (text && text.length > 0) {
+      console.log("Step 6: Parsing JSON...")
+      try {
+        data = JSON.parse(text)
+        console.log("Parsed data:", data)
+      } catch (e) {
+        console.error("JSON parse error:", e)
+        console.error("Failed to parse:", text)
+        throw new Error("Invalid response from server")
+      }
+    } else {
+      console.log("Step 6: Empty response body")
+    }
+
+    console.log("Step 7: Checking response.ok:", response.ok)
+    if (!response.ok) {
+      // IMPROVED ERROR HANDLING
+      const errorMsg = data?.error?.message || data?.error || data?.message || `Server error: ${response.status}`
+      console.error("Response not OK:", errorMsg)
+      throw new Error(errorMsg)
+    }
+
+    console.log("=== SUCCESS: Backend signup complete ===")
+    return true
+    
+  } catch (error: any) {
+    console.error("=== ERROR in postRegister ===")
+    console.error("Error type:", error.constructor.name)
+    console.error("Error message:", error.message)
+    console.error("Full error:", error)
+    
+    // IMPROVED ERROR DISPLAY
+    const displayError = typeof error === 'string' 
+      ? error 
+      : error?.message || JSON.stringify(error) || "Failed to create account on server"
+    
+    setError(displayError)
+    return false
+  }
+}
+
   return (
     <form
       className={cn("flex flex-col gap-6", className)}
@@ -169,6 +274,11 @@ export function RegisterForm({ className, ...props }: ComponentProps<"form">) {
             {error}
           </FieldDescription>
         )}
+        {error ? (
+          <div className="max-h-28 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm whitespace-pre-wrap text-red-700">
+              {error}
+          </div>
+        ) : null}
         <Field>
           <FieldLabel htmlFor="name">Username</FieldLabel>
           <Input id="name" type="text" required className="bg-background" />

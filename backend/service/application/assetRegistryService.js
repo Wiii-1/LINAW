@@ -1,3 +1,5 @@
+const { v4: uuidv4 } = require('uuid');
+
 class ValidationError extends Error {
   constructor(message, details = []) {
     super(message);
@@ -46,11 +48,15 @@ class assetRegistryService {
 
     const validated = this.validate("createAssetSchema", { body });
 
-    // allow id to come from either body or params (backwards compatibility)
-    const id = validated.body.id || (validated.params && validated.params.id)
+      // FIRST: Extract all fields from validated body
     const { color, size, owner, appraisedValue } = validated.body;
 
-    await assetRegistryDao.createAsset({
+    const id = (validated.body.id && validated.body.id.trim()) 
+    ? validated.body.id 
+    : uuidv4(); 
+
+
+    const asset = await assetRegistryDao.createAsset({
       id,
       tenantId: user.tenantId,
       color,
@@ -60,16 +66,19 @@ class assetRegistryService {
       requestedBy: user.uid,
     });
 
-    return await assetService.createAsset({
-      id,
-      tenantId: user.tenantId,
-      color,
-      size,
-      owner,
-      appraisedValue,
-      requestedBy: user.uid,
-    });
-  }
+    return asset;
+
+    // return await assetService.createAsset({
+    //   id,
+    //   tenantId: user.tenantId,
+    //   color,
+    //   size,
+    //   owner,
+    //   appraisedValue,
+    //   requestedBy: user.uid,
+    // });
+
+    }
 
   async assetTransfer({ params, body, user }) {
     if (!user?.tenantId) {
@@ -81,19 +90,33 @@ class assetRegistryService {
     const { id } = validated.params;
     const { owner } = validated.body;
 
-    await assetRegistryDao.assetTransfer({
+    const asset = await assetRegistryDao.assetTransfer({
       id,
       tenantId: user.tenantId,
       owner,
       requestedBy: user.uid,
     });
 
-    return await assetService.assetTransfer({
-      id,
-      tenantId: user.tenantId,
-      owner,
-      requestedBy: user.uid,
-    });
+    return {
+      message: "Asset transferred successfully",
+        data: {
+          id: asset.asset_id ?? asset.id,
+          color: asset.color,
+          size: asset.size,
+          owner: asset.owner,
+          appraisedValue: asset.appraised_value ?? asset.appraisedValue,
+          created_at: asset.created_at,
+          updated_at: asset.updated_at,
+        },
+      };
+    
+
+    // return await assetService.assetTransfer({
+    //   id,
+    //   tenantId: user.tenantId,
+    //   owner,
+    //   requestedBy: user.uid,
+    // });
   }
 
   async assetUpdate({ params, body, user }) {
@@ -106,7 +129,7 @@ class assetRegistryService {
     const { id } = validated.params;
     const { color, size, owner, appraisedValue } = validated.body;
 
-    await assetRegistryDao.assetUpdate({
+    const asset = await assetRegistryDao.assetUpdate({
       id,
       tenantId: user.tenantId,
       color,
@@ -116,15 +139,17 @@ class assetRegistryService {
       requestedBy: user.uid,
     });
 
-    return await assetService.assetUpdate({
-      id,
-      tenantId: user.tenantId,
-      color,
-      size,
-      owner,
-      appraisedValue,
-      requestedBy: user.uid,
-    });
+    return asset;
+
+    // return await assetService.assetUpdate({
+    //   id,
+    //   tenantId: user.tenantId,
+    //   color,
+    //   size,
+    //   owner,
+    //   appraisedValue,
+    //   requestedBy: user.uid,
+    // });
   }
 
   async assetDelete({ params, user }) {
@@ -136,33 +161,50 @@ class assetRegistryService {
 
     const { id } = validated.params;
 
-    await assetRegistryDao.assetDelete({
+    const asset = await assetRegistryDao.assetDelete({
       id,
       tenantId: user.tenantId,
       requestedBy: user.uid,
     });
 
-    return await assetService.assetDelete({
-      id,
-      tenantId: user.tenantId,
-      requestedBy: user.uid,
-    });
+    return asset;
+
+    // return await assetService.assetDelete({
+    //   id,
+    //   tenantId: user.tenantId,
+    //   requestedBy: user.uid,
+    // });
   }
 
   async assetRead({ params, user }) {
     if (!user?.tenantId) {
       throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
-    }
+    } 
 
     const validated = this.validate("assetReadSchema", { params });
-
     const { id } = validated.params;
 
-    return await assetService.assetRead({
+    const asset = await assetRegistryDao.assetRead({
       id,
       tenantId: user.tenantId,
-      requestedBy: user.uid,
     });
+
+    if (!asset) {
+      throw new AppError("Asset not found", 404, "ASSET_NOT_FOUND");
+    }
+
+    return {
+      message: "Asset fetched successfully",
+      data: {
+        id: asset.asset_id ?? asset.id,
+        color: asset.color,
+        size: asset.size,
+        owner: asset.owner,
+        appraisedValue: asset.appraised_value ?? asset.appraisedValue,
+        created_at: asset.created_at,
+        updated_at: asset.updated_at,
+      },
+    };
   }
 
   async assetReadAll({ user }) {
@@ -170,11 +212,35 @@ class assetRegistryService {
       throw new AppError('Tenant context required', 403, 'MISSING_TENANT_CONTEXT');
     }
 
-    return await assetService.assetReadAll({
+    const assets = await assetRegistryDao.assetReadAll({
       tenantId: user.tenantId,
-      requestedBy: user.uid,
     });
+
+    return {
+      message: "Assets fetched successfully",
+      data: assets.map((asset) => ({
+        id: asset.asset_id ?? asset.id,
+        color: asset.color,
+        size: asset.size,
+        owner: asset.owner,
+        appraisedValue: asset.appraised_value ?? asset.appraisedValue,
+        created_at: asset.created_at,
+        updated_at: asset.updated_at,
+      })),
+    };
   }
 }
 
 module.exports = new assetRegistryService();
+
+
+    // return await assetService.assetRead({
+    //   id,
+    //   tenantId: user.tenantId,
+    //   requestedBy: user.uid,
+    // });
+
+    // return await assetService.assetReadAll({
+    //   tenantId: user.tenantId,
+    //   requestedBy: user.uid,
+    // });

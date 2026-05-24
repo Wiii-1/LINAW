@@ -1,6 +1,6 @@
 const AppError = require('../../utils/AppError');
-const tenantStorageDao = require('../../dao/tenantStorageDao');
-const cloudflareR2Dao = require('../../dao/cloudflareR2Dao');
+const tenantStorageDao = require('../../dao/blockchain/tenantStorageDao');
+const cloudflareR2Dao = require('../../dao/storage/cloudflareR2Dao');
 
 class R2ProvisioningEngine {
   constructor({ tenantStorageDao, cloudflareR2Dao }) {

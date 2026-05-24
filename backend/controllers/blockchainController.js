@@ -1,4 +1,4 @@
-const networkAssetsService = require('../service/application/networkAssetsService')
+const networkService = require('../service/application/networkService')
 const AppError = require('../utils/AppError')
 
 // blockchainController: Network and channel provisioning
@@ -16,7 +16,7 @@ class fabricController {
 
         const user = req.user
 
-        const network = await networkAssetsService.networkCreate({
+        const network = await networkService.networkCreate({
             body: req.body,
             user: user
         }); 
@@ -28,7 +28,7 @@ class fabricController {
 
     async networkRead (req, res, next) {
         try {
-            const read = await networkAssetsService.networkRead({
+            const read = await networkService.networkRead({
                 params: req.params,
                 user: req.user
             })
@@ -42,7 +42,7 @@ class fabricController {
 
     async channelCreate (req, res, next) {
         try {
-            const channel = await networkAssetsService.channelCreate({
+            const channel = await networkService.channelCreate({
                 params: req.params,
                 body: req.body,
                 user: req.user
@@ -56,7 +56,7 @@ class fabricController {
 
     async channelRead (req, res, next) {
        try {
-            const read = await networkAssetsService.channelRead({
+            const read = await networkService.channelRead({
             params: req.params,
             user: req.user
             })
@@ -69,7 +69,7 @@ class fabricController {
 
     async smartContract (req, res, next) {
         try {
-            const contract = await networkAssetsService.smartContract({
+            const contract = await networkService.smartContract({
                 params: req.params,
                 body: req.body,
                 user: req.user
@@ -83,7 +83,7 @@ class fabricController {
 
     async contractReadAll (req, res, next) {
         try {
-            const contracts = await networkAssetsService.contractReadAll({
+            const contracts = await networkService.contractReadAll({
                 params: req.params,
                 user: req.user
             })

@@ -1,4 +1,4 @@
-const userDao = require("../../dao/userDao");
+const userDao = require("../../dao/user/userDao");
 const { userSchema } = require("../../validators/user");
 const AppError = require("../../utils/AppError");
 const disposableService = require("./disposableEmailService");
@@ -55,10 +55,11 @@ class UserService {
     return value;
   }
 
-  async signup(body) {
-    const validated = this.validate("signupSchema", { body });
-    const { email } = validated.body;
+  async signup({ email, firebase_uid, tenant_id = null }) {
+    // Validate email
+    this.validate("signupSchema", { body: { email } });
 
+    // Check disposable email
     let disposableCheck = null;
     try {
       disposableCheck = await disposableService.checkEmail(email);
@@ -76,64 +77,71 @@ class UserService {
       );
     }
 
+    // Check if user already exists
+    const existingByFirebaseUid = await userDao.findByFirebaseUid(firebase_uid);
+    if (existingByFirebaseUid) {
+      throw new AppError(
+        "User already exists. Please login.",
+        409,
+        "USER_ALREADY_EXISTS"
+      );
+    }
+
     const existingByEmail = await userDao.findUserByEmail(email);
     if (existingByEmail) {
-      throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
+      throw new AppError(
+        "Email already exists",
+        409,
+        "EMAIL_ALREADY_EXISTS"
+      );
     }
 
-    const tenant_id = await this.createDefaultTenant(email);
-
-    return {
-      email,
-      tenant_id,
-      message: "Signup request accepted",
-    };
-  }
-
-  async syncAuthenticatedUser({ email, firebase_uid, tenant_id = null }) {
-    if (!firebase_uid) {
-      throw new AppError("User not authenticated", 401, "UNAUTHORIZED");
+    // Create default tenant if not provided
+    let assignedTenantId = tenant_id;
+    if (!assignedTenantId) {
+      assignedTenantId = await this.createDefaultTenant(email);
     }
 
-    if (!email) {
-      throw new AppError("Email is required", 400, "EMAIL_REQUIRED");
-    }
-
-    const existingByFirebaseUid = await userDao.findByFirebaseUid(firebase_uid);
-      if (existingByFirebaseUid) {
-        return {
-          created: false,
-          user: existingByFirebaseUid,
-        };
-      }
-
-    const existingByEmail = await userDao.findUserByEmail(email);
-      if (existingByEmail) {
-        throw new AppError("Email already exists", 409, "EMAIL_ALREADY_EXISTS");
-      }
-
-    const createdUser = await userDao.signup({
+    // Create user
+    const user = await userDao.signup({
       email,
       firebase_uid,
-      tenant_id,
+      tenant_id: assignedTenantId,
     });
 
-    return {
-      created: true,
-      user: createdUser,
-    };
+    logger.info('User signed up successfully', { 
+      user_id: user.user_id, 
+      email 
+    });
+
+    return user;
   }
 
-  async login(email, user = {}) {
-    // validate email format via existing schema
+  async login({ email, firebase_uid }) {
+    // Validate email format
     this.validate("loginSchema", { body: { email } });
 
-    const userRow = await userDao.login({
-      email,
-      firebase_uid: user?.uid,
+    // Find user by firebase_uid
+    const user = await userDao.findByFirebaseUid(firebase_uid);
+
+    if (!user) {
+      throw new AppError(
+        "User not found. Please sign up first.",
+        404,
+        "USER_NOT_FOUND"
+      );
+    }
+
+    // Update last login timestamp
+    await db('users')
+      .where({ user_id: user.user_id })
+
+    logger.info('User logged in', { 
+      user_id: user.user_id, 
+      email 
     });
 
-    return userRow;
+    return user;
   }
 }
 

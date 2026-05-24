@@ -12,9 +12,13 @@ import {
 } from "@/components/ui/sidebar"
 import {
   LayoutDashboardIcon,
-  ChartBarIcon,
+  //ChartBarIcon,
   UsersIcon,
-  ScrollText,
+  //ScrollText,
+  PackageIcon,
+  ClipboardListIcon,
+  Building2Icon,
+  
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
@@ -28,18 +32,34 @@ const navMainData = [
   {
     title: "Organizations",
     url: "/organizations",
+    icon: <Building2Icon />,
+  },
+  {
+    title: "Members",
+    url: "/members",
     icon: <UsersIcon />,
   },
+  //{
+  //  title: "Smart Contracts",
+  //  url: "/smart-contracts",
+  //  icon: <ScrollText />,
+  //},
+  //{
+  //  title: "Analytics",
+  //  url: "/analytics",
+  //  icon: <ChartBarIcon />,
+  //},
   {
-    title: "Smart Contracts",
-    url: "/smart-contracts",
-    icon: <ScrollText />,
+    title: "Assets",
+    url: "/asset",
+    icon: <PackageIcon />,
   },
   {
-    title: "Analytics",
-    url: "/analytics",
-    icon: <ChartBarIcon />,
+    title: "Submissions",
+    url: "/submissions",
+    icon: <ClipboardListIcon />,
   },
+  // Blockchain menu temporarily hidden
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
