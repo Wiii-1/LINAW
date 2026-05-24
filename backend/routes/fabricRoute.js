@@ -4,6 +4,7 @@ const fabricController = require("../controllers/blockchainController.js");
 const assetRegistryController = require("../controllers/assetRegistryController.js");
 const approvalWorkflowController = require("../controllers/approvalWorkflowController.js");
 const organizationInviteController = require("../controllers/organizationInviteController")
+const dashboardController = require("../controllers/dashboardController.js");
 const authenticate = require("../middleware/authenticate");
 const { apiLimiter } = require("../middleware/rateLimiter");
 const uploadSubmissionFile = require("../middleware/uploadSubmissionFile.js");
@@ -71,5 +72,12 @@ router.get(
 router.delete("/submissions/:submissionId", approvalWorkflowController.deleteSubmission);
 
 // accounting contract
+
+// dashboard metrics routes
+router.get("/organizations/metrics", dashboardController.getOrganizationMetrics);
+router.get("/networks/metrics", dashboardController.getBlockchainMetrics);
+router.get("/assets/metrics", dashboardController.getAssetMetrics);
+router.get("/submissions/metrics", dashboardController.getSubmissionMetrics);
+router.get("/organization-invites/metrics", dashboardController.getInvitationMetrics);
 
 module.exports = { router };
