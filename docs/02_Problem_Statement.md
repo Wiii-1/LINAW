@@ -9,6 +9,8 @@ Example:
 Many organizations still manage procurement records
 through spreadsheets and manual documentation.
 
+Many business in the philippines comprises 
+
 ---
 
 ## Existing Problems
