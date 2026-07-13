@@ -14,13 +14,6 @@ decisions that guide the implementaion of the project.
 
 # 2. System Overview
 
-Provide a short summary of the system.
-
-Describe:
-
-- What the system does
-- Who will use it
-- Core business capabilities
 
 The procurement approval system is a web-based application that helps msme's to manage the flow of expenses, audit the expenses and streamline the purchase orders.
 
@@ -33,12 +26,25 @@ It's core business Capture purchasing needs, Validate against policies and budge
 
 # 3. Architectural Goals
 
-- Scalability
-- Maintainability
-- Security
-- High Availability
-- Auditability
-- Modularity
+The system architecture is designed to achieve the following goals:
+
+## Scalability
+The system should support an increasing number of users, procurement requests, and transactions without significant performance degradation. The architecture allows future horizontal and vertical scaling.
+
+## Maintainability
+The system is organized into modular components with clear separation of responsibilities, making it easier to update, debug, and extend without affecting unrelated modules.
+
+## Security
+The architecture enforces secure authentication, role-based authorization, encrypted communication, and protected storage of sensitive procurement data to reduce the risk of unauthorized access.
+
+## High Availability
+The system is designed to remain accessible during normal operation through reliable deployment practices, database backup strategies, and fault-tolerant components where applicable.
+
+## Auditability
+All procurement activities are recorded to provide a complete audit trail. Blockchain is used as an immutable verification layer to ensure the integrity of critical approval records.
+
+## Modularity
+The application is divided into independent modules such as Authentication, Procurement, Approval Workflow, and Reporting, allowing individual components to evolve without requiring major changes to the entire system.
 
 ---
 
@@ -74,124 +80,334 @@ This architecture keeps the system organized and easier to maintain. It also all
 
 # 7. Major Components
 
-## Frontend
-
-Responsibilities
-
-Key Interfaces
-
-Communicates With
+The system is composed of several major components that are responsible for specific areas of functionality. Each component has a defined responsibility and communicates with other components through established interfaces.
 
 ---
 
-## Backend API
+# 7.1 Frontend Application
 
-Responsibilities
+## Responsibilities
 
-Business Logic
+The frontend application provides the primary user interface for all system users.
 
-Services
+Responsibilities include:
 
----
+- Provides interfaces for procurement activities.
+- Allows users to create, submit, review, approve, and monitor procurement requests.
+- Provides dashboards based on user roles.
+- Handles user input, form interactions, and client-side validation.
+- Communicates with backend services for data retrieval and updates.
+- Provides interfaces for audit verification and system administration.
 
-## Authentication Service
+## Key Interfaces
 
-Responsibilities
+- Login and Authentication Interface
+- Procurement Dashboard
+- Approval Dashboard
+- Vendor Portal
+- Supplier Management Interface
+- Expense Tracking Interface
+- Audit Verification Interface
+- Administration Interface
 
-Authentication Flow
+## Communicates With
 
-Role-Based Access Control
-
----
-
-## Database
-
-Responsibilities
-
-Primary Stored Data
-
-Persistence Strategy
-
----
-
-## Blockchain Layer
-
-Responsibilities
-
-Immutable Audit Logs
-
-Verification
-
-Hash Storage
+- Backend Application Layer
+- Authentication Service
+- Notification Service
 
 ---
 
-## Notification Service (Optional)
+# 7.2 Backend Application Layer
 
-Responsibilities
+## Responsibilities
 
-Email Notifications
+The backend application acts as the core processing layer of the system. It manages business operations, coordinates system services, and enforces application rules.
 
-Approval Alerts
+Responsibilities include:
 
-Status Updates
+- Processing business requests.
+- Managing procurement workflows.
+- Validating user actions.
+- Coordinating communication between system components.
+- Managing vendor interactions.
+- Generating procurement-related records.
+- Integrating with database and blockchain services.
+
+## Internal Services
+
+The backend application is divided into modular services to maintain separation of responsibilities.
 
 ---
+
+## Procurement Lifecycle Service
+
+### Responsibilities
+
+- Manages the complete procurement request lifecycle.
+- Handles creation, modification, and tracking of procurement requests.
+- Coordinates transitions between procurement states.
+- Ensures procurement records follow defined workflows.
+
+---
+
+## Approval Workflow Service
+
+### Responsibilities
+
+- Manages procurement approval processes.
+- Routes requests to appropriate approvers.
+- Applies organizational approval rules.
+- Maintains approval history and decision records.
+
+---
+
+## Vendor Management Service
+
+### Responsibilities
+
+- Maintains supplier information.
+- Handles vendor invitations and communication.
+- Manages supplier quotations and vendor responses.
+- Supports vendor comparison processes.
+
+---
+
+## Reporting and Analytics Service
+
+### Responsibilities
+
+- Generates procurement reports.
+- Provides spending analysis.
+- Displays procurement trends and summaries.
+- Supports management decision-making.
+
+---
+
+# 7.3 Authentication and Authorization Service
+
+## Responsibilities
+
+The authentication service manages user identity, access control, and secure communication between users and system resources.
+
+Responsibilities include:
+
+- User authentication.
+- Session management.
+- Token generation and validation.
+- Role-Based Access Control (RBAC).
+- User permission management.
+
+## Supported Roles
+
+- Administrator
+- Procurement Officer
+- Approving Manager
+- Chief Procurement Officer
+- Auditor
+- Vendor
+
+---
+
+# 7.4 Data Management Layer
+
+## Responsibilities
+
+The data management layer handles the storage, retrieval, and organization of system information.
+
+Responsibilities include:
+
+- Persisting application data.
+- Managing transactional records.
+- Supporting reporting queries.
+- Maintaining relationships between business entities.
+- Providing reliable data access.
+
+## Stored Data
+
+The system stores:
+
+- User accounts and roles.
+- Procurement requests.
+- Approval records.
+- Vendor information.
+- Quotations.
+- Purchase orders.
+- Invoice records.
+- Audit metadata.
+- Blockchain verification references.
+
+## Storage Strategy
+
+- PostgreSQL is used as the primary database for transactional data.
+- Object storage is used for uploaded documents such as quotations, invoices, and receipts.
+- Database records maintain references to stored documents.
+- Sensitive information is protected through appropriate security controls.
+
+---
+
+# 7.5 Blockchain Verification Layer
+
+## Responsibilities
+
+The blockchain verification layer provides an immutable verification mechanism for finalized procurement records.
+
+Responsibilities include:
+
+- Creating cryptographic proofs of important procurement events.
+- Storing record hashes on the blockchain.
+- Providing verification mechanisms for auditors and authorized users.
+- Ensuring tamper-evident audit capability.
+
+## Stored Information
+
+The blockchain stores:
+
+- Cryptographic hashes of finalized records.
+- Transaction identifiers.
+- Verification timestamps.
+
+Sensitive documents and operational data remain stored in traditional databases and object storage.
+
+---
+
+# 7.6 Document Management Service
+
+## Responsibilities
+
+The document management service manages procurement-related files and documents.
+
+Responsibilities include:
+
+- Storing uploaded documents.
+- Managing document retrieval.
+- Controlling document access permissions.
+- Supporting secure handling of quotations, receipts, and invoices.
+
+## Managed Documents
+
+Examples:
+
+- Vendor quotations.
+- Purchase orders.
+- Delivery receipts.
+- Invoice documents.
+- Procurement attachments.
+
+---
+
+# 7.7 Notification Service
+
+## Responsibilities
+
+The notification service manages communication between the system and users.
+
+Responsibilities include:
+
+- Sending procurement status notifications.
+- Alerting users about pending approvals.
+- Providing workflow updates.
+- Sending email and in-app notifications.
+
+## Notification Events
+
+Examples:
+
+- Procurement request submitted.
+- Approval required.
+- Request approved or rejected.
+- Purchase order generated.
+- Delivery status updated.
+- Invoice verification completed.
 
 # 8. Module Breakdown
 
-List the major modules.
+The system is divided into modules so each part has its own responsibility.
 
-Example
-
-- Authentication
-- User Management
-- Procurement Requests
-- Approval Workflow
-- Supplier Management
-- Reporting
-- Audit Trail
-- Administration
-
-Briefly explain the purpose of each module.
+- **Authentication** — Handles login, token validation, and secure access.
+- **User Management** — Handles user accounts, roles, and permissions.
+- **Procurement Requests** — Handles request creation, submission, and tracking.
+- **Approval Workflow** — Handles request review, approval, rejection, and status updates.
+- **Supplier Management** — Handles supplier records and quotations.
+- **Purchase Order Management** — Handles end to end proocess of creating, tracking, and approving purchase order 
+- **Delivery Verification** — ensures it notifies the company that the delivery has been delivered
+- **Invoice Verification** — ensure incoming vendor invoices are accurate and justified before payment
+- **Reporting** — Shows dashboards, summaries, and procurement reports.
+- **Audit Trail** — Records actions and connects transactions to blockchain verification.
+- **Administration** — Handles system settings, configurations, and administrative controls.
+- **Invited Vendor Dashboard** — Lets invited vendors view requests and submit quotations.
 
 ---
 
 # 9. Data Flow
 
-Illustrate the primary business flow.
+                    Employee
+                       |
+                       |
+                       v
+          Create Procurement Request
+                       |
+                       |
+                       v
+              Frontend Application
+                       |
+                       |
+                       v
+              Backend API Service
+                       |
+                       |
+              Validate Request Data
+                       |
+                       |
+              +--------+--------+
+              |                 |
+            Valid            Invalid
+              |                 |
+              v                 v
+      Store Request        Return Error
+       in Database             |
+              |
+              |
+              v
+      Approval Workflow
+              |
+              |
+      Manager / Procurement
+      Officer Review
+              |
+              |
+       +------+------+
+       |             |
+    Approved       Rejected
+       |             |
+       v             v
+ Generate PO      Update Status
+       |
+       |
+       v
+ Create Audit Metadata
+       |
+       |
+       v
+ Generate Hash
+       |
+       |
+       v
+ Blockchain Verification Layer
+       |
+       |
+       v
+ Store Blockchain Reference
+       |
+       |
+       v
+ Update Procurement Status
+       |
+       |
+       v
+ Notify Users
 
-Example
-
-Employee
-
-↓
-
-Submit Procurement Request
-
-↓
-
-Validation
-
-↓
-
-Store Request
-
-↓
-
-Generate Blockchain Record
-
-↓
-
-Manager Approval
-
-↓
-
-Update Database
-
-↓
-
-Notify Requestor
+ ![flow_chart](../diagrams/flow_chart.png)
 
 ---
 
