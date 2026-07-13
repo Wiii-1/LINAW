@@ -413,142 +413,137 @@ The system is divided into modules so each part has its own responsibility.
 
 # 10. Security Architecture
 
-Explain:
+## Security objectives
 
-Authentication
+- Prevention of unauthorized access
+- Safe guard sensitive data of clients 
+- Maintain data integrity 
 
-Authorization
+## Security architecture diagram
 
-Encryption
+![Security_Architecture](../diagrams/Security_Architecture.png)
 
-Blockchain Integrity
+## Authentication
 
-Audit Logging
+- JWT based authentication
+- Role Based Access Controll (RBAC)
+- Session management
 
-HTTPS
+## Authorization
 
-JWT
+- Least privilage access
+- Role separation
+- Resource ownership validation
 
-Role-Based Access Control
+## Data Protection
+
+- HTTPS/TLS for all communication
+- Encryption of sensitive data
+- Secure password Hashing 
+
+## Audit and Integrity
+
+- System activity logging
+- Blockchain verification of finalized procurement records
+- Tamper evident audit trail
+
+## Infrastructure Security
+
+- Environment Variable management
+- Database Backups
+- Secure Api endpoints
+- Docker Container Isolation
 
 ---
 
 # 11. Database Overview
 
-Provide a high-level overview of major entities.
+The system uses a relational database to store the main operational records of the platform. 
+The database supports multi-tenant data separation and manages users, vendors, procurement transactions, and supporting documents.
 
-Example
+Major entities:
 
-- Users
-- Roles
-- Departments
-- Procurement Requests
-- Approval Records
-- Suppliers
-- Audit Logs
-- Blockchain Records
+- **Tenants** — companies or MSMEs using the system.
+- **Users** — system users under a tenant.
+- **Vendors** — supplier records linked to a tenant.
+- **Vendor Invitations** — invitation records for vendor access.
+- **Purchase Orders** — main procurement transaction records.
+- **Transaction Receipts** — receipt and proof records linked to purchase orders.
 
-(Optional)
-
-Insert ER Diagram
+At a high level, a tenant can have many users, vendors, and purchase orders. A purchase order can also have multiple transaction receipts.
 
 ---
 
 # 12. External Systems
 
-Describe third-party integrations.
-
-Example
-
-- Email Service
-- Blockchain Node
-- Active Directory
-- Cloud Storage
+- **Cloudflare R2 Storage** — Stores uploaded documents and procurement-related files.
+- **Google OAuth** — Handles Google-based user authentication and login.
+- **Cloudflare** — Provides DNS, security, and traffic routing for the application.
+- **Oracle OCI** — Hosts the application and related infrastructure.
+- **Neon PostgreSQL** — Stores the main relational data of the system.
+- **Polygon Blockchain** — Stores verification hashes for audit trail and record integrity.
 
 ---
 
 # 13. Deployment Architecture
 
-Insert deployment diagram.
-
-Example
-
 Internet
-
-↓
-
-Nginx
-
-↓
-
-Spring Boot
-
-↓
-
-PostgreSQL
-
-↓
-
-Blockchain Node
-
-↓
-
-Backup Server
+   ↓
+Cloudflare
+   ↓
+traefik proxy
+   ↓
+Oracle OCI
+   ├── Frontend Application
+   └── Backend API
+          ├── Neon PostgreSQL
+          ├── Cloudflare R2 Storage
+          ├── Google OAuth
+          └── Polygon Blockchain
 
 ---
 
 # 14. Scalability Considerations
 
-Discuss:
-
-- Horizontal scaling
-- Vertical scaling
-- Stateless backend
-- Connection pooling
-- Database indexing
-- Query optimization
-- Caching strategy
-- Load balancing
-- Container orchestration
-- Future microservices migration
+- **Horizontal scaling** — More backend instances can be added if traffic grows.
+- **Vertical scaling** — Server resources such as CPU, RAM, and storage can be increased if needed.
+- **Stateless backend** — The backend does not depend on local session memory, so any instance can handle a request.
+- **Connection pooling** — The system reuses database connections instead of opening a new one every time.
+- **Database indexing** — Important columns can be indexed to make searches and lookups faster.
+- **Query optimization** — Queries should be written efficiently to avoid slow reads and unnecessary processing.
+- **Caching strategy** — Frequently used data can be cached to reduce database load.
+- **Load balancing** — Requests can be distributed across multiple instances.
+- **Container orchestration** — Containers can be managed and scaled more easily across environments.
+- **Future microservices migration** — The current modular design supports future migration to microservices if needed.
 
 ---
 
 # 15. Reliability & Availability
 
-Describe:
-
-- Backup strategy
-- Disaster recovery
-- Fault tolerance
-- Monitoring
-- Logging
-- Health checks
-
+- **Backup strategy** — The system stores regular backups of the database and important files so data can be restored if needed.
+- **Disaster recovery** — If the main system fails, the application can be redeployed and restored from backups.
+- **Fault tolerance** — RAID can be used on the storage layer to reduce downtime if a disk fails, while separate backups are still kept for recovery from data loss.
+- **Monitoring** — UptimeRobot can be used to monitor the availability of the application and detect downtime.
+- **Logging** — Application logs and blockchain transaction logs are used for debugging and auditing.
+- **Health checks** — The backend exposes health endpoints so monitoring tools can verify that the system is running properly.
 ---
 
 # 16. Risks and Constraints
 
-Identify architectural risks.
-
-Example
-
-Risk
-
-Blockchain node downtime
-
-Mitigation
-
-Queue transactions and synchronize later
+| Risk | Mitigation |
+|---|---|
+| Blockchain downtime | Queue data and sync later. |
+| Database failure | Restore from backup. |
+| Internet outage | System will not be accessible. |
+| Third-party service failure | Some features may stop temporarily. |
+| Slow performance | Use indexing, caching, and query tuning. |
 
 ---
 
 # 17. Assumptions
 
-Document assumptions made during the design.
-
-Example
-
-- Users have internet connectivity.
-- PostgreSQL remains the primary operational database.
-- Blockchain is used solely for audit verification.
+- Users have internet.
+- Database is the main data store.
+- Blockchain is for verification only.
+- Files are stored outside the database.
+- Third-party services will be available.
