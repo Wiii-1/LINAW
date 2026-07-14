@@ -326,16 +326,16 @@ The system is divided into modules so each part has its own responsibility.
 
 - **Authentication** — Handles login, token validation, and secure access.
 - **User Management** — Handles user accounts, roles, and permissions.
-- **Procurement Requests** — Handles request creation, submission, and tracking.
+- **Purchase Requisition** — Handles request creation, submission, and tracking.
 - **Approval Workflow** — Handles request review, approval, rejection, and status updates.
 - **Supplier Management** — Handles supplier records and quotations.
 - **Purchase Order Management** — Handles end to end proocess of creating, tracking, and approving purchase order 
 - **Delivery Verification** — ensures it notifies the company that the delivery has been delivered
-- **Invoice Verification** — ensure incoming vendor invoices are accurate and justified before payment
+- **Invoice Verification** — checks whether uploaded invoice records match the related purchase order, vendor information, and supporting transaction data.
 - **Reporting** — Shows dashboards, summaries, and procurement reports.
 - **Audit Trail** — Records actions and connects transactions to blockchain verification.
 - **Administration** — Handles system settings, configurations, and administrative controls.
-- **Invited Vendor Dashboard** — Lets invited vendors view requests and submit quotations.
+- **ISupplier Dashboard** — Lets invited vendors view requests and submit quotations.
 
 ---
 
