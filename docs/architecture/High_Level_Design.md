@@ -6,44 +6,44 @@
 
 ## Purpose
 
-This documentation is the high level architecture of the procurement approval system. It lies here 
-the definition of the system's major components, interaction, deployment architecture, and design 
-decisions that guide the implementaion of the project.
-
+This documentation provides the high-level architecture of the procurement approval system. It defines the system's major components, interactions, deployment architecture, and design decisions that guide the implementation of the project.
 ---
 
 # 2. System Overview
 
 
-The procurement approval system is a web-based application that helps msme's to manage the flow of expenses, audit the expenses and streamline the purchase orders.
+The procurement approval system is a web-based application that helps MSMEs manage the flow of expenses, audit those expenses, and streamline purchase orders.
 
-The system will be used by  procurement officers / Approving managers / Chief Procurement 
-Officers / owners.
+The system will be used by procurement officers, approving managers, chief procurement officers, and owners.
 
-It's core business Capture purchasing needs, Validate against policies and budgets, Route requests to the correct approvers, Control and document spending decisions, Convert approvals into purchases, Verify delivery and payment accuracy, Provide visibility and auditability
+Its core business includes capturing purchasing needs, validating against policies and budgets, routing requests to the correct approvers, controlling and documenting spending decisions, converting approvals into purchases, verifying delivery and payment accuracy, and providing visibility and auditability.
 
 ---
 
 # 3. Architectural Goals
 
-The system architecture is designed to achieve the following goals:
-
 ## Scalability
+
 The system should support an increasing number of users, procurement requests, and transactions without significant performance degradation. The architecture allows future horizontal and vertical scaling.
 
 ## Maintainability
+
 The system is organized into modular components with clear separation of responsibilities, making it easier to update, debug, and extend without affecting unrelated modules.
 
 ## Security
+
 The architecture enforces secure authentication, role-based authorization, encrypted communication, and protected storage of sensitive procurement data to reduce the risk of unauthorized access.
 
 ## High Availability
+
 The system is designed to remain accessible during normal operation through reliable deployment practices, database backup strategies, and fault-tolerant components where applicable.
 
 ## Auditability
+
 All procurement activities are recorded to provide a complete audit trail. Blockchain is used as an immutable verification layer to ensure the integrity of critical approval records.
 
 ## Modularity
+
 The application is divided into independent modules such as Authentication, Procurement, Approval Workflow, and Reporting, allowing individual components to evolve without requiring major changes to the entire system.
 
 ---
@@ -325,17 +325,17 @@ Examples:
 The system is divided into modules so each part has its own responsibility.
 
 - **Authentication** — Handles login, token validation, and secure access.
-- **User Management** — Handles user accounts, roles, and permissions.
+- **User Management** — Handles user signup, company registration, organization administration, and company-based roles and permissions.
 - **Purchase Requisition** — Handles request creation, submission, and tracking.
 - **Approval Workflow** — Handles request review, approval, rejection, and status updates.
-- **Supplier Management** — Handles supplier records and quotations.
-- **Purchase Order Management** — Handles end to end proocess of creating, tracking, and approving purchase order 
-- **Delivery Verification** — ensures it notifies the company that the delivery has been delivered
+- **Supplier Management** — Handles supplier records, supplier onboarding invitations, and quotations.
+- **Purchase Order Management** — Handles the end-to-end process of creating, tracking, and approving purchase orders.
+- **Delivery Verification** — Ensures the company is notified when a delivery has been received.
 - **Invoice Verification** — checks whether uploaded invoice records match the related purchase order, vendor information, and supporting transaction data.
 - **Reporting** — Shows dashboards, summaries, and procurement reports.
-- **Audit Trail** — Records actions and connects transactions to blockchain verification.
-- **Administration** — Handles system settings, configurations, and administrative controls.
-- **ISupplier Dashboard** — Lets invited vendors view requests and submit quotations.
+- **Application Audit Trail** — Records actions and connects transactions to blockchain verification.
+- **Organization Administration** — Handles system settings, configurations, and organization administrative controls.
+- **Supplier Dashboard** — Allows authenticated users belonging to invited supplier companies to complete supplier onboarding, access assigned RFQs, submit quotations, and view purchase orders associated with their company. Access to the supplier dashboard is granted only when the user is linked to a company with a valid supplier invitation or approved supplier relationship.
 
 ---
 
@@ -426,12 +426,12 @@ The system is divided into modules so each part has its own responsibility.
 ## Authentication
 
 - JWT based authentication
-- Role Based Access Controll (RBAC)
+- Role-Based Access Control (RBAC)
 - Session management
 
 ## Authorization
 
-- Least privilage access
+- Least privilege access
 - Role separation
 - Resource ownership validation
 
@@ -451,7 +451,7 @@ The system is divided into modules so each part has its own responsibility.
 
 - Environment Variable management
 - Database Backups
-- Secure Api endpoints
+- Secure API endpoints
 - Docker Container Isolation
 
 ---
