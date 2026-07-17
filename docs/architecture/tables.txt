@@ -1,0 +1,144 @@
+Authentication:
+
+- user sessions
+- refresh tokens
+
+References existing table
+- users
+- audit trails
+
+User Management:
+
+- Users
+- Companies
+- Roles
+- Permissions
+- User roles
+- role permissions
+
+Purchase Requisition:
+
+- Purchase requisition
+- Purchase requisition items
+- Purchase requisition status logs
+
+Referenced existing tables
+- users
+- companies
+- approval requests
+- rfqs
+- purchase orders
+
+Approval Workflow:
+
+- Approval requests
+- Approval actions
+- Approval workflow levels
+
+Referenced Existing tables
+- users
+- companies
+- purchase requisition, rfqs, purchase orders
+
+Supplier Management:
+
+- Suppliers
+- Supplier invitations
+- Suppliers quotations
+- Suppliers quotation items
+
+Referenced Existing table
+- users
+- companies
+- rfqs 
+- purchase orders
+
+Purchase Order Management:
+
+- Purchase orders
+- Purchase order items
+- Purchase order approvals
+
+Referenced existing tables
+- suppliers
+- users
+- companies
+- purchase requisitions or rfqs
+- quotations
+
+Delivery Verification:
+
+- Delivery verifications
+- Delivery notifications
+
+Referenced Existing tables
+- purchase orders
+- suppliers
+- users
+- companies
+- goods receipt or receiving reporsts
+
+Invoice verification:
+
+- Invoice verification 
+- Invoice verification items
+- Invoice verification attachments
+
+Referenced existing tables
+- purchase orders
+- suppliers
+- goods receipts / receiving reports
+- users
+- companies
+
+Reporting:
+
+- report requests
+- report exports
+
+Referenced existing tables
+- rfqs
+- quotations
+- purchase orders
+- suppliers
+- users
+- companies
+
+Application Audit trails:
+
+- Audit trails
+- Audit trail hashes
+- Audit trail blockchain refs
+
+Referenced existing tables
+- users
+- companies
+- rfqs, quoatations, purchase orders 
+
+Organizattion administration:
+
+- Organization User
+- Organization roles
+- Organization permissions
+- Organization settings
+- Audit logs
+
+Referenced existing tables
+- users
+- companies
+
+Supplier dashboard: 
+
+- Supplier profile
+- supplier invitations
+- supplier company relationships
+- rfq supplier assignments
+- quotation
+- quotation items
+
+referenced existing tables
+
+users
+companies
+rfqs & rfq items
+purchase orders

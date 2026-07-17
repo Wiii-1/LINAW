@@ -35,23 +35,25 @@ Authentication
 
 ### Responsibilities
 
-- Handle login, token validation, and secure access to protected system resources.
+- Handle user signup and login using valid account credentials.
 - Authenticate user credentials before granting access to the application.
 - Generate, issue, validate, refresh, and revoke authentication tokens.
 - Protect secured API endpoints using authenticated session or token-based access.
-- Maintain authentication status and session security for logged-in users.
+- Maintain authentication status and session security for registered users.
+- Return the authenticated user context for the current session.
 
 ### Module Dependencies
 
 - Depends On: `users`, `refresh_tokens`, `user_sessions`, and `audit_trails`.
-- Produces: authenticated sessions, token validation results, and authenticated user context.
+- Produces: registered user accounts, authenticated sessions, authentication tokens, token validation results, and authenticated user context.
 
 ---
 
 ### Functional Requirements
 
+- The system shall allow new users to sign up using valid registration details.
 - The system shall allow registered users to log in using valid authentication credentials.
-- The system shall validate submitted login credentials before granting access.
+- The system shall validate submitted signup and login data before processing authentication.
 - The system shall generate authentication tokens after successful login.
 - The system shall allow the system to validate access tokens for protected API requests.
 - The system shall allow the system to refresh authentication tokens using a valid refresh mechanism.
@@ -64,6 +66,7 @@ Authentication
 
 ### Business Rules
 
+- Signup shall create a valid user account before login is allowed.
 - Only registered and active users shall be allowed to authenticate into the system.
 - A user must provide valid login credentials before authentication tokens can be issued.
 - Authentication tokens must be generated only after successful credential validation.
@@ -78,6 +81,7 @@ Authentication
 ### API Endpoints
 
 POST  
+/api/auth/signup  
 /api/auth/login  
 /api/auth/refresh  
 /api/auth/logout  
@@ -90,6 +94,7 @@ GET
 
 ### Validation
 
+- full_name
 - email
 - password
 - access_token
@@ -98,6 +103,8 @@ GET
 - session_status
 - Email must be in a valid format
 - Password must not be empty
+- Password must meet the configured security requirements
+- Signup must be blocked when required registration fields are incomplete
 - Login must be blocked for inactive or unauthorized users
 - Access token must be valid before protected access is granted
 - Refresh token must be valid and not revoked before a new access token is issued
@@ -117,8 +124,7 @@ GET
   - Includes user reference, token value or token identifier, issued timestamp, expiration timestamp, revocation status, and revocation timestamp.
 
 - **Referenced Existing Tables**
-  - `users` — stores the registered user accounts allowed to authenticate into the application.
-  - `companies` — stores the company context associated with the authenticated user where applicable.
+  - `users` — stores the registered user accounts allowed to sign up and authenticate into the application.
   - `audit_trails` — stores significant authentication-related events where applicable.
 
 ---
@@ -128,10 +134,18 @@ GET
 ```mermaid
 sequenceDiagram
     actor User
-    participant UI as Login Page
+    participant UI as Authentication Page
     participant API as Backend API
     participant AUTH as Authentication Module
     participant DB as Database
+
+    User->>UI: Submit signup details
+    UI->>API: Send signup request
+    API->>AUTH: Validate registration data
+    AUTH->>DB: Save user account
+    DB-->>AUTH: User account saved
+    AUTH-->>API: Return signup result
+    API-->>UI: Display account creation status
 
     User->>UI: Enter login credentials
     UI->>API: Submit login request
@@ -173,15 +187,15 @@ sequenceDiagram
 
 #### authRouter
 
-Defines the API routes for login, logout, token refresh, token validation, and authenticated user retrieval. It maps incoming HTTP requests to the appropriate controller functions.
+Defines the API routes for signup, login, logout, token refresh, token validation, and authenticated user retrieval. It maps incoming HTTP requests to the appropriate controller functions.
 
 #### authController
 
-Handles authentication API requests and responses. It receives requests for login, logout, token refresh, token validation, and authenticated user context retrieval, then returns the appropriate response to the client.
+Handles authentication API requests and responses. It receives requests for signup, login, logout, token refresh, token validation, and authenticated user context retrieval, then returns the appropriate response to the client.
 
 #### authService
 
-Contains the business logic for authentication operations. It validates credentials, issues authentication tokens, verifies token status, refreshes access tokens, revokes sessions, and enforces secure access rules.
+Contains the business logic for authentication operations. It validates signup and login credentials, creates user accounts, issues authentication tokens, verifies token status, refreshes access tokens, revokes sessions, and enforces secure access rules.
 
 #### authRepository
 
@@ -189,7 +203,7 @@ Handles data access and database queries related to user authentication sessions
 
 #### authValidator
 
-Validates request data for authentication operations. It ensures login credentials, token inputs, and session-related data are complete and correctly formatted before processing.
+Validates request data for authentication operations. It ensures signup credentials, login credentials, token inputs, and session-related data are complete and correctly formatted before processing.
 
 ---
 
@@ -208,10 +222,10 @@ User account is inactive or access is restricted
 Authenticated user or session record not found
 
 409  
-Authentication session already revoked or in conflicting state
+User account already exists or authentication session is already revoked or in conflicting state
 
 422  
-Token validation failed
+Authentication validation failed
 
 500  
 Internal server error
@@ -229,28 +243,26 @@ User Management
 
 ### Responsibilities
 
-- Handle user signup, company registration, organization administration, and company-based roles and permissions.
-- Create the initial organization administrator account for a newly registered company.
+- Handle company registration and company profile maintenance.
 - Store and maintain company profile details and user membership under the registered company.
-- Allow employees to sign up and become associated with an existing registered company.
+- Allow authorized users to view and update their own profile information.
+- Allow authorized company administrators to manage company user accounts.
 - Control access to procurement functions based on company-scoped roles and permissions.
 
 ### Module Dependencies
 
-- Depends On: Authentication, `users`, `companies`, `roles`, and `permissions`.
-- Produces: user accounts, company records, role assignments, and permission mappings.
+- Depends On: Authentication, `users`, `companies`, `roles`, `permissions`, `user_roles`, and `role_permissions`.
+- Produces: company records, updated user profiles, company user account changes, role assignments, and permission mappings.
 
 ---
 
 ### Functional Requirements
 
-- The system shall allow a new user to sign up as the initial organization administrator for a company.
 - The system shall allow the initial organization administrator to register and maintain company details in the application.
-- The system shall allow the system to associate the initial registered user with the newly registered company as its organization administrator.
-- The system shall allow employees to sign up under an existing registered company.
-- The system shall allow the organization administrator to manage company user accounts after company setup is completed.
-- The system shall allow the organization administrator to assign roles and permissions to company users based on authorized access requirements.
+- The system shall allow the system to associate a registered user with a company as its organization administrator after company registration.
 - The system shall allow authorized users to view and update their account information within the scope allowed by the company.
+- The system shall allow authorized company administrators to create, view, update, deactivate, and remove company user accounts after company setup is completed.
+- The system shall allow authorized company administrators to assign roles and permissions to company users based on authorized access requirements.
 - The system shall allow authorized company administrators to search and filter company users by name, email, role, or account status.
 - The system shall allow the system to enforce access restrictions based on company membership, assigned roles, and permissions.
 - The system shall restrict company user and role management functions to authorized organization administrators only.
@@ -259,10 +271,9 @@ User Management
 
 ### Business Rules
 
-- The first registered user for a new company shall become the organization administrator of that company.
-- A company record must be created before employee accounts can be fully associated with that organization.
-- Every user account must belong to one valid company record.
-- Employee signup shall be allowed only for a valid and existing company based on the system’s company association rules.
+- A company record must be created before company-level administration can be fully performed.
+- The registered user designated during company setup shall become the organization administrator of that company.
+- Every managed user account must belong to one valid company record based on the current system design.
 - A user account must have at least one valid company-scoped role before it can access protected procurement functions.
 - Company administrators shall manage only users belonging to their own company.
 - Inactive or deactivated user accounts shall not be allowed to access the system.
@@ -271,10 +282,112 @@ User Management
 
 ---
 
+### Internal Sections
+
+#### User Profile Management
+
+Handles self-service user profile retrieval and profile updates for the authenticated user.
+
+**API Endpoints**
+
+GET  
+/api/users/profile
+
+PUT  
+/api/users/profile
+
+**Validation**
+- full_name
+- email
+- contact_number
+- Email must be in a valid format
+- User email must be unique within the allowed account rules
+- Contact number must follow the accepted format when provided
+
+#### Organization (Company) Management
+
+Handles company registration and company profile maintenance for the SaaS platform.
+
+**API Endpoints**
+
+POST  
+/api/companies/register
+
+GET  
+/api/companies/:companyId
+
+PUT  
+/api/companies/:companyId
+
+**Validation**
+- company_name
+- company_email
+- company_address
+- company_contact_number
+- company_status
+- Company name must not be empty during company registration
+- Company record must contain required organization details before setup is completed
+- Company email must be in a valid format when provided
+- Company status must match an allowed company state
+
+#### User Administration
+
+Handles company-scoped user creation, retrieval, update, deactivation, and removal after company setup is completed.
+
+**API Endpoints**
+
+POST  
+/api/companies/:companyId/users
+
+GET  
+/api/companies/:companyId/users  
+/api/companies/:companyId/users/:userId  
+/api/companies/:companyId/users?status=active  
+/api/companies/:companyId/users?role=:roleName
+
+PUT  
+/api/companies/:companyId/users/:userId  
+/api/companies/:companyId/users/:userId/status
+
+DELETE  
+/api/companies/:companyId/users/:userId
+
+**Validation**
+- full_name
+- email
+- password
+- user_status
+- User email must be unique within the allowed account rules
+- Password must meet the configured security requirements when applicable
+- User status must match an allowed account state
+- Company user administration must be restricted to the acting administrator’s company scope
+
+#### Role & Permission Management
+
+Handles company-scoped role assignment, role removal, and permission reference retrieval for RBAC enforcement.
+
+**API Endpoints**
+
+POST  
+/api/companies/:companyId/users/:userId/assign-role  
+/api/companies/:companyId/users/:userId/remove-role
+
+GET  
+/api/roles  
+/api/permissions
+
+**Validation**
+- role_id
+- permission_id
+- Role reference must match an existing company-scoped role record
+- Permission reference must match an existing permission record
+- User account must have at least one assigned role before protected procurement access is allowed
+
+---
+
 ### API Endpoints
 
 POST  
-/api/auth/signup  
 /api/companies/register  
 /api/companies/:companyId/users  
 /api/companies/:companyId/users/:userId/assign-role  
@@ -317,11 +430,11 @@ DELETE
 - permission_id
 - Email must be in a valid format
 - User email must be unique within the allowed account rules
-- Password must meet the configured security requirements
+- Password must meet the configured security requirements when applicable
 - Company name must not be empty during company registration
 - Company record must contain required organization details before setup is completed
-- Employee signup must reference a valid and existing company
 - Role reference must match an existing company-scoped role record
+- Permission reference must match an existing permission record
 - User account must have at least one assigned role before protected procurement access is allowed
 
 ---
@@ -364,23 +477,29 @@ sequenceDiagram
     participant UM as User Management Module
     participant DB as Database
 
-    User->>UI: Sign up as organization administrator
-    UI->>API: Submit signup and company registration details
-    API->>UM: Validate signup and company data
-    UM->>DB: Save user account
-    DB-->>UM: User account saved
-    UM->>DB: Save company record and link admin user
+    User->>UI: Register company details
+    UI->>API: Submit company registration request
+    API->>UM: Validate company data
+    UM->>DB: Save company record and link organization administrator
     DB-->>UM: Company registered
-    UM-->>API: Return registration result
+    UM-->>API: Return company registration result
     API-->>UI: Display organization setup result
 
-    User->>UI: Employee signs up under company
-    UI->>API: Submit employee signup details
-    API->>UM: Validate company association
-    UM->>DB: Save employee account linked to company
-    DB-->>UM: Employee account saved
-    UM-->>API: Return signup result
-    API-->>UI: Display account creation status
+    User->>UI: View or update user profile
+    UI->>API: Submit profile request
+    API->>UM: Validate profile data
+    UM->>DB: Retrieve or update user profile
+    DB-->>UM: Profile processed
+    UM-->>API: Return profile result
+    API-->>UI: Display updated profile information
+
+    User->>UI: Manage company user account
+    UI->>API: Submit company user management request
+    API->>UM: Validate company scope and permissions
+    UM->>DB: Save or update company user record
+    DB-->>UM: Company user record updated
+    UM-->>API: Return company user result
+    API-->>UI: Display updated company user data
 
     User->>UI: Assign company role to employee
     UI->>API: Submit role assignment request
@@ -397,15 +516,15 @@ sequenceDiagram
 
 #### userRouter
 
-Defines the API routes for user signup, company registration, company user management, and company-scoped role and permission operations. It maps incoming HTTP requests to the appropriate controller functions.
+Defines the API routes for company registration, user profile management, company user management, and company-scoped role and permission operations. It maps incoming HTTP requests to the appropriate controller functions.
 
 #### userController
 
-Handles user management API requests and responses. It receives requests for signup, company registration, profile updates, company user management, and role assignment, then returns the appropriate response to the client.
+Handles user management API requests and responses. It receives requests for company registration, profile updates, company user management, and role assignment, then returns the appropriate response to the client.
 
 #### userService
 
-Contains the business logic for user management operations. It creates organization administrator accounts, registers companies, links users to companies, manages company user membership, validates company-scoped roles, and enforces company-based access control rules.
+Contains the business logic for user management operations. It registers companies, links organization administrators to companies, manages company user membership, validates company-scoped roles, and enforces company-based access control rules.
 
 #### userRepository
 
@@ -413,14 +532,14 @@ Handles data access and database queries related to users, companies, roles, per
 
 #### userValidator
 
-Validates request data for user management operations. It ensures signup inputs, company registration details, role references, permission references, and account status inputs are complete and correctly formatted before processing.
+Validates request data for user management operations. It ensures company registration details, profile inputs, role references, permission references, and account status inputs are complete and correctly formatted before processing.
 
 ---
 
 ### Error Handling
 
 400  
-Invalid user or company registration request data
+Invalid user management request data
 
 401  
 Unauthorized access
@@ -432,7 +551,7 @@ Insufficient privileges to manage company users, roles, or permissions
 User, company, role, or permission record not found
 
 409  
-User account, company record, or role assignment already exists or is in conflicting state
+Company record or role assignment already exists or is in conflicting state
 
 422  
 User management validation failed

@@ -481,7 +481,7 @@ At a high level, a tenant can have many users, vendors, and purchase orders. A p
 - **Cloudflare** — Provides DNS, security, and traffic routing for the application.
 - **Oracle OCI** — Hosts the application and related infrastructure.
 - **Neon PostgreSQL** — Stores the main relational data of the system.
-- **Polygon Blockchain** — Stores verification hashes for audit trail and record integrity.
+- **Blockchain** — Stores verification hashes for audit trail and record integrity.
 
 ---
 
@@ -499,7 +499,7 @@ Oracle OCI
           ├── Neon PostgreSQL
           ├── Cloudflare R2 Storage
           ├── Google OAuth
-          └── Polygon Blockchain
+          └── Blockchain
 
 ---
 
