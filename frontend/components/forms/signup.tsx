@@ -10,6 +10,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSepar
 import { Input } from "@/components/ui/input";
 import { signUpSchema, type SignUpFormValues } from "@/validators/auth";
 import { markAuthTransition, runAuthTransition } from "@/lib/auth-client";
+import { useToast } from "@/components/toast-provider";
 
 function getSafeReturnTo() {
   if (typeof window === "undefined") return null;
@@ -28,6 +29,7 @@ function getInvitationToken() {
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { success, error: toastError } = useToast();
   const safeReturnTo = getSafeReturnTo();
   const invitationToken = getInvitationToken();
   const form = useForm<SignUpFormValues>({ resolver: zodResolver(signUpSchema), defaultValues: { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" } });
@@ -43,11 +45,14 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
       });
       if (!response.ok || data.success !== true) {
         form.setError("root", { message: data.message ?? "Unable to create your account." });
+        toastError("Unable to create your account.");
         return;
       }
+      success("Account created successfully.");
       router.push(safeReturnTo ?? "/dashboard");
     } catch {
       form.setError("root", { message: "Unable to reach the signup service. Please try again." });
+      toastError("Unable to reach the signup service. Please try again.");
     } finally {
       setIsLoading(false);
     }

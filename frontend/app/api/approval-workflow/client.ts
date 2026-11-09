@@ -47,7 +47,7 @@ export type ApprovalAction = {
 
 export type ApprovalRequest = {
   id: string;
-  entityId: string;
+  prNumber: string | null;
   request: string;
   requester: string;
   entityType: string;
@@ -64,6 +64,7 @@ type RawApprovalRequest = {
   id?: unknown;
   entity_type?: unknown;
   entity_id?: unknown;
+  pr_number?: unknown;
   requester_user_id?: unknown;
   current_level?: unknown;
   status?: unknown;
@@ -179,12 +180,14 @@ function mapRequest(raw: RawApprovalRequest): ApprovalRequest {
     });
   }
 
+  const prNumber = stringValue(
+    raw.pr_number ?? raw.purchase_requisition?.pr_number,
+    "",
+  );
+
   return {
     id,
-    entityId: stringValue(
-      raw.purchase_requisition?.pr_number ?? raw.entity_id,
-      String(raw.entity_id),
-    ),
+    prNumber: prNumber || null,
     request: stringValue(
       raw.purchase_requisition?.purpose,
       stringValue(

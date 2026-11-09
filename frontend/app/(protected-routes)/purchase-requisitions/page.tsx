@@ -44,7 +44,14 @@ import {
   type WorkflowDefinition,
 } from "@/app/api/approval-workflow/client";
 import { formatCurrency, supportedCurrencies } from "@/lib/currencies";
+import { getApplicationTodayDate } from "@/lib/application-date";
+import {
+  getPurchaseRequisitionDefaultUom,
+  getPurchaseRequisitionUomOptions,
+  isPurchaseRequisitionUomValid,
+} from "@/lib/purchase-requisition-uom";
 import { type DataTableFeatures } from "@/types/data-table-features";
+import { useToast } from "@/components/toast-provider";
 
 const statusStyles: Record<PurchaseRequisitionStatus, string> = {
   DRAFT:
@@ -67,26 +74,36 @@ const statusLabels: Record<PurchaseRequisitionStatus, string> = {
   CANCELLED: "Cancelled",
 };
 
-const itemSchema = z.object({
-  item_type: z.enum(["GOODS", "SERVICE", "ASSET"]),
-  description: z.string().trim().min(1, "Description is required.").max(255),
-  specification: z.string().max(1000),
-  quantity: z
-    .string()
-    .min(1, "Quantity is required.")
-    .refine(
-      (value) => Number.isFinite(Number(value)) && Number(value) > 0,
-      "Quantity must be greater than zero.",
-    ),
-  unit_of_measure: z.string().trim().min(1, "Unit is required.").max(50),
-  estimated_unit_cost: z
-    .string()
-    .min(1, "Estimated unit cost is required.")
-    .refine(
-      (value) => Number.isFinite(Number(value)) && Number(value) >= 0,
-      "Cost cannot be negative.",
-    ),
-});
+const itemSchema = z
+  .object({
+    item_type: z.enum(["GOODS", "SERVICE", "ASSET"]),
+    description: z.string().trim().min(1, "Description is required.").max(255),
+    specification: z.string().max(1000),
+    quantity: z
+      .string()
+      .min(1, "Quantity is required.")
+      .refine(
+        (value) => Number.isFinite(Number(value)) && Number(value) > 0,
+        "Quantity must be greater than zero.",
+      ),
+    unit_of_measure: z.string().trim().min(1, "Unit is required.").max(50),
+    estimated_unit_cost: z
+      .string()
+      .min(1, "Estimated unit cost is required.")
+      .refine(
+        (value) => Number.isFinite(Number(value)) && Number(value) >= 0,
+        "Cost cannot be negative.",
+      ),
+  })
+  .superRefine((item, context) => {
+    if (!isPurchaseRequisitionUomValid(item.item_type, item.unit_of_measure)) {
+      context.addIssue({
+        code: "custom",
+        path: ["unit_of_measure"],
+        message: "Select a valid unit of measure for this item type.",
+      });
+    }
+  });
 
 const formSchema = z.object({
   workflow_code: z.string().min(1, "Approval workflow is required."),
@@ -134,7 +151,7 @@ const emptyForm: FormState & { items: [FormItem, ...FormItem[]] } = {
       description: "",
       specification: "",
       quantity: "1",
-      unit_of_measure: "EA",
+      unit_of_measure: getPurchaseRequisitionDefaultUom("GOODS"),
       estimated_unit_cost: "",
     },
   ],
@@ -146,7 +163,7 @@ function createFormItem(): FormItem {
     description: "",
     specification: "",
     quantity: "1",
-    unit_of_measure: "EA",
+    unit_of_measure: getPurchaseRequisitionDefaultUom("GOODS"),
     estimated_unit_cost: "",
   };
 }
@@ -192,6 +209,7 @@ function Notice({ error, onRetry }: { error: string; onRetry?: () => void }) {
 }
 
 export default function PurchaseRequisitionsPage() {
+  const { success, error: toastError, warning } = useToast();
   const [requisitions, setRequisitions] = useState<
     PurchaseRequisitionSummary[]
   >([]);
@@ -319,6 +337,27 @@ export default function PurchaseRequisitionsPage() {
     setFormError(null);
   }
 
+  function updateItemType(index: number, value: FormItem["item_type"]) {
+    setForm((current) => ({
+      ...current,
+      items: current.items.map((item, itemIndex) => {
+        if (itemIndex !== index) return item;
+
+        return {
+          ...item,
+          item_type: value,
+          unit_of_measure: isPurchaseRequisitionUomValid(
+            value,
+            item.unit_of_measure,
+          )
+            ? item.unit_of_measure
+            : getPurchaseRequisitionDefaultUom(value),
+        };
+      }),
+    }));
+    setFormError(null);
+  }
+
   function resetCreate() {
     setForm({
       ...emptyForm,
@@ -329,9 +368,19 @@ export default function PurchaseRequisitionsPage() {
   }
 
   async function createDraft() {
+    if (
+      form.needed_by_date &&
+      form.needed_by_date < getApplicationTodayDate()
+    ) {
+      setFormError("Needed-by date cannot be in the past.");
+      warning("Please choose today or a future needed-by date.");
+      return;
+    }
+
     const parsed = formSchema.safeParse(form);
     if (!parsed.success) {
       setFormError(parsed.error.issues[0]?.message ?? "Review the form.");
+      warning(parsed.error.issues[0]?.message ?? "Please review the form.");
       return;
     }
     setMutation("create");
@@ -357,9 +406,11 @@ export default function PurchaseRequisitionsPage() {
       setCreateOpen(false);
       resetCreate();
       setNotice(`${created.requisition_number} was created as a draft.`);
+      success("Purchase Requisition created successfully.");
       void openDetail(created.requisition_id);
     } catch (error) {
       setFormError(errorMessage(error));
+      toastError("Unable to create Purchase Requisition.");
     } finally {
       setMutation(null);
     }
@@ -371,10 +422,12 @@ export default function PurchaseRequisitionsPage() {
     try {
       await submitPurchaseRequisition(selected.requisition_id);
       setNotice("Requisition submitted for approval.");
+      success("Purchase Requisition submitted successfully.");
       await loadList();
       await openDetail(selected.requisition_id);
     } catch (error) {
       setDetailError(errorMessage(error));
+      toastError("Failed to submit Purchase Requisition.");
     } finally {
       setMutation(null);
     }
@@ -391,10 +444,12 @@ export default function PurchaseRequisitionsPage() {
       setCancelOpen(false);
       setCancelRemarks("");
       setNotice("Requisition cancelled.");
+      success("Purchase Requisition cancelled successfully.");
       await loadList();
       await openDetail(selected.requisition_id);
     } catch (error) {
       setDetailError(errorMessage(error));
+      toastError("Unable to cancel Purchase Requisition.");
     } finally {
       setMutation(null);
     }
@@ -596,6 +651,7 @@ export default function PurchaseRequisitionsPage() {
               <FieldContent>
                 <Input
                   type="date"
+                    min={getApplicationTodayDate()}
                   value={form.needed_by_date}
                   onChange={(event) =>
                     updateForm("needed_by_date", event.target.value)
@@ -651,7 +707,10 @@ export default function PurchaseRequisitionsPage() {
                     className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                     value={item.item_type}
                     onChange={(event) =>
-                      updateItem(index, "item_type", event.target.value)
+                      updateItemType(
+                        index,
+                        event.target.value as FormItem["item_type"],
+                      )
                     }
                     aria-label="Item type"
                   >
@@ -678,14 +737,22 @@ export default function PurchaseRequisitionsPage() {
                     }
                     aria-label="Quantity"
                   />
-                  <Input
-                    placeholder="Unit"
+                  <select
+                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                     value={item.unit_of_measure}
                     onChange={(event) =>
                       updateItem(index, "unit_of_measure", event.target.value)
                     }
                     aria-label="Unit of measure"
-                  />
+                  >
+                    {getPurchaseRequisitionUomOptions(item.item_type).map(
+                      (option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ),
+                    )}
+                  </select>
                   <Input
                     type="number"
                     min="0"

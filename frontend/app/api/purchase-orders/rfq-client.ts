@@ -26,6 +26,7 @@ export type Rfq = {
   id: string;
   rfq_number: string;
   purchase_requisition_id?: string | null;
+  purchase_requisition?: { pr_number?: string | null } | null;
   title: string;
   description?: string | null;
   status: RfqStatus;
@@ -55,6 +56,12 @@ export type Quotation = {
     supplier_code?: string;
     name?: string;
     legal_name?: string;
+  } | null;
+  rfq?: {
+    id?: string;
+    rfq_number?: string | null;
+    title?: string | null;
+    purchase_requisition?: { pr_number?: string | null } | null;
   } | null;
 };
 

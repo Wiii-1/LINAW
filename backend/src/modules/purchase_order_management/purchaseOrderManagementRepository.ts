@@ -5,6 +5,7 @@ import {
   type ListRFQsQuery,
   type ProcurementQueueQuery,
 } from "./purchaseOrderManagementValidator.js";
+import { formatApplicationDate } from "../../shared/applicationDate.js";
 
 interface CreateRFQSContext {
   id: string;
@@ -59,7 +60,6 @@ interface SupplierSelectionContext {
   quotation_id: string;
   supplier_id: string;
 
-  po_number: string;
   order_date: Date;
   expected_delivery_date: Date | undefined;
 }
@@ -146,26 +146,52 @@ export class PurchaseOrderManagementRepository {
   // Create
 
   async createRFQS(data: CreateRFQSContext) {
-    return prisma.rFQ.create({
-      data: {
-        id: data.id,
-        tenant_id: data.tenant_id,
-        company_id: data.company_id,
+    return prisma.$transaction(async (transaction) => {
+      const businessDate = formatApplicationDate(data.created_at).replaceAll(
+        "-",
+        "",
+      );
+      const sequenceLockKey = `${data.tenant_id}:${businessDate}`;
 
-        rfq_number: data.rfq_number,
-        purchase_requisition_id: data.purchase_requisition_id,
-        created_by_user_id: data.created_by_user_id,
+      await transaction.$executeRaw`
+        SELECT pg_advisory_xact_lock(hashtextextended(${sequenceLockKey}, 0))
+      `;
 
-        title: data.title,
-        description: data.description,
-        closing_date: data.closing_date,
-        status: data.status,
-        created_at: data.created_at,
-
-        items: {
-          create: data.items,
+      const existingNumbers = await transaction.rFQ.findMany({
+        where: {
+          tenant_id: data.tenant_id,
+          rfq_number: { contains: `RFQ-${businessDate}-` },
         },
-      },
+        select: { rfq_number: true },
+      });
+      const sequencePattern = new RegExp(`^RFQ-${businessDate}-(\\d+)$`);
+      const nextSequence =
+        existingNumbers.reduce((highest, rfq) => {
+          const match = rfq.rfq_number.match(sequencePattern);
+          return match ? Math.max(highest, Number(match[1])) : highest;
+        }, 0) + 1;
+
+      return transaction.rFQ.create({
+        data: {
+          id: data.id,
+          tenant_id: data.tenant_id,
+          company_id: data.company_id,
+
+          rfq_number: `RFQ-${businessDate}-${String(nextSequence).padStart(3, "0")}`,
+          purchase_requisition_id: data.purchase_requisition_id,
+          created_by_user_id: data.created_by_user_id,
+
+          title: data.title,
+          description: data.description,
+          closing_date: data.closing_date,
+          status: data.status,
+          created_at: data.created_at,
+
+          items: {
+            create: data.items,
+          },
+        },
+      });
     });
   }
 
@@ -180,6 +206,9 @@ export class PurchaseOrderManagementRepository {
       },
       include: {
         items: true,
+        purchase_requisition: {
+          select: { pr_number: true },
+        },
       },
     });
   }
@@ -410,6 +439,30 @@ export class PurchaseOrderManagementRepository {
         return null;
       }
 
+      const businessDate = formatApplicationDate(data.order_date).replaceAll(
+        "-",
+        "",
+      );
+      const sequenceLockKey = `${data.tenant_id}:${businessDate}`;
+
+      await tx.$executeRaw`
+        SELECT pg_advisory_xact_lock(hashtextextended(${sequenceLockKey}, 0))
+      `;
+
+      const existingNumbers = await tx.purchaseOrder.findMany({
+        where: {
+          tenant_id: data.tenant_id,
+          po_number: { contains: `PO-${businessDate}-` },
+        },
+        select: { po_number: true },
+      });
+      const sequencePattern = new RegExp(`^PO-${businessDate}-(\\d+)$`);
+      const nextSequence =
+        existingNumbers.reduce((highest, purchaseOrder) => {
+          const match = purchaseOrder.po_number.match(sequencePattern);
+          return match ? Math.max(highest, Number(match[1])) : highest;
+        }, 0) + 1;
+
       const purchaseOrder = await tx.purchaseOrder.create({
         data: {
           id: data.id,
@@ -421,7 +474,7 @@ export class PurchaseOrderManagementRepository {
           rfq_id: rfq.id,
           supplier_quotation_id: quotation.id,
 
-          po_number: data.po_number,
+          po_number: `PO-${businessDate}-${String(nextSequence).padStart(3, "0")}`,
           issued_by_user_id: data.user_id,
           status: "DRAFT",
 
@@ -631,6 +684,9 @@ export class PurchaseOrderManagementRepository {
       },
       include: {
         items: true,
+        purchase_requisition: {
+          select: { pr_number: true },
+        },
       },
     });
   }
@@ -680,6 +736,22 @@ export class PurchaseOrderManagementRepository {
       },
       include: {
         items: true,
+        supplier: {
+          select: {
+            id: true,
+            supplier_code: true,
+          },
+        },
+        rfq: {
+          select: {
+            id: true,
+            rfq_number: true,
+            title: true,
+            purchase_requisition: {
+              select: { pr_number: true },
+            },
+          },
+        },
       },
     });
   }
@@ -718,6 +790,16 @@ export class PurchaseOrderManagementRepository {
       },
       include: {
         items: true,
+        rfq: {
+          select: {
+            id: true,
+            rfq_number: true,
+            title: true,
+            purchase_requisition: {
+              select: { pr_number: true },
+            },
+          },
+        },
       },
     });
   }

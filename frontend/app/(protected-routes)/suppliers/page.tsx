@@ -32,6 +32,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supportedCurrencies } from "@/lib/currencies";
+import { getApplicationTodayDate } from "@/lib/application-date";
+import { useToast } from "@/components/toast-provider";
 import {
   Table,
   TableBody,
@@ -540,6 +543,7 @@ export function Governance() {
 }
 
 export function Portal() {
+  const { success, error: toastError } = useToast();
   const [rfqs, setRfqs] = useState<Rfq[]>([]);
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -558,7 +562,7 @@ export function Portal() {
         header: "RFQ",
         cell: ({ row }) => (
           <div>
-            <div className="font-medium">{display(row.original.rfq_number || row.original.id)}</div>
+            <div className="font-medium">{display(row.original.rfq_number)}</div>
             <div className="text-xs text-muted-foreground">{display(row.original.title)}</div>
           </div>
         ),
@@ -589,13 +593,13 @@ export function Portal() {
       columnHelper.accessor("quotation_number", {
         header: "Quotation",
         cell: ({ row }) => (
-          <span className="font-medium">{display(row.original.quotation_number || row.original.id)}</span>
+          <span className="font-medium">{display(row.original.quotation_number)}</span>
         ),
       }),
       columnHelper.display({
         id: "rfq",
         header: "RFQ",
-        cell: ({ row }) => display(row.original.rfq?.rfq_number || row.original.rfq_id),
+        cell: ({ row }) => display(row.original.rfq?.rfq_number),
       }),
       columnHelper.accessor("total_amount", {
         header: "Total",
@@ -674,6 +678,7 @@ export function Portal() {
       await submitQuotation(rfqId, input);
       setSelectedRfq(null);
       setMessage("Quotation submitted successfully.");
+      success("Quotation submitted successfully.");
       await loadQuotations();
       setActiveView("quotations");
     } catch (cause) {
@@ -682,6 +687,7 @@ export function Portal() {
           ? cause.message
           : "Unable to submit quotation. The RFQ may have closed.",
       );
+      toastError("Failed to submit quotation. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -828,13 +834,11 @@ export function Portal() {
 type QuoteDraft = {
   quantity: string;
   price: string;
-  lead: string;
   remarks: string;
 };
 const emptyQuoteDraft = (): QuoteDraft => ({
   quantity: "",
   price: "",
-  lead: "",
   remarks: "",
 });
 
@@ -851,7 +855,7 @@ function QuotationDialog({
   onSubmit: (rfqId: string, input: QuotationInput) => Promise<void>;
   submitting: boolean;
 }) {
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("PHP");
   const [validUntil, setValidUntil] = useState("");
   const [items, setItems] = useState<Record<string, QuoteDraft>>({});
   useEffect(() => {
@@ -882,9 +886,6 @@ function QuotationDialog({
         rfq_item_id: item.id,
         quoted_quantity: Number(items[item.id]?.quantity),
         unit_price: Number(items[item.id]?.price),
-        lead_time_days: items[item.id]?.lead
-          ? Number(items[item.id]?.lead)
-          : undefined,
         remarks: items[item.id]?.remarks || undefined,
       })),
     });
@@ -893,7 +894,7 @@ function QuotationDialog({
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>{display(rfq?.rfq_number || rfq?.title)}</DialogTitle>
+          <DialogTitle>{display(rfq?.rfq_number)}</DialogTitle>
           <DialogDescription>
             {companyName(rfq?.purchasing_company || rfq?.company)} · submission
             deadline {dateFormat(rfq?.closing_date)}
@@ -907,19 +908,26 @@ function QuotationDialog({
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="space-y-2 text-sm font-medium">
                 Currency code
-                <Input
+                <select
+                  className="h-9 w-full rounded-md border border-input bg-background px-2.5 text-sm"
                   value={currency}
                   onChange={(event) =>
-                    setCurrency(event.target.value.toUpperCase())
+                    setCurrency(event.target.value)
                   }
-                  maxLength={3}
                   required
-                />
+                >
+                  {supportedCurrencies.map((option) => (
+                    <option key={option.code} value={option.code}>
+                      {option.code} - {option.currency}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="space-y-2 text-sm font-medium">
                 Quotation valid until
                 <Input
                   type="date"
+                  min={getApplicationTodayDate()}
                   value={validUntil}
                   onChange={(event) => setValidUntil(event.target.value)}
                 />
@@ -967,18 +975,6 @@ function QuotationDialog({
                     />
                   </label>
                   <label className="space-y-1 text-xs font-medium sm:col-span-2">
-                    Lead time (days)
-                    <Input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={items[item.id]?.lead ?? ""}
-                      onChange={(event) =>
-                        updateItem(item.id, "lead", event.target.value)
-                      }
-                    />
-                  </label>
-                  <label className="space-y-1 text-xs font-medium sm:col-span-2">
                     Remarks
                     <textarea
                       className="flex min-h-16 w-full rounded-md border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -1022,7 +1018,7 @@ function QuotationDetail({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {display(quotation?.quotation_number || quotation?.id)}
+            {display(quotation?.quotation_number)}
           </DialogTitle>
           <DialogDescription>Saved quotation details</DialogDescription>
         </DialogHeader>
@@ -1031,7 +1027,7 @@ function QuotationDetail({
             <div className="grid gap-3 rounded-lg border p-4 text-sm sm:grid-cols-2">
               <Info
                 label="RFQ"
-                value={quotation.rfq?.rfq_number || quotation.rfq_id}
+                value={quotation.rfq?.rfq_number || "RFQ unavailable"}
               />
               <Info
                 label="Total"

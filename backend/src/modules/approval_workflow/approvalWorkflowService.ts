@@ -644,7 +644,10 @@ export class ApprovalWorkflowService {
     const workflowRequests =
       await this.repository.findApprovalWorkflowRequests(query);
 
-    return workflowRequests;
+    return workflowRequests.map((request) => ({
+      ...request,
+      pr_number: request.purchase_requisition?.pr_number ?? null,
+    }));
   }
 
   async countApprovalWorkflows(input: AuthenticatedUser) {
@@ -699,7 +702,10 @@ export class ApprovalWorkflowService {
       throw new NotFoundError("Approval request not found");
     }
 
-    return approvalRequest;
+    return {
+      ...approvalRequest,
+      pr_number: approvalRequest.purchase_requisition?.pr_number ?? null,
+    };
   }
 
   async createLevel(input: CreateLevels) {

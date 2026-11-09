@@ -76,7 +76,7 @@ A user may be able to sign in without having company membership, but company-sco
 2. Select **Log in** if you already have an account, or select **Sign up** to create one.
 3. Use the email address and password associated with your account.
 
-![Screenshot: LINAW Login Page](screenshots/login-page.png)
+![Screenshot: LINAW Login Page](docs/diagrams/screenshots/login-page.png)
 
 This screenshot should show the email and password fields, the login action, the **Forgot your password?** link, and the link to create an account.
 
@@ -137,7 +137,7 @@ The Dashboard may show:
 
 The completed procurement value is the stored value of completed purchase orders. It is not a verified payment or expenditure total.
 
-![Screenshot: LINAW Overview Dashboard](screenshots/dashboard.png)
+![Screenshot: LINAW Overview Dashboard](docs/diagrams/screenshots/Overview.png)
 
 This screenshot should show the summary cards, procurement activity, navigation links, and any completed procurement report control.
 
@@ -251,7 +251,7 @@ A purchase requisition records a request to obtain goods, services, or assets. I
 3. Review the list of existing requisitions.
 4. Select a requisition to open its details and current status.
 
-![Screenshot: Purchase Requisition List](screenshots/purchase-requisition-list.png)
+![Screenshot: Purchase Requisition List](docs/diagrams/screenshots/purchase-requisition.png)
 
 This screenshot should show the requisition list, visible status labels, and the action used to open a requisition.
 
@@ -273,7 +273,7 @@ This screenshot should show the requisition list, visible status labels, and the
 14. Confirm that the new requisition appears with status **DRAFT**.
 15. Open the new requisition to verify its details.
 
-![Screenshot: Purchase Requisition Creation Form](screenshots/purchase-requisition-creation.png)
+![Screenshot: Purchase Requisition Creation Form](docs/diagrams/screenshots/purchase-requisition-creation.png)
 
 This screenshot should show the approval workflow, justification, priority, currency, and item-entry fields before submission.
 
@@ -305,7 +305,7 @@ LINAW calculates the estimated total from the item quantities and estimated unit
 
 After submission, LINAW creates a pending approval request when the configured workflow and approval levels are valid. The request may need to pass through more than one approval level.
 
-![Screenshot: Purchase Requisition Details](screenshots/purchase-requisition-details.png)
+![Screenshot: Purchase Requisition Details](docs/diagrams/screenshots/purchase-requisition-submission.png)
 
 This screenshot should show the requisition status, item details, and the **Submit for approval** action on an eligible draft.
 
@@ -357,7 +357,7 @@ The **Approval Workflows** page contains approval requests and, for authorized u
 5. Confirm that the request is **PENDING** before deciding it.
 6. Confirm that your assigned role matches the current approval level.
 
-![Screenshot: Approval Request List](screenshots/approval-request-list.png)
+![Screenshot: Approval Request List](docs/diagrams/screenshots/approval-workflow.png)
 
 This screenshot should show the approval filters, request rows, and current statuses.
 
@@ -383,7 +383,7 @@ For an intermediate level, the action is approved but the request remains **PEND
 
 Rejection remarks explain why the request was not approved and should be specific enough for the requester or procurement team to understand the decision.
 
-![Screenshot: Approval Decision Dialog](screenshots/approval-decision-dialog.png)
+![Screenshot: Approval Decision Dialog](docs/diagrams/screenshots/approval-decision-dialog.png)
 
 This screenshot should show the approval and rejection actions, including the rejection-remarks field.
 
@@ -445,7 +445,7 @@ Supplier Management is the buyer-side area for supplier relationships and invita
 
 Supplier details can include a supplier code, contact information, relationship status, and established date.
 
-![Screenshot: Supplier Management](screenshots/supplier-management.png)
+![Screenshot: Supplier Management](docs/diagrams/screenshots/supplier-management.png)
 
 This screenshot should show the **Suppliers** and **Invitations** tabs and the supplier relationship information visible to an authorized buyer.
 
@@ -461,7 +461,7 @@ This screenshot should show the **Suppliers** and **Invitations** tabs and the s
 
 The invitation is valid for 72 hours after it is sent. The email contains a link to the public invitation-acceptance page.
 
-![Screenshot: Supplier Invitation Form](screenshots/supplier-invitation-form.png)
+![Screenshot: Supplier Invitation Form](docs/diagrams/screenshots/supplier-invitation-dialog.png)
 
 This screenshot should show the recipient email field and the **Send invitation** action.
 
@@ -929,59 +929,3 @@ flowchart LR
 | **SELECTED** | The quotation chosen by the Procurement Officer; this creates a draft purchase order. |
 | **CANCELLED** | A requisition or purchase order ended through an eligible cancellation action. |
 
-## 18. Screenshot Collection Checklist
-
-The paths below are placeholders for screenshots to be captured manually from a running LINAW environment. No screenshot files are included by this manual. Capture only data from a safe test organization and remove personal or confidential information before publication.
-
-### Authentication and account access
-
-- [ ] Login page: `screenshots/login-page.png`
-- [ ] Supplier invitation acceptance: `screenshots/supplier-invitation-acceptance.png`
-
-### Dashboard and navigation
-
-- [ ] Overview Dashboard: `screenshots/dashboard.png`
-
-### Purchase requisitions
-
-- [ ] Purchase requisition list: `screenshots/purchase-requisition-list.png`
-- [ ] Purchase requisition creation form: `screenshots/purchase-requisition-creation.png`
-- [ ] Purchase requisition details: `screenshots/purchase-requisition-details.png`
-
-### Approval workflows
-
-- [ ] Approval request list: `screenshots/approval-request-list.png`
-- [ ] Approval decision dialog: `screenshots/approval-decision-dialog.png`
-
-### Supplier management
-
-- [ ] Supplier Management with **Suppliers** and **Invitations**: `screenshots/supplier-management.png`
-- [ ] Supplier invitation form: `screenshots/supplier-invitation-form.png`
-
-### Supplier portal
-
-- [ ] Supplier Portal: `screenshots/supplier-portal.png`
-- [ ] Available RFQs: `screenshots/available-rfqs.png`
-- [ ] Quotation submission form: `screenshots/quotation-submission-form.png`
-- [ ] My quotations: capture as part of `screenshots/supplier-portal.png` or add a separate image if the final publication needs it.
-
-### RFQs and quotations
-
-- [ ] RFQ workspace: `screenshots/rfq-workspace.png`
-- [ ] Supplier quotations: `screenshots/supplier-quotations.png`
-
-### Purchase orders
-
-- [ ] Purchase Order details and lifecycle actions: `screenshots/purchase-order-details.png`
-
-### Audit
-
-- [ ] Audit Trail search and results: `screenshots/audit-trail.png`
-- [ ] Audit verification details: `screenshots/audit-verification-details.png`
-
-### Organization and profile
-
-- [ ] Organization settings and members: `screenshots/organization-settings.png`
-- [ ] User profile: `screenshots/user-profile.png`
-
-> **Capture guidance:** The requested workflow includes no verified separate quotation-scoring screen, negotiation screen, approval-cancellation dialog, supplier-relationship-removal dialog, or company-registration screen. Do not add screenshots for those unavailable interfaces unless the application is later extended.

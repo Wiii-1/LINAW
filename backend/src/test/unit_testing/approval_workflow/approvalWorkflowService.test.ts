@@ -4,8 +4,10 @@ import { ApprovalWorkflowService } from "../../../modules/approval_workflow/appr
 
 describe("ApprovalWorkflowService.createApprovalRequest", () => {
   const repository = {
+    findActiveByUserId: vi.fn(),
     findApprovalWorkflowDefinition: vi.fn(),
     findApprovalRequestByEntity: vi.fn(),
+    findApprovalWorkflowRequests: vi.fn(),
     findRequisitionById: vi.fn(),
     getLevels: vi.fn(),
     createApprovalRequest: vi.fn(),
@@ -18,6 +20,10 @@ describe("ApprovalWorkflowService.createApprovalRequest", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    repository.findActiveByUserId.mockResolvedValue({
+      company_id: "company-id",
+      company: { tenant_id: "tenant-id" },
+    });
     repository.findApprovalWorkflowDefinition.mockResolvedValue({
       id: "workflow-id",
       entity_type: "purchase_requisition",
@@ -89,5 +95,24 @@ describe("ApprovalWorkflowService.createApprovalRequest", () => {
     );
 
     expect(repository.createApprovalRequest).not.toHaveBeenCalled();
+  });
+  it("exposes the persisted PR number while retaining the entity UUID", async () => {
+    repository.findApprovalWorkflowRequests.mockResolvedValue([
+      {
+        entity_id: "requisition-id",
+        purchase_requisition: {
+          pr_number: "PR-OFFICE-SUPPLIES-20261109",
+        },
+      },
+    ]);
+
+    const [request] = await service.getApprovalWorkflows({
+      userId: "approver-id",
+    });
+
+    expect(request).toMatchObject({
+      entity_id: "requisition-id",
+      pr_number: "PR-OFFICE-SUPPLIES-20261109",
+    });
   });
 });

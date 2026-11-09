@@ -4,6 +4,7 @@ import {
   DEFAULT_CURRENCY_CODE,
   hasCurrencyPrecision,
 } from "../../../shared/currency.js";
+import { isDateOnOrAfterApplicationToday } from "../../../shared/applicationDate.js";
 
 // ====================
 // RFQ Parameters
@@ -53,12 +54,6 @@ export const SupplierQuotationItemSchema = z.object({
       "Unit price supports up to 4 decimal places.",
     ),
 
-  lead_time_days: z
-    .number()
-    .int("Lead time must be a whole number of days.")
-    .nonnegative("Lead time cannot be negative.")
-    .optional(),
-
   remarks: z
     .string()
     .trim()
@@ -81,6 +76,14 @@ export const SubmitSupplierQuotationSchema = z
       .min(1, "A quotation must contain at least one item."),
   })
   .superRefine((value, context) => {
+    if (value.valid_until && !isDateOnOrAfterApplicationToday(value.valid_until)) {
+      context.addIssue({
+        code: "custom",
+        path: ["valid_until"],
+        message: "Quotation validity date cannot be in the past.",
+      });
+    }
+
     value.items.forEach((item, index) => {
       if (!hasCurrencyPrecision(item.unit_price, value.currency_code)) {
         context.addIssue({

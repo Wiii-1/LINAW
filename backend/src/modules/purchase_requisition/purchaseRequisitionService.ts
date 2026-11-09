@@ -1,22 +1,4 @@
-/*  [x] createRequisition ()
-    [x] submitRequisition ()
-    [x] cancelRequisition ()
-    [x] resubmitRequisition ()
-    [x] getRequisition ()
-    [x] purchaseRequisitDetail ()
-    [x] updateRequisition ()
-    [x] requisitionUpdateStatus ()
-    [x] prNumberGenerator ()
 
-    ## Future Enhancement
-
-        - Draft requisitions may expire after a configurable retention period
-        (e.g., 30–60 days).
-        - Expiration should be handled automatically rather than through a
-        user-facing delete endpoint.
-        - Expired drafts should remain as historical records if auditability
-        is required.
-*/
 import {
   ConflictError,
   NotFoundError,
@@ -127,9 +109,6 @@ export class purchaseRequisitionService {
 
     const id = crypto.randomUUID();
     const created_at = new Date();
-    const generation = 1;
-
-    const pr_number = this.prNumberGenerator(created_at, id, generation);
 
     const requested_by_user_id = userId;
 
@@ -171,7 +150,7 @@ export class purchaseRequisitionService {
       root_id: id,
       tenant_id: tenantId,
       company_id: companyId,
-      pr_number,
+      pr_number: "",
       generation: 1,
       requested_by_user_id,
       purpose,
@@ -229,6 +208,7 @@ export class purchaseRequisitionService {
         dataCreate,
         dataItems,
         statusLogs,
+        this.prNumberPrefixGenerator(purpose),
       );
 
     return requisition;
@@ -596,12 +576,6 @@ export class purchaseRequisitionService {
     const created_at = new Date();
     const generation = nextGeneration;
 
-    const pr_number = this.prNumberGenerator(
-      created_at,
-      requisition.root_id,
-      generation,
-    );
-
     const total_amount = items.reduce(
       (total, item) =>
         total.add(
@@ -640,7 +614,7 @@ export class purchaseRequisitionService {
       root_id: requisition.root_id,
       tenant_id,
       company_id: companyId,
-      pr_number,
+      pr_number: "",
       generation,
       requested_by_user_id,
       workflow_code,
@@ -699,6 +673,7 @@ export class purchaseRequisitionService {
       dataCreate,
       dataItems,
       statusLogs,
+      this.prNumberPrefixGenerator(purpose),
     );
 
     return {
@@ -955,42 +930,15 @@ export class purchaseRequisitionService {
     }
   }
 
-  private prNumberGenerator(
-    creationDate: Date,
-    uniqueIdentifier: string,
-    revision: number,
-  ): string {
-    const date = creationDate.toISOString().slice(0, 10).replaceAll("-", "");
+  private prNumberPrefixGenerator(purpose: string | null | undefined): string {
+    const normalizedPurpose = (purpose ?? "")
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40)
+      .replace(/-+$/g, "");
 
-    return `PR-${uniqueIdentifier}-${date}-${revision}`;
-
-    /*
-            1. Receive the information required to generate a Purchase Requisition number.
-            - Purchase Requisition creation date.
-            - Unique sequence/identifier for the original requisition.
-            - Revision number.
-
-            2. Format the creation date using the required date format.
-
-            3. Generate or receive the unique sequence/identifier used by the Purchase
-            Requisition number.
-
-            4. Append the revision number to identify the current revision.
-
-            5. Construct the final `pr_number` using the defined format.
-
-            6. Return the generated `pr_number`.
-
-            The generator should only be responsible for constructing the Purchase
-            Requisition number.
-
-            It should not:
-            - Validate the user's permissions.
-            - Retrieve the Purchase Requisition.
-            - Update the database.
-            - Create a Purchase Requisition.
-            - Handle revision state.
-            - Publish events.
-        */
+    return `PR-${normalizedPurpose || "GENERAL"}`;
   }
 }

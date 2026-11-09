@@ -37,6 +37,7 @@ import {
 } from "@/app/api/purchase-orders/client";
 import { RfqWorkspace } from "./rfq-workspace";
 import { type DataTableFeatures } from "@/types/data-table-features";
+import { useToast } from "@/components/toast-provider";
 
 const statuses: Array<PurchaseOrderStatus | "ALL"> = [
   "ALL",
@@ -69,6 +70,17 @@ const errorMessage = (error: unknown) =>
   error instanceof PurchaseOrderApiError
     ? error.message
     : "Purchase orders could not be loaded. Please try again.";
+
+function poReference(value: unknown): string {
+  if (typeof value === "string" && value.trim()) return value;
+  if (value && typeof value === "object" && "po_number" in value) {
+    const nestedReference = (value as { po_number?: unknown }).po_number;
+    if (typeof nestedReference === "string" && nestedReference.trim()) {
+      return nestedReference;
+    }
+  }
+  return "PO reference unavailable";
+}
 
 function StatusBadge({ status }: { status: PurchaseOrderStatus }) {
   return (
@@ -105,6 +117,7 @@ function Notice({
 }
 
 export default function PurchaseOrdersPage() {
+  const { success, error: toastError } = useToast();
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
@@ -123,7 +136,9 @@ export default function PurchaseOrdersPage() {
     return columnHelper.columns([
       columnHelper.accessor("po_number", {
         header: "PO number",
-        cell: ({ row }) => <span className="font-medium">{row.original.po_number}</span>,
+        cell: ({ row }) => (
+          <span className="font-medium">{poReference(row.original.po_number)}</span>
+        ),
       }),
       columnHelper.accessor("supplier", {
         header: "Supplier",
@@ -163,7 +178,7 @@ export default function PurchaseOrdersPage() {
         cell: ({ row }) => (
           <ChevronRightIcon
             className="size-4 text-muted-foreground"
-            aria-label={`View ${row.original.po_number}`}
+            aria-label={`View ${poReference(row.original.po_number)}`}
           />
         ),
       }),
@@ -208,11 +223,13 @@ export default function PurchaseOrdersPage() {
     try {
       await cancelPurchaseOrder(selected.id);
       setCancelOpen(false);
-      setNotice(`${selected.po_number} was cancelled.`);
+      setNotice(`${poReference(selected.po_number)} was cancelled.`);
+      success("Purchase Order cancelled successfully.");
       setSelected(null);
       await loadOrders();
     } catch (requestError) {
       setError(errorMessage(requestError));
+      toastError("Unable to cancel Purchase Order.");
     } finally {
       setMutation(null);
     }
@@ -225,10 +242,12 @@ export default function PurchaseOrdersPage() {
     try {
       const updated = await orderPurchaseOrder(selected.id);
       setSelected(updated);
-      setNotice(`${updated.po_number} is now ${updated.status}.`);
+      setNotice(`${poReference(updated.po_number)} is now ${updated.status}.`);
+      success(`Purchase Order is now ${updated.status.toLowerCase()}.`);
       await loadOrders();
     } catch (requestError) {
       setError(errorMessage(requestError));
+      toastError("Unable to update Purchase Order.");
     } finally {
       setMutation(null);
     }
@@ -241,10 +260,12 @@ export default function PurchaseOrdersPage() {
     try {
       const updated = await completePurchaseOrder(selected.id);
       setSelected(updated);
-      setNotice(`${updated.po_number} was completed.`);
+      setNotice(`${poReference(updated.po_number)} was completed.`);
+      success("Purchase Order completed successfully.");
       await loadOrders();
     } catch (requestError) {
       setError(errorMessage(requestError));
+      toastError("Unable to complete Purchase Order.");
     } finally {
       setMutation(null);
     }
@@ -408,7 +429,7 @@ export default function PurchaseOrdersPage() {
                 <DialogTitle>
                   {detailLoading
                     ? "Loading purchase order"
-                    : selected?.po_number}
+                    : poReference(selected?.po_number)}
                 </DialogTitle>
                 <DialogDescription>
                   Purchase order details and lifecycle actions.
@@ -432,24 +453,20 @@ export default function PurchaseOrdersPage() {
                         label="Source PR"
                         value={
                           selected.purchase_requisition?.pr_number ??
-                          selected.purchase_requisition_id ??
-                          "Not provided"
+                          "PR reference unavailable"
                         }
                       />
                       <Info
                         label="RFQ"
                         value={
-                          selected.rfq?.rfq_number ??
-                          selected.rfq_id ??
-                          "Not provided"
+                          selected.rfq?.rfq_number ?? "RFQ reference unavailable"
                         }
                       />
                       <Info
                         label="Quotation"
                         value={
                           selected.supplier_quotation?.quotation_number ??
-                          selected.supplier_quotation_id ??
-                          "Not provided"
+                          "Quotation reference unavailable"
                         }
                       />
                       <Info
@@ -651,7 +668,7 @@ export default function PurchaseOrdersPage() {
               <DialogHeader>
                 <DialogTitle>Cancel purchase order?</DialogTitle>
                 <DialogDescription>
-                  This will mark {selected?.po_number} as CANCELLED. The record
+                  This will mark {poReference(selected?.po_number)} as CANCELLED. The record
                   will remain available for audit history.
                 </DialogDescription>
               </DialogHeader>

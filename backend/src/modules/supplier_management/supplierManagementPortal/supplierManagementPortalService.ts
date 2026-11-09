@@ -1,4 +1,5 @@
 import { NotFoundError } from "../../../shared/errors/appError.js";
+import { isDateOnOrAfterApplicationToday } from "../../../shared/applicationDate.js";
 import type { EventBus } from "../../../shared/events/eventBus";
 import type { SubmitSupplierQuotation } from "./supplierManagementPortalValidator";
 import { SupplierManagementPortalRepository } from "./supplierManagementPortalRepository";
@@ -49,20 +50,6 @@ export class SupplierManagementPortalService {
     }
 
     return supplier;
-  }
-
-  /**
-   * Generate a unique quotation number using the same date-based
-   * convention as the Purchase Order Management service.
-   */
-  private generateQuotationNumber(
-    creationDate: Date,
-    uniqueIdentifier: string,
-    revision: number,
-  ): string {
-    const date = creationDate.toISOString().slice(0, 10).replaceAll("-", "");
-
-    return `${uniqueIdentifier}-${date}-${revision}`;
   }
 
   private formatAmount(amount: Decimal, currencyCode: string): string {
@@ -167,7 +154,7 @@ export class SupplierManagementPortalService {
 
     if (
       input.body.valid_until &&
-      input.body.valid_until.getTime() < Date.now()
+      !isDateOnOrAfterApplicationToday(input.body.valid_until)
     ) {
       throw new Error("Quotation validity date cannot be in the past.");
     }
@@ -219,21 +206,11 @@ export class SupplierManagementPortalService {
           input.body.currency_code,
         ),
         total_price: this.formatAmount(lineTotal, input.body.currency_code),
-        ...(item.lead_time_days !== undefined
-          ? { lead_time_days: item.lead_time_days }
-          : {}),
         ...(item.remarks !== undefined ? { remarks: item.remarks } : {}),
       };
     });
 
     const submittedAt = new Date();
-    const quotationId = crypto.randomUUID();
-
-    const quotationNumber = this.generateQuotationNumber(
-      submittedAt,
-      quotationId,
-      1,
-    );
 
     const quotation = await this.repository.submitQuotation({
       // These IDs belong to the purchasing company, which owns the RFQ.
@@ -242,7 +219,6 @@ export class SupplierManagementPortalService {
 
       supplier_id: supplier.id,
       rfq_id: rfq.id,
-      quotation_number: quotationNumber,
       currency_code: input.body.currency_code,
       total_amount: this.formatAmount(totalAmount, input.body.currency_code),
       submitted_at: submittedAt,

@@ -17,6 +17,11 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { ChevronRightIcon } from "lucide-react"
+import { usePathname } from "next/navigation"
+
+function matchesRoute(pathname: string, url: string) {
+  return pathname === url || pathname.startsWith(`${url}/`)
+}
 
 export function NavMain({
   items,
@@ -32,48 +37,59 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const pathname = usePathname()
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible
-            key={item.title}
-            defaultOpen={item.isActive}
-            render={<SidebarMenuItem />}
-          >
-            <SidebarMenuButton
-              tooltip={item.title}
-              render={<a href={item.url} />}
+        {items.map((item) => {
+          const isActive =
+            matchesRoute(pathname, item.url) ||
+            item.items?.some((subItem) => matchesRoute(pathname, subItem.url));
+
+          return (
+            <Collapsible
+              key={item.title}
+              defaultOpen={isActive}
+              render={<SidebarMenuItem />}
             >
-              {item.icon}
-              <span>{item.title}</span>
-            </SidebarMenuButton>
-            {item.items?.length ? (
-              <>
-                <SidebarMenuAction
-                  render={<CollapsibleTrigger />}
-                  className="aria-expanded:rotate-90"
-                >
-                  <ChevronRightIcon
-                  />
-                  <span className="sr-only">Toggle</span>
-                </SidebarMenuAction>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {item.items?.map((subItem) => (
-                      <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton render={<a href={subItem.url} />}>
-                          <span>{subItem.title}</span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </>
-            ) : null}
-          </Collapsible>
-        ))}
+              <SidebarMenuButton
+                isActive={isActive}
+                tooltip={item.title}
+                render={<a href={item.url} />}
+              >
+                {item.icon}
+                <span>{item.title}</span>
+              </SidebarMenuButton>
+              {item.items?.length ? (
+                <>
+                  <SidebarMenuAction
+                    render={<CollapsibleTrigger />}
+                    className="aria-expanded:rotate-90"
+                  >
+                    <ChevronRightIcon />
+                    <span className="sr-only">Toggle</span>
+                  </SidebarMenuAction>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {item.items.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton
+                            isActive={matchesRoute(pathname, subItem.url)}
+                            render={<a href={subItem.url} />}
+                          >
+                            <span>{subItem.title}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </>
+              ) : null}
+            </Collapsible>
+          );
+        })}
       </SidebarMenu>
     </SidebarGroup>
   )

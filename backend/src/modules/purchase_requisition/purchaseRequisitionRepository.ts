@@ -249,10 +249,17 @@ export class purchaseRequisitionRepository {
     data: purchaseRequisitionData,
     dataItems: PurchaseRequisitionItemCreateData[],
     statusLog: PurchaseRequisitionStatusLogInput,
+    prNumberPrefix: string,
   ) {
     return prisma.$transaction(async (transaction) => {
+      const creationDate = data.created_at.toISOString().slice(0, 10).replaceAll("-", "");
+      const requisitionData = {
+        ...data,
+        pr_number: `${prNumberPrefix}-${creationDate}`,
+      };
+
       const requisition = await transaction.purchaseRequisition.create({
-        data,
+        data: requisitionData,
       });
 
       await transaction.purchaseRequisitionItem.createMany({
@@ -261,7 +268,7 @@ export class purchaseRequisitionRepository {
 
       const metadata = await transaction.purchaseRequisition.findUnique({
         where: {
-          id: data.id,
+          id: requisitionData.id,
         },
         select: {
           id: true,

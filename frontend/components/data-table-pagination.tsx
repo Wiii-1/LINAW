@@ -28,7 +28,7 @@ export function DataTablePagination<TData extends RowData>({
 }: Readonly<DataTablePaginationProps<TData>>) {
   return (
     <div
-      className={`mt-4 flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-background px-4 sm:px-5 ${
+      className={`mt-4 mb-4 flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-background px-4 sm:px-5 ${
         density === "comfortable"
           ? "mt-5 min-h-[4.25rem] pt-4 pb-5"
           : "py-4"

@@ -29,7 +29,7 @@ import {
 
 const data = {
   navMain: [
-    { title: "Overview", url: "/dashboard", icon: <LayoutDashboardIcon />, isActive: true },
+    { title: "Overview", url: "/dashboard", icon: <LayoutDashboardIcon /> },
     { title: "Purchase Requisitions", url: "/purchase-requisitions", icon: <FileTextIcon /> },
     { title: "Approval Workflows", url: "/approval-workflows", icon: <GitBranchIcon /> },
     { title: "Supplier Management", url: "/supplier-management", icon: <UsersRoundIcon /> },

@@ -33,8 +33,11 @@ const app = new Hono<AppContext>().basePath("/api");
 app.use(
   "*",
   cors({
-    origin: (origin, c: Context<AppContext>) =>
-      origin === c.env.ALLOWED_ORIGIN ? origin : "",
+    origin: (origin, c: Context<AppContext>) => {
+      const allowedOrigins = c.env.ALLOWED_ORIGIN.split(",")
+        .map((allowedOrigin) => allowedOrigin.trim().replace(/\/+$/, ""));
+      return allowedOrigins.includes(origin.replace(/\/+$/, "")) ? origin : "";
+    },
   }),
 );
 

@@ -10,6 +10,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from 
 import { Input } from "@/components/ui/input";
 import { loginSchema, type LoginFormValues } from "@/validators/auth";
 import { markAuthTransition, runAuthTransition } from "@/lib/auth-client";
+import { useToast } from "@/components/toast-provider";
 
 function getSafeReturnTo() {
   if (typeof window === "undefined") return null;
@@ -20,6 +21,7 @@ function getSafeReturnTo() {
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { success, error: toastError } = useToast();
   const safeReturnTo = getSafeReturnTo();
   const form = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema), defaultValues: { email: "", password: "" } });
 
@@ -34,11 +36,14 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       });
       if (!response.ok || data.success !== true) {
         form.setError("root", { message: data.message ?? "Login failed. Please try again." });
+        toastError("Login failed. Please check your credentials.");
         return;
       }
+      success("Signed in successfully.");
       router.push(safeReturnTo ?? "/dashboard");
     } catch {
       form.setError("root", { message: "Unable to reach the login service. Please try again." });
+      toastError("Unable to reach the login service. Please try again.");
     } finally {
       setIsLoading(false);
     }

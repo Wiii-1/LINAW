@@ -27,6 +27,7 @@ export type PurchaseRequisitionSummary = {
   updated_at: string;
 };
 export type PurchaseRequisitionDetail = PurchaseRequisitionSummary & {
+  total_amount?: number | string;
   id?: string;
   purpose?: string | null;
   justification?: string | null;
@@ -133,7 +134,9 @@ export async function getPurchaseRequisition(id: string) {
   );
   return {
     ...data,
-    total_estimated_amount: numberValue(data.total_estimated_amount),
+    total_estimated_amount: numberValue(
+      data.total_estimated_amount ?? data.total_amount,
+    ),
   };
 }
 export async function createPurchaseRequisition(

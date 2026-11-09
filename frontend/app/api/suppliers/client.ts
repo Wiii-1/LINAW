@@ -57,6 +57,7 @@ export type Rfq = {
     display_name?: string | null;
     name?: string | null;
   } | null;
+  purchase_requisition?: { pr_number?: string | null } | null;
   items?: RfqItem[];
   [key: string]: unknown;
 };
@@ -67,7 +68,6 @@ export type QuotationItem = {
   quoted_quantity?: string | number | null;
   unit_price?: string | number | null;
   line_total?: string | number | null;
-  lead_time_days?: number | null;
   remarks?: string | null;
   [key: string]: unknown;
 };
@@ -206,7 +206,6 @@ export type QuotationInput = {
     rfq_item_id: string;
     quoted_quantity: number;
     unit_price: number;
-    lead_time_days?: number;
     remarks?: string;
   }>;
 };

@@ -18,11 +18,11 @@
         "JWT_REFRESH_EXPIRES": "7d",
 
         "APP_URL": "https://zj9tbp0k-5173.asse.devtunnels.ms/",
-        "ALLOWED_ORIGIN": "http://localhost:5173",
+        "ALLOWED_ORIGIN": "http://localhost:5173,https://zj9tbp0k-5173.asse.devtunnels.ms",
 
         "REDIS_URL": "https://linaw-buff-inlet-rest.cloud.layerbase.dev",
 
-        "BLOCKCHAIN_RPC_URL": "http://localhost:8545",
+        "BLOCKCHAIN_RPC_URL": "https://eth-sepolia.g.alchemy.com/v2/alch_wCYtfR8NDJzeVKZbf84qr",
         "AUDIT_CONTRACT_ADDRESS": "0x4419328A7a7a23621A3EA3E82D9145641728Daa8",
         "MAILGUN_DOMAIN": "wii.qd.je",
         "MAILGUN_FROM": "LINAW<noreply@wii.qd.je>"
@@ -41,9 +41,59 @@
     },
 
     "staging": {
+      "name": "linaw-server-staging",
+
+      "workers_dev": true,
+
       "vars": {
         "NODE_ENV": "staging",
-        "ALLOWED_ORIGIN": "https://your-frontend-domain.com",
+
+        "JWT_ACCESS_EXPIRES": "60m",
+        "JWT_REFRESH_EXPIRES": "7d",
+
+        "APP_URL": "https://your-staging-frontend-url",
+        "ALLOWED_ORIGIN": "https://your-staging-frontend-url",
+
+        "REDIS_URL": "https://linaw-buff-inlet-rest.cloud.layerbase.dev",
+
+        "BLOCKCHAIN_RPC_URL": "https://eth-sepolia.g.alchemy.com/v2/alch_wCYtfR8NDJzeVKZbf84qr",
+        "AUDIT_CONTRACT_ADDRESS": "0x4419328A7a7a23621A3EA3E82D9145641728Daa8",
+
+        "MAILGUN_DOMAIN": "wii.qd.je",
+        "MAILGUN_FROM": "LINAW<noreply@wii.qd.je>"
+      },
+
+      "secrets": {
+        "required": [
+          "JWT_ACCESS_SECRET",
+          "JWT_REFRESH_SECRET",
+          "REDIS_TOKEN",
+          "BLOCKCHAIN_PRIVATE_KEY",
+          "DATABASE_URL",
+          "MAILGUN_API_KEY"
+        ]
+      }
+    },
+
+    "production": {
+      "name": "linaw-server-worker",
+
+      "workers_dev": true,
+
+      "vars": {
+        "NODE_ENV": "production",
+
+        "JWT_ACCESS_EXPIRES": "60m",
+        "JWT_REFRESH_EXPIRES": "7d",
+
+        "APP_URL": "https://your-production-frontend-url",
+        "ALLOWED_ORIGIN": "https://your-production-frontend-url",
+
+        "REDIS_URL": "https://linaw-buff-inlet-rest.cloud.layerbase.dev",
+
+        "BLOCKCHAIN_RPC_URL": "https://eth-sepolia.g.alchemy.com/v2/alch_wCYtfR8NDJzeVKZbf84qr",
+        "AUDIT_CONTRACT_ADDRESS": "0x4419328A7a7a23621A3EA3E82D9145641728Daa8",
+
         "MAILGUN_DOMAIN": "wii.qd.je",
         "MAILGUN_FROM": "LINAW<noreply@wii.qd.je>"
       },

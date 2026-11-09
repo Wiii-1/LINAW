@@ -1,4 +1,5 @@
 import { prisma } from "../../../config/database.js";
+import { formatApplicationDate } from "../../../shared/applicationDate.js";
 
 export class SupplierManagementPortalRepository {
   /**
@@ -53,6 +54,9 @@ export class SupplierManagementPortalRepository {
             display_name: true,
           },
         },
+        purchase_requisition: {
+          select: { pr_number: true },
+        },
       },
     });
   }
@@ -82,6 +86,9 @@ export class SupplierManagementPortalRepository {
             display_name: true,
           },
         },
+        purchase_requisition: {
+          select: { pr_number: true },
+        },
       },
     });
   }
@@ -101,6 +108,16 @@ export class SupplierManagementPortalRepository {
       },
       include: {
         items: true,
+        rfq: {
+          select: {
+            id: true,
+            rfq_number: true,
+            title: true,
+            purchase_requisition: {
+              select: { pr_number: true },
+            },
+          },
+        },
       },
     });
   }
@@ -116,6 +133,16 @@ export class SupplierManagementPortalRepository {
       },
       include: {
         items: true,
+        rfq: {
+          select: {
+            id: true,
+            rfq_number: true,
+            title: true,
+            purchase_requisition: {
+              select: { pr_number: true },
+            },
+          },
+        },
       },
     });
   }
@@ -133,7 +160,6 @@ export class SupplierManagementPortalRepository {
     company_id: string;
     supplier_id: string;
     rfq_id: string;
-    quotation_number: string;
     currency_code: string;
     total_amount: string;
     submitted_at: Date;
@@ -146,7 +172,6 @@ export class SupplierManagementPortalRepository {
       quoted_quantity: string;
       unit_price: string;
       total_price: string;
-      lead_time_days?: number;
       remarks?: string;
     }[];
   }) {
@@ -231,13 +256,37 @@ export class SupplierManagementPortalRepository {
         return null;
       }
 
+      const businessDate = formatApplicationDate(input.submitted_at).replaceAll(
+        "-",
+        "",
+      );
+      const sequenceLockKey = `${input.tenant_id}:${businessDate}`;
+
+      await tx.$executeRaw`
+        SELECT pg_advisory_xact_lock(hashtextextended(${sequenceLockKey}, 0))
+      `;
+
+      const existingNumbers = await tx.supplierQuotation.findMany({
+        where: {
+          tenant_id: input.tenant_id,
+          quotation_number: { contains: `QUO-${businessDate}-` },
+        },
+        select: { quotation_number: true },
+      });
+      const sequencePattern = new RegExp(`^QUO-${businessDate}-(\\d+)$`);
+      const nextSequence =
+        existingNumbers.reduce((highest, quotation) => {
+          const match = quotation.quotation_number.match(sequencePattern);
+          return match ? Math.max(highest, Number(match[1])) : highest;
+        }, 0) + 1;
+
       return tx.supplierQuotation.create({
         data: {
           tenant_id: input.tenant_id,
           company_id: input.company_id,
           rfq_id: input.rfq_id,
           supplier_id: input.supplier_id,
-          quotation_number: input.quotation_number,
+          quotation_number: `QUO-${businessDate}-${String(nextSequence).padStart(3, "0")}`,
           currency_code: input.currency_code,
           total_amount: input.total_amount,
           status: "SUBMITTED",
@@ -252,7 +301,6 @@ export class SupplierManagementPortalRepository {
               quoted_quantity: item.quoted_quantity,
               unit_price: item.unit_price,
               total_price: item.total_price,
-              lead_time_days: item.lead_time_days,
               remarks: item.remarks,
             })),
           },

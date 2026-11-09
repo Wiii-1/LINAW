@@ -4,6 +4,7 @@ import {
   DEFAULT_CURRENCY_CODE,
   hasCurrencyPrecision,
 } from "../../shared/currency.js";
+import { isDateOnOrAfterApplicationToday } from "../../shared/applicationDate.js";
 
 export const RFQStatus = {
   DRAFT: "DRAFT",
@@ -80,6 +81,14 @@ export const CreateRFQSchema = z
     items: z.array(RFQItemSchema).min(1).optional(),
   })
   .superRefine((value, context) => {
+    if (!isDateOnOrAfterApplicationToday(value.closing_date)) {
+      context.addIssue({
+        code: "custom",
+        path: ["closing_date"],
+        message: "RFQ closing date cannot be in the past.",
+      });
+    }
+
     if (!value.rfq_items && !value.items) {
       context.addIssue({
         code: "custom",
@@ -93,23 +102,36 @@ export const CreateRFQSchema = z
     rfq_items: rfq_items ?? items ?? [],
   }));
 
-export const UpdateRFQSchema = z.object({
-  title: z.string().trim().min(1).max(255).optional(),
-  description: z.string().trim().max(5000).optional(),
-  closing_date: z.coerce.date().optional(),
-  rfq_items: z
-    .array(
-      z.object({
-        line_no: z.number().int().positive(),
-        description: z.string().trim().max(5000),
-        quantity: z.number().positive(),
-        unit_of_measure: z.string().trim().min(1).max(50),
-        specification: z.string().trim().min(1).max(5000),
-      }),
-    )
-    .min(1)
-    .optional(),
-});
+export const UpdateRFQSchema = z
+  .object({
+    title: z.string().trim().min(1).max(255).optional(),
+    description: z.string().trim().max(5000).optional(),
+    closing_date: z.coerce.date().optional(),
+    rfq_items: z
+      .array(
+        z.object({
+          line_no: z.number().int().positive(),
+          description: z.string().trim().max(5000),
+          quantity: z.number().positive(),
+          unit_of_measure: z.string().trim().min(1).max(50),
+          specification: z.string().trim().min(1).max(5000),
+        }),
+      )
+      .min(1)
+      .optional(),
+  })
+  .superRefine((value, context) => {
+    if (
+      value.closing_date &&
+      !isDateOnOrAfterApplicationToday(value.closing_date)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["closing_date"],
+        message: "RFQ closing date cannot be in the past.",
+      });
+    }
+  });
 
 // Purchase Order
 

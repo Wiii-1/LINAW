@@ -40,12 +40,24 @@ import {
   type Rfq,
 } from "@/app/api/purchase-orders/rfq-client";
 import { type DataTableFeatures } from "@/types/data-table-features";
+import { getApplicationTodayDate } from "@/lib/application-date";
+import { useToast } from "@/components/toast-provider";
 
-const formSchema = z.object({
-  title: z.string().trim().min(1, "A title is required.").max(255),
-  description: z.string().max(5000),
-  closingDate: z.string().min(1, "A submission deadline is required."),
-});
+const formSchema = z
+  .object({
+    title: z.string().trim().min(1, "A title is required.").max(255),
+    description: z.string().max(5000),
+    closingDate: z.string().min(1, "A submission deadline is required."),
+  })
+  .superRefine((value, context) => {
+    if (value.closingDate < getApplicationTodayDate()) {
+      context.addIssue({
+        code: "custom",
+        path: ["closingDate"],
+        message: "Submission deadline cannot be in the past.",
+      });
+    }
+  });
 
 const dateFormat = (value?: string | null) =>
   value
@@ -127,6 +139,7 @@ function Info({ label, value }: { label: string; value: string }) {
 }
 
 export function RfqWorkspace() {
+  const { success, error: toastError, warning } = useToast();
   const [queue, setQueue] = useState<ProcurementQueueItem[]>([]);
   const [rfqs, setRfqs] = useState<Rfq[]>([]);
   const [loading, setLoading] = useState(true);
@@ -182,7 +195,7 @@ export function RfqWorkspace() {
       columnHelper.accessor("purchase_requisition_id", {
         header: "Source PR",
         cell: ({ row }) => (
-          <span className="text-muted-foreground">{display(row.original.purchase_requisition_id)}</span>
+          <span className="text-muted-foreground">{display(row.original.purchase_requisition?.pr_number)}</span>
         ),
       }),
       columnHelper.accessor("closing_date", {
@@ -250,11 +263,17 @@ export function RfqWorkspace() {
 
   async function post() {
     if (!selected) return;
+    if (form.closingDate < getApplicationTodayDate()) {
+      setFormError("Submission deadline cannot be in the past.");
+      warning("Please choose today or a future submission deadline.");
+      return;
+    }
     const parsed = formSchema.safeParse(form);
     if (!parsed.success) {
       setFormError(
         parsed.error.issues[0]?.message ?? "Review the RFQ details.",
       );
+      warning(parsed.error.issues[0]?.message ?? "Please review the RFQ details.");
       return;
     }
     const items = (selectedDetail?.items ?? selected.items ?? []).map(
@@ -268,6 +287,7 @@ export function RfqWorkspace() {
     );
     if (items.length === 0) {
       setFormError("The approved requisition has no items to quote.");
+      warning("The approved requisition has no items to quote.");
       return;
     }
     setMutation("post");
@@ -283,9 +303,11 @@ export function RfqWorkspace() {
       await publishRfq(draft.id);
       setRfqOpen(false);
       setNotice(`${draft.rfq_number} was published.`);
+      success("RFQ created and published successfully.");
       await load();
     } catch (requestError) {
       setFormError(errorMessage(requestError));
+      toastError("Unable to create or publish the RFQ.");
     } finally {
       setMutation(null);
     }
@@ -311,10 +333,12 @@ export function RfqWorkspace() {
       setNotice(
         `${quotation.quotation_number} was selected and the purchase order was created.`,
       );
+      success("Quotation selected and purchase order created.");
       setQuotations(await listRfqQuotations(rfqDetail.id));
       await load();
     } catch (requestError) {
       setError(errorMessage(requestError));
+      toastError("Unable to select the quotation.");
     } finally {
       setMutation(null);
     }
@@ -468,6 +492,7 @@ export function RfqWorkspace() {
                   Submission deadline
                   <Input
                     type="date"
+                    min={getApplicationTodayDate()}
                     value={form.closingDate}
                     onChange={(event) =>
                       setForm((current) => ({
@@ -543,7 +568,7 @@ export function RfqWorkspace() {
               <div className="grid gap-4 rounded-xl border border-border/70 bg-muted/20 p-4 sm:grid-cols-3">
                 <Info
                   label="Source PR"
-                  value={display(rfqDetail.purchase_requisition_id)}
+                  value={display(rfqDetail.purchase_requisition?.pr_number)}
                 />
                 <Info
                   label="Deadline"
@@ -581,10 +606,8 @@ export function RfqWorkspace() {
                             {quotation.quotation_number}
                           </p>
                             <p className="mt-1 truncate text-xs text-muted-foreground">
-                            {quotation.supplier?.legal_name ??
-                              quotation.supplier?.name ??
-                              quotation.supplier?.supplier_code ??
-                              quotation.supplier_id}
+                            {quotation.supplier?.supplier_code ??
+                              "Supplier unavailable"}
                           </p>
                         </div>
                           <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-center">

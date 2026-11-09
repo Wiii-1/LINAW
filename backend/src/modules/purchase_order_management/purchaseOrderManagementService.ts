@@ -133,16 +133,6 @@ export class PurchaseOrderManagementService {
     await this.eventBus.publish(PURCHASE_ORDER_AUDIT_EVENT, input);
   }
 
-  private NumberGenerator(
-    creationDate: Date,
-    uniqueIdentifier: string,
-    revision: number,
-  ): string {
-    const date = creationDate.toISOString().slice(0, 10).replaceAll("-", "");
-
-    return `${uniqueIdentifier}-${date}-${revision}`;
-  }
-
   async orderPurchaseOrder(input: OrderPurchaseOrderContext) {
     const purchaseOrder = await this.repository.findPoById({
       po_id: input.poId,
@@ -392,15 +382,11 @@ export class PurchaseOrderManagementService {
 
     const id = crypto.randomUUID();
     const created_at = new Date();
-    const generation = 1;
-
-    const rfq_number = this.NumberGenerator(created_at, id, generation);
-
     const data = {
       id: id,
       tenant_id: input.tenant_id,
       company_id: input.company_id,
-      rfq_number: rfq_number,
+      rfq_number: "",
       purchase_requisition_id: input.body.purchase_requisition_id,
       created_by_user_id: input.user_id,
       title: input.body.title,
@@ -517,8 +503,6 @@ export class PurchaseOrderManagementService {
 
     const createdAt = new Date();
     const id = crypto.randomUUID();
-    const poNumber = this.NumberGenerator(createdAt, id, 1);
-
     const purchaseOrder = await this.repository.selectSupplier({
       id,
       tenant_id: input.tenant_id,
@@ -527,7 +511,6 @@ export class PurchaseOrderManagementService {
       rfq_id: rfq.id,
       quotation_id: quotation.id,
       supplier_id: quotation.supplier_id,
-      po_number: poNumber,
       order_date: createdAt,
       expected_delivery_date: undefined,
     });

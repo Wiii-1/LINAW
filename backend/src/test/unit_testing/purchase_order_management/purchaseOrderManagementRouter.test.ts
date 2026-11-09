@@ -50,7 +50,7 @@ describe("PurchaseOrderManagementRouter", () => {
         body: JSON.stringify({
           purchase_requisition_id: "00000000-0000-1000-8000-000000000001",
           title: "Office equipment quotation",
-          closing_date: "2026-11-01",
+          closing_date: "2099-11-01",
           rfq_items: [
             {
               line_no: 1,

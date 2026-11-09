@@ -4,6 +4,8 @@ import {
   DEFAULT_CURRENCY_CODE,
   hasCurrencyPrecision,
 } from "../../shared/currency.js";
+import { isPurchaseRequisitionUomValid } from "./purchaseRequisitionUom.js";
+import { isDateStringOnOrAfterApplicationToday } from "../../shared/applicationDate.js";
 
 // ===========================
 // Shared Schemas
@@ -100,7 +102,16 @@ export const purchaseRequisitionItemSchema = z
       .date("Invalid needed-by date format.")
       .optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((item, context) => {
+    if (!isPurchaseRequisitionUomValid(item.item_type, item.unit_of_measure)) {
+      context.addIssue({
+        code: "custom",
+        path: ["unit_of_measure"],
+        message: "Unit of measure is not valid for this item type.",
+      });
+    }
+  });
 
 // ===========================
 // Purchase Requisition Input
@@ -164,6 +175,17 @@ export const purchaseRequisitionInputSchema = z
     path: ["line_items"],
   })
   .superRefine((value, context) => {
+    if (
+      value.needed_by_date &&
+      !isDateStringOnOrAfterApplicationToday(value.needed_by_date)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["needed_by_date"],
+        message: "Needed-by date cannot be in the past.",
+      });
+    }
+
     value.items.forEach((item, index) => {
       if (
         !hasCurrencyPrecision(item.estimated_unit_cost, value.currency_code)
@@ -213,7 +235,19 @@ export const updatePurchaseRequisitionSchema = z
     ...value,
     needed_by_date: value.needed_by_date ?? value.request_date,
     items: value.items ?? value.line_items,
-  }));
+  }))
+  .superRefine((value, context) => {
+    if (
+      value.needed_by_date &&
+      !isDateStringOnOrAfterApplicationToday(value.needed_by_date)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["needed_by_date"],
+        message: "Needed-by date cannot be in the past.",
+      });
+    }
+  });
 
 export const PurchaseRequisitionStatusSchema = z.object({
   status: purchaseRequisitionStatusSchema,

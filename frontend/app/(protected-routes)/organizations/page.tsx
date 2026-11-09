@@ -276,9 +276,21 @@ function RegistrationView({
         contact_phone: form.contact_phone || undefined,
       });
     if (!parsed.success) {
-      setError(
-        "Please complete the registration fields using the required formats.",
-      );
+        const issue = parsed.error.issues[0];
+        const field = issue?.path[0];
+        const fieldLabels: Record<string, string> = {
+          legal_name: "Legal name",
+          display_name: "Display name",
+          tax_id: "Tax ID",
+          address: "Address",
+          contact_email: "Contact email",
+          contact_phone: "Contact phone",
+        };
+        setError(
+          issue
+            ? `${fieldLabels[String(field)] ?? "Registration"}: ${issue.message}`
+            : "Please complete the registration fields using the required formats.",
+        );
       return;
     }
     if (busy || registeredCompany) return;

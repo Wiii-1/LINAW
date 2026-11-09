@@ -15,6 +15,7 @@ import {
 
 export type ApprovalWorkflow = {
   id: string;
+  prNumber: string | null;
   request: string;
   requester: string;
   approvalLevel: number;
@@ -37,9 +38,9 @@ export function createColumns(actions: {
       cell: ({ row }) => (
         <span
           className="block max-w-40 truncate font-mono text-xs"
-          title={row.original.id}
+          title={row.original.prNumber ?? "PR number unavailable"}
         >
-          {row.original.id}
+          {row.original.prNumber ?? "PR number unavailable"}
         </span>
       ),
     }),

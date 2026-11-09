@@ -32,6 +32,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/toast-provider";
 
 function toApprovalWorkflow(request: ApprovalRequest): ApprovalWorkflow {
   const status = {
@@ -43,6 +44,7 @@ function toApprovalWorkflow(request: ApprovalRequest): ApprovalWorkflow {
 
   return {
     id: request.id,
+    prNumber: request.prNumber,
     request: request.request,
     requester: request.requester,
     approvalLevel: request.currentLevel,
@@ -54,6 +56,7 @@ function toApprovalWorkflow(request: ApprovalRequest): ApprovalWorkflow {
 }
 
 export default function ApprovalWorkflowsPage() {
+  const { success, error: toastError } = useToast();
   const [statusFilter, setStatusFilter] = useState<
     ApprovalRequest["status"] | undefined
   >();
@@ -160,6 +163,7 @@ export default function ApprovalWorkflowsPage() {
 
     try {
       await submitApprovalDecision(workflow.id, decision, remarks);
+      success(decision === "approve" ? "Approval completed successfully." : "Request rejected successfully.");
       setRejectionTarget(null);
       setRejectionRemarks("");
       await loadRequests();
@@ -176,6 +180,7 @@ export default function ApprovalWorkflowsPage() {
           ? requestError.message
           : "Unable to complete the approval action.",
       );
+      toastError("Unable to complete the approval action.");
     } finally {
       setIsActionLoading(false);
     }
@@ -199,12 +204,14 @@ export default function ApprovalWorkflowsPage() {
       });
       const definitions = await getWorkflowDefinitions();
       setWorkflowDefinitions(definitions);
+      success("Workflow definition created successfully.");
     } catch (requestError: unknown) {
       setConfigurationError(
         requestError instanceof Error
           ? requestError.message
           : "Unable to create workflow definition.",
       );
+      toastError("Unable to create workflow definition.");
     } finally {
       setIsConfigurationLoading(false);
     }
@@ -248,12 +255,14 @@ export default function ApprovalWorkflowsPage() {
         level_no: String(levelNo + 1),
         role_code: "",
       });
+      success("Approval level created successfully.");
     } catch (requestError: unknown) {
       setConfigurationError(
         requestError instanceof Error
           ? requestError.message
           : "Unable to create workflow level.",
       );
+      toastError("Unable to create approval level.");
     } finally {
       setIsConfigurationLoading(false);
     }
@@ -390,7 +399,7 @@ export default function ApprovalWorkflowsPage() {
                 <span className="text-xs">Request</span>
                 <strong>{selectedRequest.request}</strong>
                 <span className="font-mono text-xs">
-                  {selectedRequest.entityId}
+                  {selectedRequest.prNumber ?? "PR number unavailable"}
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-4">

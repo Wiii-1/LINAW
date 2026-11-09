@@ -352,14 +352,13 @@ Invitation summaries contain `invitation_id`, `email`, `invitation_status`, null
       "rfq_item_id": "rfq-item-uuid",
       "quoted_quantity": 10,
       "unit_price": 125.5,
-      "lead_time_days": 14,
       "remarks": "Delivery included"
     }
   ]
 }
 ```
 
-`currency_code` defaults to the shared default and has currency precision checks. `valid_until` is optional and must not be in the past. Items are required and non-empty; each RFQ item ID must be UUID, quantity and unit price positive with up to four decimals, lead time an optional nonnegative integer, and remarks optional up to 1000 characters. Every RFQ item must appear exactly once.
+`currency_code` defaults to the shared default and has currency precision checks. `valid_until` is optional and must not be in the past. Items are required and non-empty; each RFQ item ID must be UUID, quantity and unit price positive with up to four decimals, and remarks optional up to 1000 characters. Every RFQ item must appear exactly once.
 
 **Success Response:** `201` with `{ "success": true, "message": "Supplier quotation submitted successfully.", "data": <created SupplierQuotation including items> }`. Service calculates line totals and total amount; clients' totals are not accepted.
 

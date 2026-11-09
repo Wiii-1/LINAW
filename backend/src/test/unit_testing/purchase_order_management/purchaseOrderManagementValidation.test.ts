@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   CreateRFQSchema,
   MonthlyCompletedProcurementQuerySchema,
+  UpdateRFQSchema,
 } from "../../../modules/purchase_order_management/purchaseOrderManagementValidator.js";
+import { getApplicationTodayDate } from "../../../shared/applicationDate.js";
 
 const purchaseRequisitionId = "00000000-0000-1000-8000-000000000001";
 
@@ -17,7 +19,7 @@ const item = {
 const validRequest = {
   purchase_requisition_id: purchaseRequisitionId,
   title: "Office equipment quotation",
-  closing_date: "2026-11-01",
+  closing_date: "2099-11-01",
 };
 
 describe("CreateRFQSchema", () => {
@@ -63,6 +65,54 @@ describe("CreateRFQSchema", () => {
           expect.objectContaining({
             path: ["rfq_items", 0, "quantity"],
             message: "Invalid input: expected number, received string",
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("rejects a past RFQ closing date", () => {
+    const result = CreateRFQSchema.safeParse({
+      ...validRequest,
+      closing_date: "2000-01-01",
+      rfq_items: [item],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["closing_date"],
+            message: "RFQ closing date cannot be in the past.",
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("accepts today's RFQ closing date", () => {
+    expect(
+      CreateRFQSchema.safeParse({
+        ...validRequest,
+        closing_date: getApplicationTodayDate(),
+        rfq_items: [item],
+      }).success,
+    ).toBe(true);
+  });
+});
+
+describe("UpdateRFQSchema", () => {
+  it("rejects a past draft RFQ closing date", () => {
+    const result = UpdateRFQSchema.safeParse({ closing_date: "2000-01-01" });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["closing_date"],
+            message: "RFQ closing date cannot be in the past.",
           }),
         ]),
       );

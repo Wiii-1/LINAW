@@ -54,8 +54,14 @@ describe("PurchaseOrderManagementRepository.selectSupplier", () => {
         findFirst: vi.fn().mockResolvedValue({ id: "assignment-id" }),
       },
       purchaseOrder: {
+        findMany: vi.fn().mockResolvedValue([
+          { po_number: "PO-20261025-001" },
+          { po_number: "PO-20261025-1000" },
+          { po_number: "legacy-po-uuid-20261025-1" },
+        ]),
         create: purchaseOrderCreate,
       },
+      $executeRaw: vi.fn(),
     };
     prismaMock.$transaction.mockImplementation(async (callback) => callback(tx));
 
@@ -67,7 +73,6 @@ describe("PurchaseOrderManagementRepository.selectSupplier", () => {
       rfq_id: "rfq-id",
       quotation_id: "quotation-id",
       supplier_id: "supplier-id",
-      po_number: "po-number",
       order_date: new Date("2026-10-25T00:00:00.000Z"),
       expected_delivery_date: undefined,
     });
@@ -80,6 +85,7 @@ describe("PurchaseOrderManagementRepository.selectSupplier", () => {
           supplier_quotation_id: "quotation-id",
           supplier_id: "supplier-id",
           status: "DRAFT",
+          po_number: "PO-20261025-1001",
         }),
       }),
     );
