@@ -7,12 +7,22 @@ export interface PasswordResetNotificationInput {
   resetLink: string;
 }
 
+export interface SignupOtpNotificationInput {
+  email: string;
+  otp: string;
+}
+
 export interface AuthNotifier {
   sendPasswordResetEmail(input: PasswordResetNotificationInput): Promise<void>;
+  sendSignupOtpEmail(input: SignupOtpNotificationInput): Promise<void>;
 }
 
 export class NoopAuthNotifier implements AuthNotifier {
   async sendPasswordResetEmail(): Promise<void> {
+    return;
+  }
+
+  async sendSignupOtpEmail(): Promise<void> {
     return;
   }
 }
@@ -52,6 +62,21 @@ export class MailgunAuthNotifier implements AuthNotifier {
                     <p>If you did not request a password reset, you can safely ignore this email.</p>
                 </div>
             `,
+    });
+  }
+
+  async sendSignupOtpEmail(input: SignupOtpNotificationInput): Promise<void> {
+    await this.emailService.send({
+      to: input.email,
+      subject: "Verify your LINAW email address",
+      text: [
+        "Hello,",
+        "",
+        `Your LINAW verification code is: ${input.otp}`,
+        "",
+        "This code expires in 10 minutes and can only be used once.",
+        "If you did not create a LINAW account, you can safely ignore this email.",
+      ].join("\n"),
     });
   }
 }

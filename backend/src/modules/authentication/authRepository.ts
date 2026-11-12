@@ -1,6 +1,168 @@
 import { prisma } from "../../config/database.js";
 
 export class AuthRepository {
+  async findPendingRegistrationByEmail(email: string) {
+    return prisma.pendingRegistration.findUnique({ where: { email } });
+  }
+
+  async findPendingRegistration(id: string, email: string) {
+    return prisma.pendingRegistration.findFirst({
+      where: { id, email },
+    });
+  }
+
+  async createOrUpdatePendingRegistration(data: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    password_hash: string;
+    invitation_token_hash?: string;
+    otp_hash: string;
+    otp_expires_at: Date;
+    last_sent_at: Date;
+  }) {
+    return prisma.pendingRegistration.upsert({
+      where: { email: data.email },
+      create: data,
+      update: {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        password_hash: data.password_hash,
+        invitation_token_hash: data.invitation_token_hash,
+        otp_hash: data.otp_hash,
+        otp_expires_at: data.otp_expires_at,
+        otp_attempts: 0,
+        last_sent_at: data.last_sent_at,
+        consumed_at: null,
+        verified_at: null,
+      },
+    });
+  }
+
+  async updatePendingOtp(data: {
+    id: string;
+    email: string;
+    otp_hash: string;
+    otp_expires_at: Date;
+    last_sent_at: Date;
+    not_sent_since: Date;
+  }) {
+    return prisma.pendingRegistration.updateMany({
+      where: {
+        id: data.id,
+        email: data.email,
+        consumed_at: null,
+        last_sent_at: { lte: data.not_sent_since },
+      },
+      data: {
+        otp_hash: data.otp_hash,
+        otp_expires_at: data.otp_expires_at,
+        otp_attempts: 0,
+        last_sent_at: data.last_sent_at,
+      },
+    });
+  }
+
+  async incrementPendingOtpAttempts(data: {
+    id: string;
+    email: string;
+    now: Date;
+    max_attempts: number;
+  }) {
+    return prisma.pendingRegistration.updateMany({
+      where: {
+        id: data.id,
+        email: data.email,
+        consumed_at: null,
+        otp_expires_at: { gt: data.now },
+        otp_attempts: { lt: data.max_attempts },
+      },
+      data: { otp_attempts: { increment: 1 } },
+    });
+  }
+
+  async completePendingRegistration(data: {
+    id: string;
+    email: string;
+    otp_hash: string;
+    now: Date;
+    max_attempts: number;
+    first_name: string;
+    last_name: string;
+    password_hash: string;
+    invitation_token_hash?: string;
+    tenant_id: string;
+  }) {
+    return prisma.$transaction(async (tx) => {
+      const invitation = data.invitation_token_hash
+        ? await tx.companyInvitation.findUnique({
+            where: { invite_token_hash: data.invitation_token_hash },
+          })
+        : null;
+
+      if (
+        data.invitation_token_hash &&
+        (!invitation ||
+          invitation.status !== "PENDING" ||
+          invitation.accepted_at ||
+          invitation.expires_at <= data.now ||
+          invitation.email !== data.email)
+      ) {
+        return { status: "invalid" as const };
+      }
+
+      const claimed = await tx.pendingRegistration.updateMany({
+        where: {
+          id: data.id,
+          email: data.email,
+          otp_hash: data.otp_hash,
+          consumed_at: null,
+          otp_expires_at: { gt: data.now },
+          otp_attempts: { lt: data.max_attempts },
+        },
+        data: { consumed_at: data.now, verified_at: data.now },
+      });
+      if (claimed.count !== 1) return { status: "invalid" as const };
+
+      if (data.invitation_token_hash) {
+        if (!invitation) return { status: "invalid" as const };
+        const user = await tx.user.create({
+          data: {
+            tenant_id: invitation.tenant_id,
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.email,
+            status: "ACTIVE",
+            credentials: { create: { password_hash: data.password_hash } },
+          },
+        });
+        const claimedInvitation = await tx.companyInvitation.updateMany({
+          where: { id: invitation.id, status: "PENDING", accepted_at: null, expires_at: { gt: data.now } },
+          data: { status: "ACCEPTED", accepted_at: data.now },
+        });
+        if (claimedInvitation.count !== 1) return { status: "invalid" as const };
+        await tx.companyMembership.create({
+          data: { tenant_id: invitation.tenant_id, company_id: invitation.company_id, user_id: user.id, employment_status: "ACTIVE" },
+        });
+        return { status: "created" as const, user };
+      }
+
+      const tenant = await tx.tenant.create({ data: { id: data.tenant_id, status: "ACTIVE", plan: "FREE" } });
+      const user = await tx.user.create({
+        data: {
+          tenant_id: tenant.id,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          status: "ACTIVE",
+          credentials: { create: { password_hash: data.password_hash } },
+        },
+      });
+      return { status: "created" as const, user };
+    });
+  }
+
   async findUserWithCredentialsByEmail(email: string) {
     return prisma.user.findFirst({
       where: {

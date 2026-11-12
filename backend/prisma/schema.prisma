@@ -236,6 +236,26 @@ model PasswordResetToken {
   @@index([expires_at])
 }
 
+model PendingRegistration {
+  id                   String    @id @default(uuid()) @db.Uuid
+  email                String    @unique
+  first_name           String
+  last_name            String
+  password_hash        String
+  invitation_token_hash String?
+  otp_hash             String
+  otp_expires_at       DateTime  @db.Timestamptz(6)
+  otp_attempts        Int       @default(0)
+  last_sent_at         DateTime  @db.Timestamptz(6)
+  consumed_at          DateTime? @db.Timestamptz(6)
+  verified_at          DateTime? @db.Timestamptz(6)
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([otp_expires_at])
+  @@index([consumed_at])
+}
+
 // Access Controll
 
 model Role {

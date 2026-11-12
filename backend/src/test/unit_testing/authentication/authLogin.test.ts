@@ -163,6 +163,29 @@ describe("AuthService login", () => {
     expect(repositoryMock.createSession).not.toHaveBeenCalled();
   });
 
+  it("allows an existing account to use a short legacy password", async () => {
+    await expect(
+      createService().login({ email: credentials.email, password: "old-pass" }),
+    ).resolves.toEqual({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+    });
+
+    expect(mocks.verifyPassword).toHaveBeenCalledWith(
+      user.credentials.password_hash,
+      "old-pass",
+    );
+  });
+
+  it("allows an existing account to use a legacy password without special characters", async () => {
+    await expect(
+      createService().login({ email: credentials.email, password: "LegacyPassword2026" }),
+    ).resolves.toEqual({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+    });
+  });
+
   it("rejects a user without an active company membership", async () => {
     repositoryMock.findActiveCompanyMemberships.mockResolvedValue([]);
 

@@ -10,6 +10,9 @@ interface SignupResponse {
   result?: {
     accessToken?: string;
     refreshToken?: string;
+    verification_id?: string;
+    expires_at?: string;
+    resend_available_at?: string;
   };
 }
 
@@ -173,6 +176,21 @@ export async function POST(request: Request): Promise<Response> {
         status: upstream.ok ? 502 : upstream.status,
         headers: { "Cache-Control": "no-store" },
       },
+    );
+  }
+
+  if (
+    typeof data.result?.verification_id === "string" &&
+    typeof data.result.expires_at === "string" &&
+    typeof data.result.resend_available_at === "string"
+  ) {
+    return Response.json(
+      {
+        success: true,
+        message: data.message ?? "Verification code sent.",
+        result: data.result,
+      },
+      { status: 202, headers: { "Cache-Control": "no-store" } },
     );
   }
 

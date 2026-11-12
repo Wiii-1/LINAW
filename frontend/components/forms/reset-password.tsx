@@ -104,7 +104,7 @@ export function ResetPasswordForm({
           <div className="flex flex-col items-center gap-2 text-center">
             <h1 className="text-xl font-bold">Reset Your Password</h1>
             <FieldDescription>
-              Choose a new password containing 12–128 characters.
+              Choose a new password meeting all password requirements.
             </FieldDescription>
           </div>
 

@@ -4,7 +4,7 @@
 
 The Authentication module handles account registration, password authentication, access/refresh token issuance, refresh-token rotation, logout, password-reset requests, password-reset completion, authenticated user lookup, and access-token validation.
 
-The live API base path is `/api/auth`. The router exposes eight routes. Signup, login, forgot-password, and reset-password are public but rate-limited. User lookup and token validation require the shared access-token middleware. Logout and refresh use a `refreshToken` cookie and do not apply the access-token middleware in the router.
+The live API base path is `/api/auth`. The router exposes ten routes. Signup, signup verification/resend, login, forgot-password, and reset-password are public but rate-limited. User lookup and token validation require the shared access-token middleware. Logout and refresh use a `refreshToken` cookie and do not apply the access-token middleware in the router.
 
 ## 2. Implementation References
 
@@ -61,7 +61,9 @@ The backend does not set or clear browser cookies; the trusted frontend/server i
 
 | Method | Effective Path              | Purpose                                         | Authentication       | Authorization                                   |
 | ------ | --------------------------- | ----------------------------------------------- | -------------------- | ----------------------------------------------- |
-| POST   | `/api/auth/signup`          | Create tenant, user, and credentials            | Public; rate limited | None                                            |
+| POST   | `/api/auth/signup`          | Validate email and send registration OTP        | Public; rate limited | None                                            |
+| POST   | `/api/auth/signup/verify`   | Verify OTP and complete registration            | Public; rate limited | None                                            |
+| POST   | `/api/auth/signup/resend`   | Resend registration OTP                         | Public; rate limited | None                                            |
 | POST   | `/api/auth/login`           | Verify credentials and create session/tokens    | Public; rate limited | Active user and unambiguous company membership  |
 | POST   | `/api/auth/forgot-password` | Request reset email                             | Public; rate limited | None; response is account-enumeration resistant |
 | POST   | `/api/auth/reset-password`  | Consume reset token and change password         | Public reset token   | Valid unused/unexpired token                    |
@@ -74,7 +76,7 @@ The backend does not set or clear browser cookies; the trusted frontend/server i
 
 ### POST `/api/auth/signup`
 
-**Purpose:** Creates a new tenant, active user, and password credential.
+**Purpose:** Validates the registration email, stores a pending registration, and sends a one-time verification code.
 
 **Implementation:** Router -> `AuthController.createUser` -> `AuthService.register` -> `AuthRepository.registerUser`.
 
@@ -92,21 +94,16 @@ The backend does not set or clear browser cookies; the trusted frontend/server i
 
 `first_name` and `last_name` must be 3-40 characters. Email is normalized to trimmed lowercase and must be valid. Password and confirmation must be 12-128 characters and equal. The schema is not strict, so unknown body keys are not explicitly rejected.
 
-**Success Response:** `201`:
+**Success Response:** `202`:
 
 ```json
 {
   "success": true,
-  "message": "Account created successfully",
+  "message": "Verification code sent",
   "result": {
-    "id": "user-uuid",
-    "tenant_id": "tenant-uuid",
-    "first_name": "Ada",
-    "last_name": "Lovelace",
-    "email": "ada@example.com",
-    "status": "ACTIVE",
-    "created_at": "2026-10-21T12:00:00.000Z",
-    "updated_at": "2026-10-21T12:00:00.000Z"
+    "verification_id": "verification-uuid",
+    "expires_at": "2026-10-21T12:10:00.000Z",
+    "resend_available_at": "2026-10-21T12:01:00.000Z"
   }
 }
 ```
@@ -115,7 +112,15 @@ The returned Prisma user record does not include credentials. Passwords are hash
 
 **Errors:** `409 CONFLICT` if the email already exists; `422 INVALID DATA` for validation; `500` for unhandled database/hash errors. No authentication is required.
 
-**Business Rules and Side Effects:** The service creates a new random tenant ID. A Serializable transaction creates the tenant with `ACTIVE`/`FREE`, creates the active user, and creates the credential. No session or tokens are issued by signup.
+**Business Rules and Side Effects:** The service uses Mailtester for syntax, typo, and disposable checks. MX and SMTP validators are disabled because the published package uses Node DNS/TCP APIs unavailable to Cloudflare Workers. The pending record stores only an HMAC OTP hash; the account is not created and no session is issued until OTP verification.
+
+### POST `/api/auth/signup/verify`
+
+Accepts `verification_id`, normalized `email`, and a six-digit `otp`. A successful `201` response completes the existing tenant/user/invitation transaction and returns access and refresh tokens. OTPs expire after 10 minutes, allow five failed attempts, and are atomically consumed with account creation.
+
+### POST `/api/auth/signup/resend`
+
+Accepts `verification_id` and normalized `email`. A new OTP is sent only after the 60-second cooldown and resets the ten-minute expiry.
 
 ### POST `/api/auth/login`
 
@@ -127,7 +132,7 @@ The returned Prisma user record does not include credentials. Passwords are hash
 { "email": "ada@example.com", "password": "a-strong-password" }
 ```
 
-Email is normalized lowercase and must be valid. Password must be 12-128 characters.
+Email is normalized lowercase and must be valid. Login passwords are passed to the existing hash verifier without length or complexity validation so legacy accounts remain usable.
 
 **Success Response:** `200`:
 
@@ -181,7 +186,7 @@ Tokens are returned in JSON; this backend does not set cookies.
 }
 ```
 
-`resetToken` must be 10-512 characters. Password must be 12-128 characters and equal confirmation.
+`resetToken` must be 10-512 characters. New passwords must be 12-128 characters and contain uppercase, lowercase, numeric, and special characters; they must equal confirmation.
 
 **Success Response:** `200`:
 

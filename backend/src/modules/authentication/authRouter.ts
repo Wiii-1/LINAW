@@ -18,6 +18,8 @@ export function createAuthRouter(env: AppEnv) {
   const controller = new AuthController(service);
 
   router.post("/signup", criticalRateLimit, controller.createUser);
+  router.post("/signup/verify", criticalRateLimit, controller.verifySignup);
+  router.post("/signup/resend", criticalRateLimit, controller.resendSignup);
   router.post("/login", criticalRateLimit, controller.loginUser);
   router.post("/forgot-password", criticalRateLimit, controller.forgotPassword);
   router.post("/reset-password", criticalRateLimit, controller.resetPassword);

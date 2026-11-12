@@ -8,6 +8,8 @@ import {
   resetPasswordSchema,
   signupSchema,
   findByIdSchema,
+  resendSignupSchema,
+  verifySignupSchema,
 } from "./authValidator.js";
 import {
   InvalidTokenError,
@@ -44,7 +46,21 @@ export class AuthController {
     const body = await c.req.json();
     const data = signupSchema.parse(body);
 
-    const result = await this.service.register(data);
+    const result = await this.service.startRegistration(data);
+
+    return c.json(
+      {
+        success: true,
+        message: "Verification code sent",
+        result,
+      },
+      202,
+    );
+  };
+
+  verifySignup = async (c: Context<AppContext>) => {
+    const data = verifySignupSchema.parse(await c.req.json());
+    const result = await this.service.verifyRegistration(data);
 
     return c.json(
       {
@@ -53,6 +69,20 @@ export class AuthController {
         result,
       },
       201,
+    );
+  };
+
+  resendSignup = async (c: Context<AppContext>) => {
+    const data = resendSignupSchema.parse(await c.req.json());
+    const result = await this.service.resendRegistration(data);
+
+    return c.json(
+      {
+        success: true,
+        message: "Verification code sent",
+        result,
+      },
+      200,
     );
   };
 

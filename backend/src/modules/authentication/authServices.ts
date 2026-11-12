@@ -6,12 +6,15 @@ import type {
   resetPasswordInput,
   signupInput,
   findById,
+  resendSignupInput,
+  verifySignupInput,
 } from "./authValidator.js";
 import {
   ConflictError,
   NotFoundError,
   UnauthorizedAccessError,
 } from "../../shared/errors/appError.js";
+import { EmailValidationService } from "../../shared/email/email-validation.service.js";
 import { randomBytes, randomUUID } from "node:crypto";
 import {
   generateAccessToken,
@@ -24,12 +27,20 @@ import { resolveAppUrl } from "../../config/env.js";
 import type { AuthNotifier } from "./authNotifications.js";
 import { NoopAuthNotifier } from "./authNotifications.js";
 import { hashToken } from "../../shared/types/cryptoUtility.js";
+import {
+  generateOtp,
+  hashOtp,
+  OTP_EXPIRATION_MS,
+  OTP_MAX_ATTEMPTS,
+  OTP_RESEND_COOLDOWN_MS,
+} from "./registrationOtp.js";
 
 export class AuthService {
   constructor(
     private repository: AuthRepository,
     private env: AppEnv,
     private notifier: AuthNotifier = new NoopAuthNotifier(),
+    private emailValidation = new EmailValidationService(),
   ) {}
 
   private async resolveCompanyMembership(
@@ -54,7 +65,7 @@ export class AuthService {
     return memberships[0]!.company_id;
   }
 
-  async register(data: signupInput) {
+  async startRegistration(data: signupInput) {
     const existingEmail = await this.repository.findUserWithCredentialsByEmail(
       data.email,
     );
@@ -63,33 +74,129 @@ export class AuthService {
       throw new ConflictError("This email address is already registered.");
     }
 
-    const password_hash = await hashPassword(data.password);
-    if (data.invitation_token) {
-      const result = await this.repository.registerUserForInvitation({
-        token_hash: await hashToken(data.invitation_token),
-        first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email,
-        password_hash,
-      });
-      if (result.status === "invalid") {
-        throw new UnauthorizedAccessError("Invalid or expired invitation");
-      }
-    } else {
-      const tenant_id = randomUUID();
-      await this.repository.registerUser({
-        tenant_id,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email,
-        password_hash,
-      });
+    const pending = await this.repository.findPendingRegistrationByEmail(data.email);
+    if (pending && !pending.consumed_at && pending.last_sent_at.getTime() > Date.now() - OTP_RESEND_COOLDOWN_MS) {
+      throw new ConflictError("Please wait before requesting another code.");
     }
 
-    return this.login({
+    await this.emailValidation.validate(data.email);
+
+    const password_hash = await hashPassword(data.password);
+    const verificationId = randomUUID();
+    const otp = generateOtp();
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + OTP_EXPIRATION_MS);
+
+    await this.repository.createOrUpdatePendingRegistration({
+      id: verificationId,
       email: data.email,
-      password: data.password,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      password_hash,
+      ...(data.invitation_token
+        ? { invitation_token_hash: await hashToken(data.invitation_token) }
+        : {}),
+      otp_hash: await hashOtp(otp, verificationId, data.email, this.env),
+      otp_expires_at: expiresAt,
+      last_sent_at: now,
     });
+
+    await this.notifier.sendSignupOtpEmail({ email: data.email, otp });
+
+    return {
+      verification_id: verificationId,
+      expires_at: expiresAt,
+      resend_available_at: new Date(now.getTime() + OTP_RESEND_COOLDOWN_MS),
+    };
+  }
+
+  async register(data: signupInput) {
+    return this.startRegistration(data);
+  }
+
+  async resendRegistration(data: resendSignupInput) {
+    const pending = await this.repository.findPendingRegistration(
+      data.verification_id,
+      data.email,
+    );
+
+    if (!pending || pending.consumed_at) {
+      throw new UnauthorizedAccessError("Invalid verification request");
+    }
+
+    const now = new Date();
+    const notSentSince = new Date(now.getTime() - OTP_RESEND_COOLDOWN_MS);
+    const otp = generateOtp();
+    const updated = await this.repository.updatePendingOtp({
+      id: pending.id,
+      email: pending.email,
+      otp_hash: await hashOtp(otp, pending.id, pending.email, this.env),
+      otp_expires_at: new Date(now.getTime() + OTP_EXPIRATION_MS),
+      last_sent_at: now,
+      not_sent_since: notSentSince,
+    });
+
+    if (updated.count !== 1) {
+      throw new ConflictError("Please wait before requesting another code.");
+    }
+
+    await this.notifier.sendSignupOtpEmail({ email: pending.email, otp });
+
+    return {
+      expires_at: new Date(now.getTime() + OTP_EXPIRATION_MS),
+      resend_available_at: new Date(now.getTime() + OTP_RESEND_COOLDOWN_MS),
+    };
+  }
+
+  async verifyRegistration(data: verifySignupInput) {
+    const pending = await this.repository.findPendingRegistration(
+      data.verification_id,
+      data.email,
+    );
+
+    if (!pending || pending.consumed_at) {
+      throw new UnauthorizedAccessError("Invalid verification request");
+    }
+
+    const now = new Date();
+    if (pending.otp_expires_at <= now) {
+      throw new UnauthorizedAccessError("Verification code expired");
+    }
+    if (pending.otp_attempts >= OTP_MAX_ATTEMPTS) {
+      throw new UnauthorizedAccessError("Too many verification attempts");
+    }
+
+    const otpHash = await hashOtp(
+      data.otp,
+      pending.id,
+      pending.email,
+      this.env,
+    );
+    const completed = await this.repository.completePendingRegistration({
+      id: pending.id,
+      email: pending.email,
+      otp_hash: otpHash,
+      now,
+      max_attempts: OTP_MAX_ATTEMPTS,
+      first_name: pending.first_name,
+      last_name: pending.last_name,
+      password_hash: pending.password_hash,
+      invitation_token_hash: pending.invitation_token_hash ?? undefined,
+      tenant_id: randomUUID(),
+    });
+
+    if (completed.status !== "created") {
+      await this.repository.incrementPendingOtpAttempts({
+        id: pending.id,
+        email: pending.email,
+        now,
+        max_attempts: OTP_MAX_ATTEMPTS,
+      });
+      throw new UnauthorizedAccessError("Invalid verification code");
+    }
+
+    if (!completed.user) throw new UnauthorizedAccessError("Unable to activate the account");
+    return this.createSession(completed.user);
   }
 
   async login(data: loginInput) {
@@ -116,10 +223,14 @@ export class AuthService {
       throw new UnauthorizedAccessError("Invalid email or password");
     }
 
-    const company_id = await this.resolveCompanyMembership(
-      user.id,
-      user.tenant_id,
-    );
+    return this.createSession(user);
+  }
+
+  private async createSession(user: {
+    id: string;
+    tenant_id: string;
+  }) {
+    const company_id = await this.resolveCompanyMembership(user.id, user.tenant_id);
 
     const sessionId = randomUUID();
 

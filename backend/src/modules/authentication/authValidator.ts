@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+export const strongPasswordSchema = z
+  .string()
+  .min(12, "Password must be at least 12 characters")
+  .max(128, "Password is too long")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+  .regex(/\d/, "Password must contain at least one number")
+  .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character");
+
 // ==========
 // Find by Id
 // ==========
@@ -32,10 +41,7 @@ export const resetPasswordSchema = z
       .min(10, "Reset token is required")
       .max(512, "Reset token is too long"),
 
-    password: z
-      .string()
-      .min(12, "Password must be at least 12 characters")
-      .max(128, "Password is too long"),
+    password: strongPasswordSchema,
 
     confirmPassword: z.string(),
   })
@@ -64,12 +70,9 @@ export const signupSchema = z
       .min(3, "Last must be 3 characters minimum ")
       .max(40, " Last name is too long"),
 
-    email: z.string().email("Invalid email").trim().toLowerCase(),
+    email: z.string().trim().email("Invalid email").toLowerCase(),
 
-    password: z
-      .string()
-      .min(12, "Password must be at least 12 characters")
-      .max(128, "Password is too long"),
+    password: strongPasswordSchema,
 
     confirmPassword: z.string(),
 
@@ -92,17 +95,25 @@ export const signupSchema = z
     },
   );
 
+export const verifySignupSchema = z.object({
+  verification_id: z.string().uuid("Invalid verification request"),
+  email: z.string().trim().email("Invalid email").max(255).toLowerCase(),
+  otp: z.string().regex(/^\d{6}$/, "OTP must be six digits"),
+});
+
+export const resendSignupSchema = z.object({
+  verification_id: z.string().uuid("Invalid verification request"),
+  email: z.string().trim().email("Invalid email").max(255).toLowerCase(),
+});
+
 // ==========
 // Login Validation schema
 // ==========
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email").trim().toLowerCase(),
+  email: z.string().trim().email("Invalid email").toLowerCase(),
 
-  password: z
-    .string()
-    .min(12, " Must be 12 characters long")
-    .max(128, "password is too long"),
+  password: z.string(),
 });
 
 // ==========
@@ -118,6 +129,8 @@ export const logoutSchema = z.object({
 // ==========
 
 export type signupInput = z.infer<typeof signupSchema>;
+export type verifySignupInput = z.infer<typeof verifySignupSchema>;
+export type resendSignupInput = z.infer<typeof resendSignupSchema>;
 
 export type loginInput = z.infer<typeof loginSchema>;
 
